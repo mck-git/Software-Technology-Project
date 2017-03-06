@@ -1,7 +1,7 @@
 package dtu.robboss.app;
 
 public class User {
-	
+
 	private String username;
 	private String password;
 	private String cpr;
@@ -10,13 +10,13 @@ public class User {
 		this.username = username;
 		this.password = password;
 		this.cpr = cpr;
-		
+
 	}
 
 	public String getUsername() {
 		return this.username;
 	}
-	
+
 	public String getPassword() {
 		return this.password;
 	}

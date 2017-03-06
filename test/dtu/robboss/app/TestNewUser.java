@@ -10,12 +10,12 @@ import org.junit.Test;
 import dtu.robboss.app.AdminNotLoggedInException;
 import dtu.robboss.app.Application;
 import dtu.robboss.app.User;
-import dtu.robboss.app.UserAlreadyExistException;
+import dtu.robboss.app.AlreadyExistsException;
 
 public class TestNewUser {
 
 	@Test
-	public void testLoginAdmin() throws Exception{
+	public void testLoginAdmin() throws Exception {
 
 		Application app = new Application();
 
@@ -45,7 +45,7 @@ public class TestNewUser {
 
 		assertEquals(1, app.userCount());
 	}
-	
+
 	@Test
 	public void testNewUserAldreadyExists() throws Exception {
 		Application app = new Application();
@@ -59,14 +59,14 @@ public class TestNewUser {
 		assertEquals(0, app.userCount());
 
 		User user = new User("user1", "userpass", "123456-1234");
-		
-		try{
-		app.createNewUser(user);
-		app.createNewUser(user);
-		
-		fail("User already exist");
-		} catch(UserAlreadyExistException e){
-			
+
+		try {
+			app.createNewUser(user);
+			app.createNewUser(user);
+
+			fail("User already exist");
+		} catch (AlreadyExistsException e) {
+
 		}
 
 		assertEquals(1, app.userCount());
@@ -115,7 +115,7 @@ public class TestNewUser {
 		assertEquals(0, app.userCount());
 
 	}
-	
+
 	@Test
 	public void testDeleteUserAdminNotLoggedIn() throws Exception {
 		Application app = new Application();
@@ -131,16 +131,16 @@ public class TestNewUser {
 		User user = new User("user1", "userpass", "123456-1234");
 
 		app.createNewUser(user);
-		
-		app.adminLogOut();
-		
+
+		app.logOut();
+
 		assertEquals(1, app.userCount());
-		
-		try{
-		app.deleteUser(user);
-		fail("Admin not logged in");
-		} catch (AdminNotLoggedInException e){
-			
+
+		try {
+			app.deleteUser(user);
+			fail("Admin not logged in");
+		} catch (AdminNotLoggedInException e) {
+
 		}
 
 		assertEquals(1, app.userCount());

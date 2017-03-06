@@ -9,39 +9,39 @@ public class Application {
 	private boolean adminLoggedIn = false;
 
 	String adminUserName = "admin", adminPassWord = "admin";
-	
+
 	private User userLoggedIn = null;
-	
+
 	//////////////////
 	// LOGIN LOGOUT //
 	//////////////////
-	
+
 	public void login(String user, String pass) throws UnknownLoginException {
-		
+
 		boolean loginFound = false;
-		
+
 		// Checks if login info matches a user in the database
-		for(User u : database.users){
-			if(user.equals(u.getUsername()) && pass.equals(u.getPassword())){
+		for (User u : database.users) {
+			if (user.equals(u.getUsername()) && pass.equals(u.getPassword())) {
 				userLoggedIn = u;
 				loginFound = true;
 				break;
 			}
 		}
-		
+
 		if (user.equals(adminUserName) && pass.equals(adminPassWord))
 			adminLoggedIn = true;
-		
-		else if(!loginFound){
+
+		else if (!loginFound) {
 			throw new UnknownLoginException();
 		}
-		
+
 	}
-	
+
 	public boolean adminLoggedIn() {
 		return adminLoggedIn;
 	}
-	
+
 	public boolean userLoggedIn() {
 		return userLoggedIn != null;
 	}
@@ -54,31 +54,54 @@ public class Application {
 	/////////////////////
 	// USER MANAGEMENT //
 	/////////////////////
-	
+
 	public Object userCount() {
 
 		return database.userCount();
 	}
 
-	public void createNewUser(User user) throws AdminNotLoggedInException, UserAlreadyExistException {
+	public void createNewUser(User user) throws AdminNotLoggedInException, AlreadyExistsException {
 		if (!adminLoggedIn)
 			throw new AdminNotLoggedInException();
-		
-		if(database.contains(user)) 
-			throw new UserAlreadyExistException();
-		
-		database.add(user);
+
+		if (database.containsUser(user))
+			throw new AlreadyExistsException("User");
+
+		database.addUser(user);
 	}
 
 	public void deleteUser(User user) throws AdminNotLoggedInException {
 		if (!adminLoggedIn)
 			throw new AdminNotLoggedInException();
-		
-		database.remove(user);
+
+		database.removeUser(user);
 
 	}
 
+	////////////////////////
+	// ACCOUNT MANAGEMENT //
+	////////////////////////
 
-	
+	public void createNewAccount(Account account) throws AdminNotLoggedInException, AlreadyExistsException {
+		if (!adminLoggedIn)
+			throw new AdminNotLoggedInException();
+
+		if (database.containsAccount(account))
+			throw new AlreadyExistsException("Account");
+
+		database.addAccount(account);
+	}
+
+	public Object accountCount() {
+		return database.accountCount();
+	}
+
+	public void deleteAccount(Account account) throws AdminNotLoggedInException {
+		if (!adminLoggedIn)
+			throw new AdminNotLoggedInException();
+		
+		database.removeAccount(account);
+		
+	}
 
 }
