@@ -1,4 +1,4 @@
-package dtu.library.app;
+package dtu.robboss.app;
 
 public class User {
 	
@@ -11,6 +11,14 @@ public class User {
 		this.password = password;
 		this.cpr = cpr;
 		
+	}
+
+	public String getUsername() {
+		return this.username;
+	}
+	
+	public String getPassword() {
+		return this.password;
 	}
 
 }

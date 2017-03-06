@@ -1,4 +1,4 @@
-package dtu.library.app;
+package dtu.robboss.app;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -7,10 +7,15 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import dtu.robboss.app.AdminNotLoggedInException;
+import dtu.robboss.app.Application;
+import dtu.robboss.app.User;
+import dtu.robboss.app.UserAlreadyExistException;
+
 public class TestNewUser {
 
 	@Test
-	public void testLoginAdmin() {
+	public void testLoginAdmin() throws Exception{
 
 		Application app = new Application();
 

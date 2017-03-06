@@ -1,4 +1,4 @@
-package dtu.library.app;
+package dtu.robboss.app;
 
 public class UserAlreadyExistException extends Exception {
 	
