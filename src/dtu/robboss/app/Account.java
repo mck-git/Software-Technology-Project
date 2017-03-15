@@ -1,8 +1,8 @@
 package dtu.robboss.app;
 
-	//HEJ MAGNUS!
-	//,,,,,,,,,,
+//HEJ MAGNUS!
 
+//,,,,,,,,,,
 
 public class Account {
 
@@ -11,32 +11,29 @@ public class Account {
 	private int balance;
 	private int credit;
 
-	public Account(User user, String id){
+	public Account(User user, String id) {
 		this.user = user;
 		this.id = id;
 		this.balance = 0;
 		this.credit = 0;
+
+		user.addAccount(this);
 	}
-	
-	
-	
-	
-	
-	
-	public User getUser(){
+
+	public User getUser() {
 		return this.user;
 	}
-	
-	public String getID(){
+
+	public String getID() {
 		return this.id;
 	}
-	
-	public int getBalance(){
+
+	public int getBalance() {
 		return this.balance;
 	}
-	
-	public int getCredit(){
+
+	public int getCredit() {
 		return this.credit;
 	}
-	
+
 }

@@ -17,7 +17,6 @@ public class SampleDataSetup {
 		User aage = new User("Aage", "entotrefirefem","987654321");
 		User karla = new User("Karla", "dugætterdetaldrig", "56789123");
 		
-		
 		// Admin logs in
 		assertFalse(app.adminLoggedIn());
 		app.login("admin", "admin");

@@ -11,6 +11,7 @@ public class TestNewAccount extends SampleDataSetup {
 	User u = new User("name", "pass", "cpr");
 
 	Account account = new Account(u, "1");
+	Account account2 = new Account(u, "2");
 
 	@Test
 	public void testNewAccount() throws Exception {
@@ -78,7 +79,29 @@ public class TestNewAccount extends SampleDataSetup {
 		// Admin deletes account
 		app.deleteAccount(account);
 		assertEquals(0, app.accountCount());
-		
+
+	}
+	
+	@Test
+	public void testNewMainAccount() throws Exception {
+		// Admin logs in
+		app.login("admin", "admin");
+
+		// Admin creates account
+		app.createNewAccount(account);
+		app.createNewAccount(account2);
+
+		// Checks if account was successfully created
+		assertEquals(2, app.accountCount());
+
+		// Checks if account with ID 1 is the main account for user u
+		assertEquals(account, u.getMainAccount());
+
+		// Sets account2 as main for u
+		u.setMainAccount(account2);
+
+		assertEquals(account2, u.getMainAccount());
+
 	}
 
 }
