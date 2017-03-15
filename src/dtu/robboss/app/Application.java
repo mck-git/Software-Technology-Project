@@ -78,6 +78,15 @@ public class Application {
 
 	}
 
+	public User getUser(String username) {
+		for (User u : database.users) {
+			if (u.getUsername().equals(username)) {
+				return u;
+			}
+		}
+		return null;
+	}
+
 	////////////////////////
 	// ACCOUNT MANAGEMENT //
 	////////////////////////
@@ -99,9 +108,52 @@ public class Application {
 	public void deleteAccount(Account account) throws AdminNotLoggedInException {
 		if (!adminLoggedIn)
 			throw new AdminNotLoggedInException();
-		
+
+		account.getUser().removeAccount(account);
 		database.removeAccount(account);
-		
+	}
+
+	public Account getAccount(int accountID) {
+		for (Account a : database.accounts) {
+			if (a.getID() == accountID)
+				return a;
+		}
+		return null;
+	}
+
+	//////////////////////////////
+	// USER-ACCOUNT INTERACTION //
+	//////////////////////////////
+
+	public void setUserMainAccount(User user, Account newMain) throws AdminNotLoggedInException {
+
+		if (!adminLoggedIn) {
+			throw new AdminNotLoggedInException();
+		}
+
+		user.setMainAccount(newMain);
+	}
+
+	public void changeBalanceUser(User u, int amount) {
+
+		u.getMainAccount().changeBalance(amount);
+
+	}
+
+	public void transferMoneyUser(User source, User target, int amount) throws UserNotLoggedInException {
+		if (!(userLoggedIn == source)) {
+			throw new UserNotLoggedInException();
+		}
+
+		source.getMainAccount().changeBalance(-amount);
+		target.getMainAccount().changeBalance(amount);
+
+	}
+
+	public void changeBalanceAccount(int accountID, int amount) {
+
+		getAccount(accountID).changeBalance(amount);
+
 	}
 
 }

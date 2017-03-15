@@ -19,7 +19,7 @@ public class TestUserLogin extends SampleDataSetup {
 		assertFalse(app.userLoggedIn());
 
 		// User logs in
-		app.login("Borge", "kodeord");
+		app.login("borge", "kodeord");
 
 		// Checks if user successfully logged in
 		assertTrue(app.userLoggedIn());
@@ -50,7 +50,7 @@ public class TestUserLogin extends SampleDataSetup {
 		assertFalse(app.userLoggedIn());
 		
 		// User logs in
-		app.login("Borge", "kodeord");
+		app.login("borge", "kodeord");
 
 		// Checks if user successfully logged in
 		assertTrue(app.userLoggedIn());

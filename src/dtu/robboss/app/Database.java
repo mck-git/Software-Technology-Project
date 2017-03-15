@@ -55,14 +55,9 @@ public class Database {
 	}
 
 	public void removeAccount(Account account) {
-			
-		if (account.getBalance() == 0) {
-			accountCount--;
-			accounts.remove(account);
-		}
-		
-		
-		
+		accountCount--;
+		accounts.remove(account);
+
 	}
 
 }

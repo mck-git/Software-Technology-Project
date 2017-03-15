@@ -8,10 +8,13 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 public class TestNewAccount extends SampleDataSetup {
-	User u = new User("name", "pass", "cpr");
+	
+	Application app = new Application();
+	
+	User u = new User("name", "u", "pass", "cpr");
 
-	Account account = new Account(u, "1");
-	Account account2 = new Account(u, "2");
+	Account account = new Account(u, 10);
+	Account account2 = new Account(u, 11);
 
 	@Test
 	public void testNewAccount() throws Exception {
@@ -81,7 +84,32 @@ public class TestNewAccount extends SampleDataSetup {
 		assertEquals(0, app.accountCount());
 
 	}
+
 	
+	@Test
+	public void testDeleteMainAccount() throws Exception {
+		// Admin logs in
+		app.login("admin", "admin");
+
+		// Admin creates account
+		app.createNewAccount(account);
+		app.createNewAccount(account2);
+
+		// Checks if account was successfully created
+		assertEquals(2, app.accountCount());
+
+		// Checks if account with ID 1 is the main account for user u
+		assertEquals(account, u.getMainAccount());
+
+		// Admin tries to delete main account
+		app.deleteAccount(account);
+
+		assertEquals(u.getAccounts().size(), 1);
+
+		// Checks if account2 is new main account for u
+		assertEquals(account2, u.getMainAccount());
+	}
+
 	@Test
 	public void testNewMainAccount() throws Exception {
 		// Admin logs in
@@ -98,10 +126,40 @@ public class TestNewAccount extends SampleDataSetup {
 		assertEquals(account, u.getMainAccount());
 
 		// Sets account2 as main for u
-		u.setMainAccount(account2);
+		app.setUserMainAccount(u, account2);
 
 		assertEquals(account2, u.getMainAccount());
 
+	}
+	
+	@Test
+	public void testDeleteAccountAdminNotLoggedIn() throws Exception {
+
+		// Admin logs in
+		app.login("admin", "admin");
+
+		// Admin creates account
+		app.createNewAccount(account);
+		app.createNewAccount(account2);
+
+		// Checks if account was successfully created
+		assertEquals(2, app.accountCount());
+
+		// Checks if account with ID 1 is the main account for user u
+		assertEquals(account, u.getMainAccount());
+
+		// admin logs out
+		app.logOut();
+		assertFalse(app.adminLoggedIn());
+
+		try {
+			// Admin tries to delete account while not logged in
+			app.deleteAccount(account);
+
+			fail("Admin Not Logged In Exception expected");
+		} catch (AdminNotLoggedInException e) {
+
+		}
 	}
 
 }

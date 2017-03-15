@@ -39,7 +39,7 @@ public class TestNewUser {
 
 		assertEquals(0, app.userCount());
 
-		User user = new User("user1", "userpass", "123456-1234");
+		User user = new User("user1", "user", "userpass", "123456-1234");
 
 		app.createNewUser(user);
 
@@ -58,7 +58,7 @@ public class TestNewUser {
 
 		assertEquals(0, app.userCount());
 
-		User user = new User("user1", "userpass", "123456-1234");
+		User user = new User("user1", "user", "userpass", "123456-1234");
 
 		try {
 			app.createNewUser(user);
@@ -80,7 +80,7 @@ public class TestNewUser {
 
 		assertEquals(0, app.userCount());
 
-		User user = new User("user1", "userpass", "123456-1234");
+		User user = new User("user1", "user", "userpass", "123456-1234");
 
 		try {
 			app.createNewUser(user);
@@ -104,7 +104,7 @@ public class TestNewUser {
 
 		assertEquals(0, app.userCount());
 
-		User user = new User("user1", "userpass", "123456-1234");
+		User user = new User("user1", "user", "userpass", "123456-1234");
 
 		app.createNewUser(user);
 
@@ -128,7 +128,7 @@ public class TestNewUser {
 
 		assertEquals(0, app.userCount());
 
-		User user = new User("user1", "userpass", "123456-1234");
+		User user = new User("user1", "user", "userpass", "123456-1234");
 
 		app.createNewUser(user);
 

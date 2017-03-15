@@ -5,12 +5,14 @@ import java.util.ArrayList;
 public class User {
 
 	private String username;
+	private String name;
 	private String password;
 	private String cpr;
 	private ArrayList<Account> accounts;
 
-	public User(String username, String password, String cpr) {
+	public User(String name, String username, String password, String cpr) {
 		this.username = username;
+		this.name = name;
 		this.password = password;
 		this.cpr = cpr;
 		this.accounts = new ArrayList<Account>();
