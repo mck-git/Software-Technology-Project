@@ -1,0 +1,158 @@
+!SESSION 2017-03-22 11:13:07.252 -----------------------------------------------
+eclipse.buildId=4.6.1.M20160907-1200
+java.version=1.8.0_112
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -product org.eclipse.epp.package.java.product -product org.eclipse.epp.package.java.product -keyring /Users/Roar/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -product org.eclipse.epp.package.java.product -data /Users/Roar/Documents/workspaceFagprojekt -product org.eclipse.epp.package.java.product -keyring /Users/Roar/.eclipse_keyring
+
+!ENTRY com.ibm.issw.migr.osgi.liberty 4 0 2017-03-22 11:13:08.903
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.liberty. The component header value is wsadmin.xml
+
+!ENTRY com.ibm.issw.migr.osgi.liberty 4 0 2017-03-22 11:13:08.904
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.liberty. The component header value is wsadmin.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig 4 0 2017-03-22 11:13:08.906
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig. The component header value is cell.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig 4 0 2017-03-22 11:13:08.907
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig. The component header value is cell.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig.jboss 4 0 2017-03-22 11:13:08.908
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig.jboss. The component header value is component.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig.jboss 4 0 2017-03-22 11:13:08.908
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig.jboss. The component header value is component.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig.was 4 0 2017-03-22 11:13:08.909
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig.was. The component header value is cell.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig.was 4 0 2017-03-22 11:13:08.910
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig.was. The component header value is cell.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig.wls 4 0 2017-03-22 11:13:08.910
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig.wls. The component header value is cell.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig.wls 4 0 2017-03-22 11:13:08.911
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig.wls. The component header value is cell.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wsadmin 4 0 2017-03-22 11:13:08.912
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wsadmin. The component header value is wsadmin.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wsadmin 4 0 2017-03-22 11:13:08.912
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wsadmin. The component header value is wsadmin.xml
+
+!ENTRY org.eclipse.core.net 1 0 2017-03-22 11:13:13.884
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.jface 2 0 2017-03-22 11:13:17.971
+!MESSAGE Keybinding conflicts occurred.  They may interfere with normal accelerator operation.
+!SUBENTRY 1 org.eclipse.jface 2 0 2017-03-22 11:13:17.971
+!MESSAGE A conflict occurred for COMMAND+SHIFT+-:
+Binding(COMMAND+SHIFT+-,
+	ParameterizedCommand(Command(com.ibm.etools.rpe.ZoomOut,ZoomOut,
+		,
+		Category(com.ibm.etools.rpe.category,Rich Page Editor,null,true),
+		org.eclipse.ui.internal.WorkbenchHandlerServiceHandler@1100363d,
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,,system)
+Binding(COMMAND+SHIFT+-,
+	ParameterizedCommand(Command(org.eclipse.ui.window.splitEditor,Toggle Split Editor,
+		Split or join the currently active editor.,
+		Category(org.eclipse.ui.category.window,Window,null,true),
+		org.eclipse.ui.internal.WorkbenchHandlerServiceHandler@7d593bbc,
+		[Parameter(Splitter.isHorizontal,Orientation,null,false)],,true),[org.eclipse.core.commands.Parameterization@6102fa90]),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,cocoa,system)
+
+!ENTRY org.eclipse.equinox.ds 1 0 2017-03-22 11:16:36.500
+!MESSAGE Could not bind a reference of component org.eclipse.fx.core.internal.JUtilLoggerFactory. The reference is: Reference[name = registerHandler, interface = java.util.logging.Handler, policy = dynamic, policy-option = greedy, cardinality = 0..n, target = null, bind = registerHandler, unbind = unregisterHandler, updated = null]
+!SESSION 2017-03-22 11:23:08.082 -----------------------------------------------
+eclipse.buildId=4.6.1.M20160907-1200
+java.version=1.8.0_112
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -product org.eclipse.epp.package.java.product -product org.eclipse.epp.package.java.product -product org.eclipse.epp.package.java.product -product org.eclipse.epp.package.java.product -keyring /Users/Roar/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -product org.eclipse.epp.package.java.product -product org.eclipse.epp.package.java.product -product org.eclipse.epp.package.java.product -data /Users/Roar/Documents/workspaceFagprojekt -product org.eclipse.epp.package.java.product -keyring /Users/Roar/.eclipse_keyring
+
+!ENTRY com.ibm.issw.migr.osgi.liberty 4 0 2017-03-22 11:23:09.757
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.liberty. The component header value is wsadmin.xml
+
+!ENTRY com.ibm.issw.migr.osgi.liberty 4 0 2017-03-22 11:23:09.758
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.liberty. The component header value is wsadmin.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig 4 0 2017-03-22 11:23:09.760
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig. The component header value is cell.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig 4 0 2017-03-22 11:23:09.760
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig. The component header value is cell.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig.jboss 4 0 2017-03-22 11:23:09.761
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig.jboss. The component header value is component.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig.jboss 4 0 2017-03-22 11:23:09.761
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig.jboss. The component header value is component.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig.was 4 0 2017-03-22 11:23:09.762
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig.was. The component header value is cell.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig.was 4 0 2017-03-22 11:23:09.763
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig.was. The component header value is cell.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig.wls 4 0 2017-03-22 11:23:09.763
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig.wls. The component header value is cell.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wasconfig.wls 4 0 2017-03-22 11:23:09.764
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wasconfig.wls. The component header value is cell.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wsadmin 4 0 2017-03-22 11:23:09.769
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wsadmin. The component header value is wsadmin.xml
+
+!ENTRY com.ibm.issw.migr.osgi.wsadmin 4 0 2017-03-22 11:23:09.770
+!MESSAGE [SCR] Component definition XMLs not found in bundle com.ibm.issw.migr.osgi.wsadmin. The component header value is wsadmin.xml
+
+!ENTRY org.eclipse.core.net 1 0 2017-03-22 11:23:14.094
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.jface 2 0 2017-03-22 11:23:15.734
+!MESSAGE Keybinding conflicts occurred.  They may interfere with normal accelerator operation.
+!SUBENTRY 1 org.eclipse.jface 2 0 2017-03-22 11:23:15.735
+!MESSAGE A conflict occurred for COMMAND+SHIFT+-:
+Binding(COMMAND+SHIFT+-,
+	ParameterizedCommand(Command(com.ibm.etools.rpe.ZoomOut,ZoomOut,
+		,
+		Category(com.ibm.etools.rpe.category,Rich Page Editor,null,true),
+		org.eclipse.ui.internal.WorkbenchHandlerServiceHandler@27acd9a7,
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,,system)
+Binding(COMMAND+SHIFT+-,
+	ParameterizedCommand(Command(org.eclipse.ui.window.splitEditor,Toggle Split Editor,
+		Split or join the currently active editor.,
+		Category(org.eclipse.ui.category.window,Window,null,true),
+		org.eclipse.ui.internal.WorkbenchHandlerServiceHandler@3f7d20c5,
+		[Parameter(Splitter.isHorizontal,Orientation,null,false)],,true),[org.eclipse.core.commands.Parameterization@6102fa90]),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,cocoa,system)
+
+!ENTRY org.eclipse.equinox.ds 1 0 2017-03-22 11:23:51.635
+!MESSAGE Could not bind a reference of component org.eclipse.fx.core.internal.JUtilLoggerFactory. The reference is: Reference[name = registerHandler, interface = java.util.logging.Handler, policy = dynamic, policy-option = greedy, cardinality = 0..n, target = null, bind = registerHandler, unbind = unregisterHandler, updated = null]
+
+!ENTRY org.eclipse.jdt.core 4 969 2017-03-22 11:23:54.228
+!MESSAGE Projekt_v1 does not exist
+
+!ENTRY org.eclipse.jdt.core 4 969 2017-03-22 11:23:54.228
+!MESSAGE Projekt_v1 does not exist
+
+!ENTRY org.eclipse.jdt.core 4 969 2017-03-22 11:23:54.228
+!MESSAGE Projekt_v1 does not exist
+
+!ENTRY org.eclipse.jdt.core 4 969 2017-03-22 11:23:54.229
+!MESSAGE Projekt_v1 does not exist
+
+!ENTRY org.eclipse.jdt.core 4 969 2017-03-22 11:23:54.230
+!MESSAGE Projekt_v1 does not exist
+
+!ENTRY org.eclipse.jdt.core 4 969 2017-03-22 11:23:54.231
+!MESSAGE Projekt_v1 does not exist
