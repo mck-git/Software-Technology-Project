@@ -1,17 +1,25 @@
 package dtu.robboss.app;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 public class Application {
 
-	Database database = new Database();
+	Database database;
 	private boolean adminLoggedIn = false;
 
 	String adminUserName = "admin", adminPassWord = "admin";
 
 	private User userLoggedIn = null;
 
+	public Application(DataSource ds1){
+		database = new Database(ds1);
+	}
+	
+	
 	//////////////////
 	// LOGIN LOGOUT //
 	//////////////////
@@ -57,7 +65,13 @@ public class Application {
 
 	public Object userCount() {
 
-		return database.userCount();
+		try {
+			return database.userCount();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return -1;
 	}
 
 	public void createNewUser(User user) throws AdminNotLoggedInException, AlreadyExistsException {
