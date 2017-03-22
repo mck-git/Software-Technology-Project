@@ -15,12 +15,6 @@ public class Account {
 		this.balance = 0;
 		this.credit = 0;
 	}
-	
-	
-	
-	
-	
-	
 	public User getUser(){
 		return this.user;
 	}
