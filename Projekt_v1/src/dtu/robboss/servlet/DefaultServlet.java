@@ -1,4 +1,4 @@
-package dtu.robbos.servlet;
+package dtu.robboss.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,10 +26,10 @@ public class DefaultServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	@Resource(name = "jdbc/DB2")
 	private DataSource ds1;
-	private Application app;
+	private BankApplication app;
 
 	public void init(){
-		app = new Application(ds1);
+		app = new BankApplication(ds1);
 	}
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

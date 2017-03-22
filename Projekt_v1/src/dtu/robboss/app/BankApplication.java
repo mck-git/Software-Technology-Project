@@ -6,17 +6,17 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-public class Application {
+public class BankApplication {
 
-	Database database;
+	DatabaseProtocol database;
 	private boolean adminLoggedIn = false;
 
 	String adminUserName = "admin", adminPassWord = "admin";
 
 	private User userLoggedIn = null;
 
-	public Application(DataSource ds1){
-		database = new Database(ds1);
+	public BankApplication(DataSource ds1){
+		database = new DatabaseProtocol(ds1);
 	}
 	
 	

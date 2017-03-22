@@ -11,7 +11,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
-public class Database {
+public class DatabaseProtocol {
 	@Resource(name = "jdbc/DB2")
 	private DataSource ds1;
 	private Connection con = null;
@@ -26,7 +26,7 @@ public class Database {
 	// AMOUNT //
 	////////////
 
-	public Database(DataSource ds1) {
+	public DatabaseProtocol(DataSource ds1) {
 		this.ds1 = ds1;
 	}
 
