@@ -2,8 +2,6 @@ package dtu.robboss.app;
 
 	//HEJ MAGNUS!
 	//,,,,,,,,,,
-
-
 public class Account {
 
 	private User user;
