@@ -19,67 +19,53 @@
 	margin-bottom: 10px;
 }
 
-#accounts {
-	background: #666;
-	float: left;
-	width: 40%;
-	padding: 20px;
-	margin: 20px;
+.inner {
+	width: 100%;
+	background: rgba(240, 230, 255, 0.9);
+	border-radius: 2px;
 }
 
-#payment {
-	background: #666;
-	float: right;
+.outer {
+	background: rgba(150, 204, 250, 0.8);
 	width: 40%;
 	padding: 20px;
 	margin: 20px;
+	max-height: 200px;
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+#accounts {
+	float: left;
+}
+
+#currency {
+	float: right;
 }
 
 #messages {
-	clear: both;
-	background: #666;
 	float: left;
-	width: 40%;
-	padding: 20px;
-	margin: 20px;
 }
 
+#payment {
+	float: right;
+}
 
 #news {
-	clear: both;
-	background: #666;
+	clear: left;
 	float: left;
-	width: 40%;
-	padding: 20px;
-	margin: 20px;
 }
 
-#editor {
-	background: #666;
+#menu {
 	float: right;
-	width: 40%;
-	padding: 20px;
-	margin: 20px;
-}
-
-#currency{
-	clear:left;
-	background: #666;
-	float: left;
-	width: 40%;
-	padding: 20px;
-	margin: 20px;
-
 }
 
 #footer {
 	clear: both;
 	background: yellow;
-	height: 30px;
-	padding: 10px;
+	height: 60px;
 	text-align: center;
 }
-
 </style>
 </head>
 <body>
@@ -93,16 +79,68 @@
 
 		<!-- CONTENT AREA -->
 		<div id="content_area">
-			<div id="accounts">Accounts <br> account <br> account</div>
-			<div id="payment">Payment <br> button<br> button<br> button</div>
-			<div id="messages">Messages <br> message<br> message<br> message</div>
-			<div id="news">News <br> news<br> news</div>
-			<div id="editor">Editor <br> edit<br> edit<br> edit<br> edit</div>
-			<div id="currency">Currency</div>
+
+			<div id="accounts" class="outer">
+				<h3 align="center" style="margin-top: 0;">Accounts</h3>
+
+				<div class="inner">
+					accounts <br>
+
+				</div>
+			</div>
+
+			<div id="currency" class="outer">
+				<h3 align="center" style="margin-top: 0;">Currency</h3>
+
+				<div class="inner">
+					forms <br>
+
+				</div>
+			</div>
+			
+			<div id="payment" class="outer">
+				<h3 align="center" style="margin-top: 0;">Payment</h3>
+				
+				<div class="inner">
+					payments <br>
+					
+				</div>
+			</div>
+
+			<div id="messages" class="outer">
+				<h3 align="center" style="margin-top: 0;">Messages</h3>
+				
+				<div class="inner">
+					message <br>
+
+				</div>
+			</div>
+
+			<div id="news" class="outer">
+				<h3 align="center" style="margin-top: 0;">News</h3>
+				
+				<div class="inner">
+					news <br>
+
+				</div>
+			</div>
+			
+			<div id="menu" class="outer">
+				<h3 align="center" style="margin-top: 0;">Menu</h3>
+
+				<div class="inner">
+					menu settings <br>
+
+				</div>
+			</div>
+
 		</div>
 
 		<!-- FOOTER -->
-		<div id="footer">Footer</div>
+		<div id="footer">Footer
+		<br> 
+		<p> Contant informations here
+						</div>
 
 		<!-- END OF CONTAINER -->
 	</div>
