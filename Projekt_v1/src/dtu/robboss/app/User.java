@@ -6,18 +6,18 @@ import java.util.HashSet;
 public class User {
 
 	private String username;
-	private String name;
+	private String fullName;
 	private String password;
-	private String cpr;
+	private String cpr; // TODO add CPR to USER database
 	private ArrayList<Account> accounts;
 	private Account mainAccount;
 	private HashSet<UserMessage> userMessages; // TODO maybe think more about this name? "user" is redundant?
 
-	public User(String name, String username, String password, String cpr) {
+	// TODO new constructor? taking a ResultSet as argument?
+	public User(String name, String username, String password) {
 		this.username = username;
-		this.name = name;
+		this.fullName = name;
 		this.password = password;
-		this.cpr = cpr;
 		this.userMessages = new HashSet<>();
 		mainAccount = new Account(this, "1"); // TODO id? connect to database
 		
@@ -51,6 +51,10 @@ public class User {
 			System.out.println("ERROR: account not found in accounts list.");
 	}
 
+	public String toString(){
+		return fullName + ", username: " + username + ", password: " + password;
+	}
+	
 	/////////////////////////
 	// GETTERS AND SETTERS //
 	/////////////////////////

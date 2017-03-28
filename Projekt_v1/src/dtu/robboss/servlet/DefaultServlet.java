@@ -70,14 +70,26 @@ public class DefaultServlet extends HttpServlet {
 
 				Statement stmt = con.createStatement();
 				out.println("<br>Created statement");
-
-				ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS");
+				
+				//Get request username and password
+				String username = request.getParameter("username");
+				String password = request.getParameter("password");
+				
+				// TODO more sanization?
+				ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '" + username 
+						+ "' AND PASSWORD = '" + password + "'");
 				out.print("<br>Data Fetched");
 				out.print("<br> Printing data: ");
 
-				while (rs.next()) {
-					out.println("<br> Username: " + rs.getString("USERNAME") + " Password: " + rs.getString("PASSWORD"));
-				}
+				//Constructs new User for session.
+				//TODO sql throws error: Ugyldig funktion til læsning på aktuel cursorposition
+//				rs.next();
+//				User user = new User(rs.getString("FULLNAME"), rs.getString("USERNAME"),
+//						rs.getString("PASSWORD"));
+						
+//				
+				out.println("<br> Welcome "); //+user.toString());
+//				
 
 			} catch (SQLException e) {
 				e.printStackTrace();
