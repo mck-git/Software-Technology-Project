@@ -1,6 +1,7 @@
 package dtu.robboss.app;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class User {
 
@@ -10,13 +11,15 @@ public class User {
 	private String cpr;
 	private ArrayList<Account> accounts;
 	private Account mainAccount;
+	private HashSet<UserMessage> userMessages; // TODO maybe think more about this name? "user" is redundant?
 
 	public User(String name, String username, String password, String cpr) {
 		this.username = username;
 		this.name = name;
 		this.password = password;
 		this.cpr = cpr;
-		mainAccount = new Account(this, "1"); //id? connect to database
+		this.userMessages = new HashSet<>();
+		mainAccount = new Account(this, "1"); // TODO id? connect to database
 		
 		//Creating account list and adding mainAccount.
 		this.accounts = new ArrayList<Account>();
