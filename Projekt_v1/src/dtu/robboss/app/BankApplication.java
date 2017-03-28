@@ -127,9 +127,9 @@ public class BankApplication {
 		database.removeAccount(account);
 	}
 
-	public Account getAccount(int accountID) {
+	public Account getAccount(String accountNumber) {
 		for (Account a : database.accounts) {
-			if (a.getID() == accountID)
+			if (a.getAccountNumber().equals(accountNumber)) 
 				return a;
 		}
 		return null;
@@ -164,9 +164,9 @@ public class BankApplication {
 
 	}
 
-	public void changeBalanceAccount(int accountID, int amount) {
+	public void changeBalanceAccount(String accountNumber, int amount) {
 
-		getAccount(accountID).changeBalance(amount);
+		getAccount(accountNumber).changeBalance(amount);
 
 	}
 

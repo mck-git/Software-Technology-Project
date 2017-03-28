@@ -7,13 +7,13 @@ package dtu.robboss.app;
 public class Account {
 
 	private User user;
-	private int id;
+	private String accountNumber;
 	private int balance;
 	private int credit;
 
-	public Account(User user, int id) {
+	public Account(User user, String accountNumber) {
 		this.user = user;
-		this.id = id;
+		this.accountNumber = accountNumber;
 		this.balance = 0;
 		this.credit = 0;
 
@@ -28,8 +28,8 @@ public class Account {
 		return this.user;
 	}
 
-	public int getID() {
-		return this.id;
+	public String getAccountNumber() {
+		return this.accountNumber;
 	}
 
 	public int getBalance() {

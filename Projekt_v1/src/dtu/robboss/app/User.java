@@ -9,13 +9,18 @@ public class User {
 	private String password;
 	private String cpr;
 	private ArrayList<Account> accounts;
+	private Account mainAccount;
 
 	public User(String name, String username, String password, String cpr) {
 		this.username = username;
 		this.name = name;
 		this.password = password;
 		this.cpr = cpr;
+		mainAccount = new Account(this, "1"); //id? connect to database
+		
+		//Creating account list and adding mainAccount.
 		this.accounts = new ArrayList<Account>();
+		accounts.add(mainAccount);
 
 	}
 
@@ -32,14 +37,15 @@ public class User {
 	}
 
 	public Account getMainAccount() {
-		return accounts.get(0);
+		return this.mainAccount;
 	}
 
 	public void setMainAccount(Account newMain) {
-		if (accounts.contains(newMain)) {
-			accounts.remove(newMain);
-			accounts.add(0, newMain);
-		}
+		//needs sanitation?
+		if(accounts.contains(newMain))
+			this.mainAccount = newMain;
+		else
+			System.out.println("ERROR: account not found in accounts list.");
 	}
 
 	/////////////////////////
