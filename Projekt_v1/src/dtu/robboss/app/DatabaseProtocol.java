@@ -36,27 +36,6 @@ public class DatabaseProtocol {
 		return -1;
 	}
 
-	/**
-	 * Fetches user from database
-	 * @param username
-	 * @return
-	 * @throws SQLException
-	 */
-	public User getUser(String username) throws SQLException {
-		Connection con = dataSource.getConnection();
-		Statement stmt = con.createStatement();
-		// TODO more sanization?
-		ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '"
-				+ username + "'");
-		if (rs.next()){
-			//Trimming removes trailing and leading whitespace from database string.
-			return new User(rs.getString("FULLNAME").trim(),
-					 		rs.getString("USERNAME").trim(),
-					 		rs.getString("PASSWORD").trim());
-		}
-		else 
-			return null;				
-	}
 
 	// TODO Implement this for bragging.
 	// public Object accountCount() {
@@ -130,13 +109,23 @@ public class DatabaseProtocol {
 	// Get //
 	////////////////////
 
+	
+	/**
+	 * Fetches user from database
+	 * @param username
+	 * @return
+	 * @throws SQLException
+	 */
 	public User getUser(String username) {
 		startConnection();
 		try {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '" + username + "'");
 			if (rs.next()) {
-				return new User(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
+				User user = new User(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
+				closeConnection();
+				return user;
 			} else {
+				closeConnection();
 				return null;
 			}
 		} catch (SQLException e) {

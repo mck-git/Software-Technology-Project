@@ -16,9 +16,9 @@ public class User {
 	// TODO new constructor? taking a ResultSet as argument?
 	// or just think about which arguments User should have
 	public User(String name, String username, String password) {
-		this.fullName = name;
-		this.username = username;
-		this.password = password;
+		this.fullName = name.trim();
+		this.username = username.trim();
+		this.password = password.trim();
 		this.userMessages = new HashSet<>();
 		
 		//Creating account list and adding mainAccount. 
