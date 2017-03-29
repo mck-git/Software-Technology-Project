@@ -1,33 +1,26 @@
 package dtu.robboss.app;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 public class DatabaseProtocol {
 	@Resource(name = "jdbc/DB2")
-	private DataSource ds1;
+	private DataSource dataSource;
 	private Connection con = null;
 	private Statement stmt = null;
 
-	int accountCount = 0;
-
-	List<User> users = new ArrayList<>();
-	List<Account> accounts = new ArrayList<>();
 
 	////////////
 	// AMOUNT //
 	////////////
 
-	public DatabaseProtocol(DataSource ds1) {
-		this.ds1 = ds1;
+	public DatabaseProtocol(DataSource dataSource) {
+		this.dataSource = dataSource;
 	}
 
 	public int userCount() throws SQLException {
@@ -47,8 +40,9 @@ public class DatabaseProtocol {
 		return -1;
 	}
 
-	public Object accountCount() {
-		return accountCount;
+	public int accountCount() {
+		// TODO: Need account table/tables.
+		return -1;
 	}
 
 	///////////////
@@ -56,46 +50,94 @@ public class DatabaseProtocol {
 	///////////////
 
 	public boolean containsUser(User user) {
-		return users.contains(user);
+		User userCheck = getUser(user.getUsername());
+
+		if (userCheck == null)
+			return false;
+		else
+			return true;
 	}
 
 	public boolean containsAccount(Account account) {
-		return accounts.contains(account);
+		// TODO: Need account table/tables.
+
+		return false;
 	}
 
 	////////////////////
 	// ADD AND REMOVE //
 	////////////////////
 
-	public void addUser(User user) {
+	public boolean addUser(User user) {
 
 		try {
 
-			stmt.executeUpdate(
-					"INSERT INTO DTUGRP04.USERS VALUES(1, '" + user.getUsername() + "', '<Full Name>', '" + user.getPassword() + "', 0, 1)");
+			stmt.executeUpdate("INSERT INTO DTUGRP04.USERS VALUES(1, '" + user.getUsername() + "', '<Full Name>', '"
+					+ user.getPassword() + "', 0, 1)");
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
+	public void addAccount(Account account) {
+		// TODO: Need account table/tables.
+
+		// accounts.add(account);
+	}
+
+	public void removeUser(User user) {
+
+		startConnection();
+		try {
+			stmt.executeUpdate("DELETE FROM DTUGRP04.USERS WHERE USERNAME = '" + user.getUsername() + "'");
+		} catch (SQLException e) {
+//			System.out.println("Could not remove user.");
+			 e.printStackTrace();
+		}
+		closeConnection();
+
+	}
+
+	public void removeAccount(Account account) {
+
+		// TODO: Need account table/tables and remove an account from table.
+
+		// accounts.remove(account);
+
+	}
+
+	////////////////////
+	// Get //
+	////////////////////
+
+	public User getUser(String username) {
+		startConnection();
+		try {
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '" + username + "'");
+			if (rs.next()) {
+				return new User(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
+			} else {
+				return null;
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
-		users.add(user);
+		closeConnection();
+		return null;
 	}
 
-	public void addAccount(Account account) {
-		accountCount++;
-		accounts.add(account);
+	public Account getAccount(String accountNumber) {
+		// TODO: Need account table/tables.
+
+		return null;
 	}
 
-	public void removeUser(User user) {
-		users.remove(user);
-		
-	}
-
-	public void removeAccount(Account account) {
-		accountCount--;
-		accounts.remove(account);
-
-	}
+	////////////////////
+	// Connection //
+	////////////////////
 
 	private void closeConnection() {
 		try {
@@ -110,7 +152,7 @@ public class DatabaseProtocol {
 
 	private void startConnection() {
 		try {
-			con = ds1.getConnection();
+			con = dataSource.getConnection();
 			stmt = con.createStatement();
 		} catch (SQLException e) {
 			e.printStackTrace();

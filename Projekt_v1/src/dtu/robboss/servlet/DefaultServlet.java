@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import javax.annotation.Resource;
-import javax.ejb.Local;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -18,7 +17,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import dtu.robboss.app.*;
+import dtu.robboss.app.AdminNotLoggedInException;
+import dtu.robboss.app.AlreadyExistsException;
+import dtu.robboss.app.BankApplication;
+import dtu.robboss.app.UnknownLoginException;
+import dtu.robboss.app.User;
 
 /**
  * Servlet implementation class DefaultServlet
@@ -37,8 +40,7 @@ public class DefaultServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		response.getWriter().println("from doget");
-		User user = new User("<full name>", "username", "password");
-		
+
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -52,59 +54,69 @@ public class DefaultServlet extends HttpServlet {
 			out.println("Amount of users: " + app.userCount());
 		}
 
-		if (subject.equals("CreateNewUser")) {
+		if(subject.equals("CreateNewUser")){
+			String fullname = request.getParameter("fullname");
+			String username = request.getParameter("username");
+			String password = request.getParameter("password");
+			String cpr = request.getParameter("cpr");
+			
+			System.out.println("Full name: " + fullname + ", username: " + username + ", password: " + password + 
+					", cpr: " + cpr);
+			
 			try {
-				Connection con = ds1.getConnection();
-				Statement stmt = con.createStatement();
-
-				stmt.executeUpdate(
-						"INSERT INTO DTUGRP04.USERS VALUES(1, 'Magnus', 'Roar Nind Steffensen', '134', 0, 1)");
-
-				subject = "Login";
-
-			} catch (SQLException e) {
+				app.createNewUser(fullname, username, password, cpr);
+			} catch (AdminNotLoggedInException e) {
+				e.printStackTrace();
+			} catch (AlreadyExistsException e) {
 				e.printStackTrace();
 			}
 		}
 
 		if (subject.equals("Login")) {
 
+			// Get request username and password
+			String username = request.getParameter("username");
+			String password = request.getParameter("password");
+
 			try {
-				Connection con = ds1.getConnection();
+				User userLoggedIn = app.login(username, password);
+				HttpSession session = request.getSession();
+				session.setAttribute("USER", userLoggedIn);
+				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+				rd.forward(request, response);
 
-				Statement stmt = con.createStatement();
-
-				// Get request username and password
-				String username = request.getParameter("username");
-				String password = request.getParameter("password");
-
-				// TODO more sanization?
-				ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '" + username
-						+ "' AND PASSWORD = '" + password + "'");
-
-				// Constructs new User for session.
-				// TODO sql throws error: Ugyldig funktion til l�sning p� aktuel
-				// cursorposition
-				// rs.next();
-				// User user = new User(rs.getString("FULLNAME"),
-				// rs.getString("USERNAME"),
-				// rs.getString("PASSWORD"));
-
-				if (rs.next()) {
-					User userLoggedIn = new User("<full name>", rs.getString("USERNAME"), rs.getString("PASSWORD"));
-					HttpSession session = request.getSession();
-					session.setAttribute("USER", userLoggedIn);
-					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
-					rd.forward(request, response);
-					
-					
-				} else {
-					out.println("Incorrect username or password.");
-				}
-
-			} catch (SQLException e) {
-				e.printStackTrace();
+			} catch (UnknownLoginException e) {
+				System.out.println("Failed to login in defaultservlet ");
+				response.sendRedirect("login.html");
+				// e.printStackTrace();
 			}
+		}
+		
+
+
+		if (subject.equals("DeleteUser")) {
+			User userToDelete = (User) request.getSession().getAttribute("USER");
+			try {
+				System.out.println("Removing " + userToDelete.getUsername() + ".");
+				// app.deleteUser(userToDelete);
+				request.getSession().removeAttribute("USER");
+				RequestDispatcher rd = request.getRequestDispatcher("login.html");
+				rd.forward(request, response);
+
+			} catch (Exception e) {
+				// e.printStackTrace();
+				System.out.println("Could not remove user.");
+			}
+
+		}
+
+		if (subject.equals("LogOutUser")) {
+
+			request.getSession().removeAttribute("USER");
+
+			RequestDispatcher rd = request.getRequestDispatcher("login.html");
+			rd.forward(request, response);
+
 		}
 	}
 
