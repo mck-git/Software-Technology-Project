@@ -69,11 +69,9 @@ public class BankApplication {
 		User newUser = new User(fullname, username, password);
 		newUser.setCpr(cpr);
 		
-		if (!adminLoggedIn)
-			throw new AdminNotLoggedInException();
+//		if (!adminLoggedIn)
+//			throw new AdminNotLoggedInException();
 
-		if (database.containsUser(newUser))
-			throw new AlreadyExistsException("User");
 
 		database.addUser(newUser);
 	}

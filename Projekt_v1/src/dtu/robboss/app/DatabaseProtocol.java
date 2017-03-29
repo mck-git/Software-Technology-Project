@@ -37,10 +37,6 @@ public class DatabaseProtocol {
 	}
 
 
-	// TODO Implement this for bragging.
-	// public Object accountCount() {
-	// return accountCount;
-	// }
 
 	///////////////
 	// SEARCHING //
@@ -65,23 +61,40 @@ public class DatabaseProtocol {
 	// ADD AND REMOVE //
 	////////////////////
 
-	public boolean addUser(User user) {
-
+	public void addUser(User user) throws AlreadyExistsException {
+		
+		if (containsUser(user))
+			throw new AlreadyExistsException("User");
+		
 		try {
-
-			stmt.executeUpdate("INSERT INTO DTUGRP04.USERS VALUES(1, '" + user.getUsername() + "', '<Full Name>', '"
-					+ user.getPassword() + "', 0, 1)");
+			startConnection();
 			
+			stmt.executeUpdate("INSERT INTO DTUGRP04.USERS VALUES(1, '" +
+			user.getUsername() + "', '"+
+			user.getFullname() +"', '" +
+			user.getPassword() + "', 0, 1)");
+			
+			addAccount(user.getMainAccount());
+			
+			closeConnection();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return false;
 	}
 
 	public void addAccount(Account account) {
-		// TODO: Need account table/tables.
-
-		// accounts.add(account);
+		startConnection();
+		try {
+			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + 
+					"(USER, TYPE, BALANCE, CREDIT)" + 
+					"VALUES ('" + account.getUser().getUsername() +"', '"+ (account.isMainAccount()? "MAIN" : "NORMAL") +"', 0, 0)"
+					);
+		} catch (SQLException e) {
+			System.out.println("Could not create account");
+//			e.printStackTrace();
+		}
+		closeConnection();
+		
 	}
 
 	public void removeUser(User user) {
@@ -90,30 +103,37 @@ public class DatabaseProtocol {
 		try {
 			stmt.executeUpdate("DELETE FROM DTUGRP04.USERS WHERE USERNAME = '" + user.getUsername() + "'");
 		} catch (SQLException e) {
-//			System.out.println("Could not remove user.");
-			 e.printStackTrace();
+			System.out.println("Could not remove user.");
+//			 e.printStackTrace();
 		}
 		closeConnection();
 
 	}
 
 	public void removeAccount(Account account) {
-
-		// TODO: Need account table/tables and remove an account from table.
-
-		// accounts.remove(account);
+		
+		startConnection();
+		try {
+			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = '" + account.getAccountNumber() + "'");
+		} catch (SQLException e) {
+			System.out.println("Could not remove account.");
+//			 e.printStackTrace();
+		}
+		
+		closeConnection();
+		
 
 	}
 
 	////////////////////
-	// Get //
+	//      Get       //
 	////////////////////
 
 	
 	/**
 	 * Fetches user from database
 	 * @param username
-	 * @return
+	 * @return User Object
 	 * @throws SQLException
 	 */
 	public User getUser(String username) {
@@ -136,10 +156,27 @@ public class DatabaseProtocol {
 		return null;
 	}
 
+	
 	public Account getAccount(String accountNumber) {
-		// TODO: Need account table/tables.
+		startConnection();
+		try {
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE ID = '" + accountNumber + "'");
+			if (rs.next()) {
+				User user = getUser(rs.getString("USER"));
+				Account account = new Account(user, accountNumber, rs.getInt("BALANCE"), rs.getInt("CREDIT"));
+				closeConnection();
+				return account;
+			} else {
+				closeConnection();
+				return null;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
+		closeConnection();
 		return null;
+
 	}
 
 	////////////////////

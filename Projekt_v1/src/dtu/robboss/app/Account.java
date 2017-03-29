@@ -19,7 +19,17 @@ public class Account {
 
 		user.addAccount(this);
 	}
+	
+	public Account(User user, String accountNumber, int balance, int credit) {
+		this.user = user;
+		this.accountNumber = accountNumber;
+		this.balance = balance;
+		this.credit = credit;
 
+		user.addAccount(this);
+	}
+
+	
 	public boolean isMainAccount() {
 		return this.getUser().getMainAccount().equals(this);
 	}

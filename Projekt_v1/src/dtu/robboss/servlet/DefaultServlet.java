@@ -2,10 +2,6 @@ package dtu.robboss.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.annotation.Resource;
 import javax.servlet.RequestDispatcher;
@@ -37,12 +33,6 @@ public class DefaultServlet extends HttpServlet {
 		app = new BankApplication(dataSource);
 	}
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		response.getWriter().println("from doget");
-
-	}
-
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		response.setContentType("text/html");
@@ -68,7 +58,9 @@ public class DefaultServlet extends HttpServlet {
 			} catch (AdminNotLoggedInException e) {
 				e.printStackTrace();
 			} catch (AlreadyExistsException e) {
-				e.printStackTrace();
+				System.out.println("User already exist");
+				response.sendRedirect("login.html");
+//				e.printStackTrace();
 			}
 		}
 
@@ -98,7 +90,7 @@ public class DefaultServlet extends HttpServlet {
 			User userToDelete = (User) request.getSession().getAttribute("USER");
 			try {
 				System.out.println("Removing " + userToDelete.getUsername() + ".");
-				// app.deleteUser(userToDelete);
+				app.deleteUser(userToDelete);
 				request.getSession().removeAttribute("USER");
 				RequestDispatcher rd = request.getRequestDispatcher("login.html");
 				rd.forward(request, response);
