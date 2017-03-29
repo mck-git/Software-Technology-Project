@@ -88,7 +88,7 @@ public class DatabaseProtocol {
 		startConnection();
 		try {
 			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + 
-					"(USER, TYPE, BALANCE, CREDIT)" + 
+					"(USERNAME, TYPE, BALANCE, CREDIT)" + 
 					"VALUES ('" + user.getUsername() +"', '"+ (main? "MAIN" : "NORMAL") +"', 0, 0)"
 					);
 		} catch (SQLException e) {
@@ -101,7 +101,7 @@ public class DatabaseProtocol {
 	
 
 	public void removeUser(User user) {
-
+		
 		startConnection();
 		try {
 			stmt.executeUpdate("DELETE FROM DTUGRP04.USERS WHERE USERNAME = '" + user.getUsername() + "'");
@@ -210,8 +210,12 @@ public class DatabaseProtocol {
 	public void addAccountsToUser(User user) {
 		startConnection();
 		try{
-			ResultSet rs = stmt.executeQuery("SELECT FROM DTUGRP04.ACCOUNTS WHERE USER = '" + user.getUsername() + "'");
+			System.out.println("Getting resultset");
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '"+user.getUsername()+"'");
+			System.out.println("Resultset recieved");
+			
 			while(rs.next()){
+				System.out.println(rs.getString("USERNAME"));
 				Account newAccount = new Account(user, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"));
 				if(rs.getString("TYPE").trim().equals("MAIN")){
 					user.setMainAccount(newAccount);
@@ -220,6 +224,8 @@ public class DatabaseProtocol {
 		} catch(SQLException e){
 			
 		}
+		
+		System.out.println("From DBP: " + user.getAccounts().size());
 		
 	}
 

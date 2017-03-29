@@ -74,8 +74,11 @@ public class DefaultServlet extends HttpServlet {
 			
 			try {
 				User userLoggedIn = app.login(username, password);
-				HttpSession session = request.getSession();
 				app.refreshAccountsForUser(userLoggedIn);
+				System.out.println(userLoggedIn.getAccounts().size());
+				
+				
+				HttpSession session = request.getSession();
 				session.setAttribute("USER", userLoggedIn);
 				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 				rd.forward(request, response);

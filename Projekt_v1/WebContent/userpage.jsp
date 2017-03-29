@@ -95,11 +95,13 @@
 				<h3 align="center" style="margin-top: 0;">Accounts</h3>
 
 				<div class="inner">
-					<% for(Account account: userLoggedIn.getAccounts()){%>
+					<%  for(Account account: userLoggedIn.getAccounts()){%>
 					
-					Account #<%=account.getAccountNumber()%> - balance: <%=account.getBalance()%>
+					AccountID: <%=account.getAccountNumber()%> - balance: <%=account.getBalance()%> - credit: <%=account.getCredit() %> <br>
 					
 					<% } %>
+					
+					<%= (userLoggedIn.getAccounts().size()==0? "No accounts": "") %>
 
 				</div>
 			</div>
