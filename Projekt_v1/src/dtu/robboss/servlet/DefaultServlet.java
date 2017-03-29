@@ -37,7 +37,6 @@ public class DefaultServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		response.getWriter().println("from doget");
-		User user = new User("<full name>", "username", "password");
 		
 	}
 
@@ -91,9 +90,9 @@ public class DefaultServlet extends HttpServlet {
 				// rs.getString("PASSWORD"));
 
 				if (rs.next()) {
-					User userLoggedIn = new User("<full name>", rs.getString("USERNAME"), rs.getString("PASSWORD"));
+					User loggedInUser = new User(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
 					HttpSession session = request.getSession();
-					session.setAttribute("USER", userLoggedIn);
+					session.setAttribute("USER", loggedInUser);
 					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 					rd.forward(request, response);
 					

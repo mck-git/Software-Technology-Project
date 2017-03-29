@@ -13,7 +13,7 @@ import javax.sql.DataSource;
 
 public class DatabaseProtocol {
 	@Resource(name = "jdbc/DB2")
-	private DataSource ds1;
+	private DataSource dataSource;
 	private Connection con = null;
 	private Statement stmt = null;
 
@@ -27,7 +27,7 @@ public class DatabaseProtocol {
 	////////////
 
 	public DatabaseProtocol(DataSource ds1) {
-		this.ds1 = ds1;
+		this.dataSource = ds1;
 	}
 
 	public int userCount() throws SQLException {
@@ -110,7 +110,7 @@ public class DatabaseProtocol {
 
 	private void startConnection() {
 		try {
-			con = ds1.getConnection();
+			con = dataSource.getConnection();
 			stmt = con.createStatement();
 		} catch (SQLException e) {
 			e.printStackTrace();

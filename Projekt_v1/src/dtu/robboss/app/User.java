@@ -20,12 +20,11 @@ public class User {
 		this.password = password;
 		this.userMessages = new HashSet<>();
 		
-		//Creating account list and adding mainAccount.
+		//Creating account list and adding mainAccount. 
+		//This has to be done before any account is created.
 		this.accounts = new ArrayList<Account>();
 		
 		mainAccount = new Account(this, "1"); // TODO id? connect to database
-//		accounts.add(mainAccount);
-
 	}
 
 	
