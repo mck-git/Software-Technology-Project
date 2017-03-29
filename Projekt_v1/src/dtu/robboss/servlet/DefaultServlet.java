@@ -120,6 +120,9 @@ public class DefaultServlet extends HttpServlet {
 			User loggedInUser = (User) request.getSession().getAttribute("USER");
 			try {
 				app.createAccount(loggedInUser, false);
+				app.refreshAccountsForUser(loggedInUser);
+				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+				rd.forward(request, response);
 			} catch (AdminNotLoggedInException e) {
 				System.out.println("Could not create new account from defaultservlet");
 //				e.printStackTrace();
