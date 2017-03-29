@@ -24,26 +24,44 @@ public class DatabaseProtocol {
 	}
 
 	public int userCount() throws SQLException {
-		try {
-			startConnection();
-			ResultSet rs = stmt.executeQuery("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.USERS");
+		startConnection();
+		ResultSet rs = stmt.executeQuery("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.USERS");
 
-			if (rs.next()) {
-				int userCount = Integer.parseInt(rs.getString("USERCOUNT"));
-				closeConnection();
-				return userCount;
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		if (rs.next()) {
+			int userCount = Integer.parseInt(rs.getString("USERCOUNT"));
+			closeConnection();
+			return userCount;
 		}
 		closeConnection();
 		return -1;
 	}
 
-	public int accountCount() {
-		// TODO: Need account table/tables.
-		return -1;
+	/**
+	 * Fetches user from database
+	 * @param username
+	 * @return
+	 * @throws SQLException
+	 */
+	public User getUser(String username) throws SQLException {
+		Connection con = dataSource.getConnection();
+		Statement stmt = con.createStatement();
+		// TODO more sanization?
+		ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '"
+				+ username + "'");
+		if (rs.next()){
+			//Trimming removes trailing and leading whitespace from database string.
+			return new User(rs.getString("FULLNAME").trim(),
+					 		rs.getString("USERNAME").trim(),
+					 		rs.getString("PASSWORD").trim());
+		}
+		else 
+			return null;				
 	}
+
+	// TODO Implement this for bragging.
+	// public Object accountCount() {
+	// return accountCount;
+	// }
 
 	///////////////
 	// SEARCHING //

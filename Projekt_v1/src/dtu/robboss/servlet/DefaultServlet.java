@@ -30,11 +30,11 @@ import dtu.robboss.app.User;
 public class DefaultServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	@Resource(name = "jdbc/DB2")
-	private DataSource ds1;
+	private DataSource dataSource;
 	private BankApplication app;
 
 	public void init() {
-		app = new BankApplication(ds1);
+		app = new BankApplication(dataSource);
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)

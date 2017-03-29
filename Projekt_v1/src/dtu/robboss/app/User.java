@@ -14,18 +14,18 @@ public class User {
 	private HashSet<UserMessage> userMessages; // TODO maybe think more about this name? "user" is redundant?
 
 	// TODO new constructor? taking a ResultSet as argument?
+	// or just think about which arguments User should have
 	public User(String name, String username, String password) {
 		this.fullName = name;
 		this.username = username;
 		this.password = password;
 		this.userMessages = new HashSet<>();
 		
-		//Creating account list and adding mainAccount.
+		//Creating account list and adding mainAccount. 
+		//This has to be done before any account is created.
 		this.accounts = new ArrayList<Account>();
 		
 		mainAccount = new Account(this, "1"); // TODO id? connect to database
-//		accounts.add(mainAccount);
-
 	}
 
 	

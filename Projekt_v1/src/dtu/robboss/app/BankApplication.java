@@ -6,7 +6,7 @@ import javax.sql.DataSource;
 
 public class BankApplication {
 
-	DatabaseProtocol database;
+	public DatabaseProtocol database;
 	private boolean adminLoggedIn = false;
 
 	String adminUserName = "admin", adminPassWord = "admin";
@@ -106,9 +106,10 @@ public class BankApplication {
 		database.addAccount(account);
 	}
 
-	public Object accountCount() {
-		return database.accountCount();
-	}
+	//TODO implement this if bragging
+//	public Object accountCount() {
+//		return database.accountCount();
+//	}
 
 	public void deleteAccount(Account account) throws AdminNotLoggedInException {
 		if (!adminLoggedIn)
