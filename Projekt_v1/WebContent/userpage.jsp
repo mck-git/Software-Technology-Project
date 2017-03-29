@@ -1,5 +1,7 @@
 <!DOCTYPE HTML><%@page language="java"
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="dtu.robboss.app.User"%>
+<%@ page import="dtu.robboss.app.Account"%>
 <html>
 <head>
 <title>userpage</title>
@@ -67,6 +69,12 @@
 	text-align: center;
 }
 </style>
+
+<!-- Get current logged in user -->
+<%
+	User userLoggedIn = (User) session.getAttribute("USER");
+%>
+
 </head>
 <body>
 	<!-- CONTAINER -->
@@ -74,7 +82,10 @@
 
 		<!-- HEADER -->
 		<div id="header">
-			<h1>Welcome</h1>
+			<h1>
+				Welcome
+				<%=userLoggedIn.getUsername()%>
+			</h1>
 		</div>
 
 		<!-- CONTENT AREA -->
@@ -84,7 +95,11 @@
 				<h3 align="center" style="margin-top: 0;">Accounts</h3>
 
 				<div class="inner">
-					accounts <br>
+					<% for(Account account: userLoggedIn.getAccounts()){%>
+					
+					Account #<%=account.getAccountNumber()%> - balance: <%=account.getBalance()%>
+					
+					<% } %>
 
 				</div>
 			</div>
@@ -97,19 +112,19 @@
 
 				</div>
 			</div>
-			
+
 			<div id="payment" class="outer">
 				<h3 align="center" style="margin-top: 0;">Payment</h3>
-				
+
 				<div class="inner">
 					payments <br>
-					
+
 				</div>
 			</div>
 
 			<div id="messages" class="outer">
 				<h3 align="center" style="margin-top: 0;">Messages</h3>
-				
+
 				<div class="inner">
 					message <br>
 
@@ -118,18 +133,26 @@
 
 			<div id="news" class="outer">
 				<h3 align="center" style="margin-top: 0;">News</h3>
-				
+
 				<div class="inner">
 					news <br>
 
 				</div>
 			</div>
-			
+
 			<div id="menu" class="outer">
 				<h3 align="center" style="margin-top: 0;">Menu</h3>
 
 				<div class="inner">
-					menu settings <br>
+					<form method = "post" action ="DS" align="center">
+					<input type="hidden" name = "subject" value = "DeleteUser"/> 
+					<input type="submit" value="Delete user" onclick="return confirm('Do you wish to delete user?')" />
+					</form>
+					
+					<form method = "post" action ="DS" align="center">
+					<input type="hidden" name = "subject" value = "LogOutUser" "/> 
+					<input type="submit" value="Log out user" onclick="return confirm('Do you wish to log out?')" />
+					</form>
 
 				</div>
 			</div>
@@ -137,10 +160,10 @@
 		</div>
 
 		<!-- FOOTER -->
-		<div id="footer">Footer
-		<br> 
-		<p> Contant informations here
-						</div>
+		<div id="footer">
+			Footer <br>
+			<p>Contact informations here
+		</div>
 
 		<!-- END OF CONTAINER -->
 	</div>
