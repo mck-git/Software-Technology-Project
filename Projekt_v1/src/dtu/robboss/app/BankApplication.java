@@ -1,8 +1,6 @@
 package dtu.robboss.app;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -24,26 +22,19 @@ public class BankApplication {
 	// LOGIN LOGOUT //
 	//////////////////
 
-	public void login(String user, String pass) throws UnknownLoginException {
+	public User login(String username, String pass) throws UnknownLoginException {
 
-		boolean loginFound = false;
+		
+		User loggedInUser = getUser(username);
+		
+		if ( loggedInUser == null || !pass.equals(loggedInUser.getPassword().trim())) 
+			throw new UnknownLoginException();
 
-		// Checks if login info matches a user in the database
-		for (User u : database.users) {
-			if (user.equals(u.getUsername()) && pass.equals(u.getPassword())) {
-				userLoggedIn = u;
-				loginFound = true;
-				break;
-			}
-		}
-
-		if (user.equals(adminUserName) && pass.equals(adminPassWord))
+		
+		if (loggedInUser.getUsername().equals(adminUserName) && loggedInUser.getPassword().equals(adminPassWord))
 			adminLoggedIn = true;
 
-		else if (!loginFound) {
-			throw new UnknownLoginException();
-		}
-
+		return loggedInUser;
 	}
 
 	public boolean adminLoggedIn() {
@@ -74,31 +65,31 @@ public class BankApplication {
 		return -1;
 	}
 
-	public void createNewUser(User user) throws AdminNotLoggedInException, AlreadyExistsException {
+	public void createNewUser(String fullname, String username, String password, String cpr) throws AdminNotLoggedInException, AlreadyExistsException {
+		User newUser = new User(fullname, username, password);
+		newUser.setCpr(cpr);
+		
 		if (!adminLoggedIn)
 			throw new AdminNotLoggedInException();
 
-		if (database.containsUser(user))
+		if (database.containsUser(newUser))
 			throw new AlreadyExistsException("User");
 
-		database.addUser(user);
+		database.addUser(newUser);
 	}
 
 	public void deleteUser(User user) throws AdminNotLoggedInException {
-		if (!adminLoggedIn)
-			throw new AdminNotLoggedInException();
+		//TODO: Administer admin.
+//		if (!adminLoggedIn)
+//			throw new AdminNotLoggedInException();
 
 		database.removeUser(user);
 
 	}
 
 	public User getUser(String username) {
-		for (User u : database.users) {
-			if (u.getUsername().equals(username)) {
-				return u;
-			}
-		}
-		return null;
+		return database.getUser(username);
+		
 	}
 
 	////////////////////////
@@ -129,11 +120,8 @@ public class BankApplication {
 	}
 
 	public Account getAccount(String accountNumber) {
-		for (Account a : database.accounts) {
-			if (a.getAccountNumber().equals(accountNumber)) 
-				return a;
-		}
-		return null;
+		
+		return database.getAccount(accountNumber);
 	}
 
 	//////////////////////////////
