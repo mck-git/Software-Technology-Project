@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 public class BankApplication {
 
 	public DatabaseProtocol database;
-	private boolean adminLoggedIn = false;
+	private boolean adminLoggedIn = true;
 
 	String adminUserName = "admin", adminPassWord = "admin";
 
@@ -16,7 +16,6 @@ public class BankApplication {
 	public BankApplication(DataSource ds1){
 		database = new DatabaseProtocol(ds1);
 	}
-	
 	
 	//////////////////
 	// LOGIN LOGOUT //
@@ -65,15 +64,16 @@ public class BankApplication {
 		return -1;
 	}
 
-	public void createNewUser(String fullname, String username, String password, String cpr) throws AdminNotLoggedInException, AlreadyExistsException {
+	public void createUser(String fullname, String username, String password, String cpr) throws AdminNotLoggedInException, AlreadyExistsException {
 		User newUser = new User(fullname, username, password);
 		newUser.setCpr(cpr);
 		
-//		if (!adminLoggedIn)
-//			throw new AdminNotLoggedInException();
-
+		if (!adminLoggedIn)
+			throw new AdminNotLoggedInException();
 
 		database.addUser(newUser);
+		createAccount(newUser, true);
+		
 	}
 
 	public void deleteUser(User user) throws AdminNotLoggedInException {
@@ -94,14 +94,10 @@ public class BankApplication {
 	// ACCOUNT MANAGEMENT //
 	////////////////////////
 
-	public void createNewAccount(Account account) throws AdminNotLoggedInException, AlreadyExistsException {
+	public void createAccount(User user, boolean main) throws AdminNotLoggedInException {
 		if (!adminLoggedIn)
 			throw new AdminNotLoggedInException();
-
-		if (database.containsAccount(account))
-			throw new AlreadyExistsException("Account");
-
-		database.addAccount(account);
+		database.addAccount(user, main);
 	}
 
 	//TODO implement this if bragging
@@ -155,6 +151,13 @@ public class BankApplication {
 
 		getAccount(accountNumber).changeBalance(amount);
 
+	}
+
+	public void refreshAccountsForUser(User user) {
+		
+		user.getAccounts().clear();
+		database.addAccountsToUser(user);
+		
 	}
 
 }

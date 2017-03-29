@@ -54,7 +54,8 @@ public class DefaultServlet extends HttpServlet {
 					", cpr: " + cpr);
 			
 			try {
-				app.createNewUser(fullname, username, password, cpr);
+				app.createUser(fullname, username, password, cpr);
+				subject = "Login";
 			} catch (AdminNotLoggedInException e) {
 				e.printStackTrace();
 			} catch (AlreadyExistsException e) {
@@ -69,10 +70,12 @@ public class DefaultServlet extends HttpServlet {
 			// Get request username and password
 			String username = request.getParameter("username");
 			String password = request.getParameter("password");
-
+			
+			
 			try {
 				User userLoggedIn = app.login(username, password);
 				HttpSession session = request.getSession();
+				app.refreshAccountsForUser(userLoggedIn);
 				session.setAttribute("USER", userLoggedIn);
 				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 				rd.forward(request, response);
@@ -99,7 +102,6 @@ public class DefaultServlet extends HttpServlet {
 				// e.printStackTrace();
 				System.out.println("Could not remove user.");
 			}
-
 		}
 
 		if (subject.equals("LogOutUser")) {
@@ -109,6 +111,16 @@ public class DefaultServlet extends HttpServlet {
 			RequestDispatcher rd = request.getRequestDispatcher("login.html");
 			rd.forward(request, response);
 
+		}
+		
+		if(subject.equals("NewAccount")){
+			User loggedInUser = (User) request.getSession().getAttribute("USER");
+			try {
+				app.createAccount(loggedInUser, false);
+			} catch (AdminNotLoggedInException e) {
+				System.out.println("Could not create new account from defaultservlet");
+//				e.printStackTrace();
+			}
 		}
 	}
 

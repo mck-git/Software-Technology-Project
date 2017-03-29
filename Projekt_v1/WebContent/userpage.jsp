@@ -153,6 +153,11 @@
 					<input type="hidden" name = "subject" value = "LogOutUser" "/> 
 					<input type="submit" value="Log out user" onclick="return confirm('Do you wish to log out?')" />
 					</form>
+					
+					<form method = "post" action ="DS" align="center">
+					<input type="hidden" name = "subject" value = "NewAccount" "/> 
+					<input type="submit" value="Add new account" onclick="return confirm('Do you wish to create new account?')" />
+					</form>
 
 				</div>
 			</div>

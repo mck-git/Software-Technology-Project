@@ -25,10 +25,8 @@ public class User {
 		//This has to be done before any account is created.
 		this.accounts = new ArrayList<Account>();
 		
-		mainAccount = new Account(this, "1"); // TODO id? connect to database
 	}
 
-	
 	////////////////////////
 	// ACCOUNT MANAGEMENT //
 	////////////////////////
