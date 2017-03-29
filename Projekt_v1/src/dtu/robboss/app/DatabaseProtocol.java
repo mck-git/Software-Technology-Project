@@ -55,6 +55,7 @@ public class DatabaseProtocol {
 		ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '"
 				+ username + "'");
 		if (rs.next()){
+			//Trimming removes trailing and leading whitespace from database string.
 			return new User(rs.getString("FULLNAME").trim(),
 					 		rs.getString("USERNAME").trim(),
 					 		rs.getString("PASSWORD").trim());
