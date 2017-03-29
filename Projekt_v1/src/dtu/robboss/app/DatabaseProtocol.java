@@ -104,6 +104,7 @@ public class DatabaseProtocol {
 		
 		startConnection();
 		try {
+			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + user.getUsername() + "'");
 			stmt.executeUpdate("DELETE FROM DTUGRP04.USERS WHERE USERNAME = '" + user.getUsername() + "'");
 		} catch (SQLException e) {
 			System.out.println("Could not remove user.");
@@ -210,12 +211,9 @@ public class DatabaseProtocol {
 	public void addAccountsToUser(User user) {
 		startConnection();
 		try{
-			System.out.println("Getting resultset");
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '"+user.getUsername()+"'");
-			System.out.println("Resultset recieved");
 			
 			while(rs.next()){
-				System.out.println(rs.getString("USERNAME"));
 				Account newAccount = new Account(user, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"));
 				if(rs.getString("TYPE").trim().equals("MAIN")){
 					user.setMainAccount(newAccount);
@@ -225,7 +223,6 @@ public class DatabaseProtocol {
 			
 		}
 		
-		System.out.println("From DBP: " + user.getAccounts().size());
 		
 	}
 

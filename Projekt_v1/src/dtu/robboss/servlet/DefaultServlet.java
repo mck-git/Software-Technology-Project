@@ -75,8 +75,6 @@ public class DefaultServlet extends HttpServlet {
 			try {
 				User userLoggedIn = app.login(username, password);
 				app.refreshAccountsForUser(userLoggedIn);
-				System.out.println(userLoggedIn.getAccounts().size());
-				
 				
 				HttpSession session = request.getSession();
 				session.setAttribute("USER", userLoggedIn);
@@ -101,7 +99,7 @@ public class DefaultServlet extends HttpServlet {
 				RequestDispatcher rd = request.getRequestDispatcher("login.html");
 				rd.forward(request, response);
 
-			} catch (Exception e) {
+			} catch (AdminNotLoggedInException e) {
 				// e.printStackTrace();
 				System.out.println("Could not remove user.");
 			}

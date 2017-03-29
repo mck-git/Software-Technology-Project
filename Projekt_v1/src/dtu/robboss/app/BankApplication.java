@@ -80,7 +80,10 @@ public class BankApplication {
 		//TODO: Administer admin.
 //		if (!adminLoggedIn)
 //			throw new AdminNotLoggedInException();
-
+		
+		//TODO: Sanitation - brugeren må kun slettes hvis alle balance på konti er 0.
+		
+		
 		database.removeUser(user);
 
 	}
