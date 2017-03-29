@@ -9,11 +9,13 @@ import java.sql.Statement;
 
 import javax.annotation.Resource;
 import javax.ejb.Local;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import dtu.robboss.app.*;
@@ -21,22 +23,26 @@ import dtu.robboss.app.*;
 /**
  * Servlet implementation class DefaultServlet
  */
-@WebServlet(description = "default servlet", urlPatterns={"/DS"})
+@WebServlet(description = "default servlet", urlPatterns = { "/DS" })
 public class DefaultServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	@Resource(name = "jdbc/DB2")
 	private DataSource ds1;
 	private BankApplication app;
 
-	public void init(){
+	public void init() {
 		app = new BankApplication(ds1);
 	}
-	
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		response.getWriter().println("from doget");
+		User user = new User("<full name>", "username", "password");
+		
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
 
@@ -51,8 +57,8 @@ public class DefaultServlet extends HttpServlet {
 				Connection con = ds1.getConnection();
 				Statement stmt = con.createStatement();
 
-				
-				stmt.executeUpdate("INSERT INTO DTUGRP04.USERS VALUES(1, 'Magnus', 'Roar Nind Steffensen', '134', 0, 1)");
+				stmt.executeUpdate(
+						"INSERT INTO DTUGRP04.USERS VALUES(1, 'Magnus', 'Roar Nind Steffensen', '134', 0, 1)");
 
 				subject = "Login";
 
@@ -63,33 +69,38 @@ public class DefaultServlet extends HttpServlet {
 
 		if (subject.equals("Login")) {
 
-			out.println("<br>Trying to access server: ");
 			try {
 				Connection con = ds1.getConnection();
-				out.println("<br>Created connection");
 
 				Statement stmt = con.createStatement();
-				out.println("<br>Created statement");
-				
-				//Get request username and password
+
+				// Get request username and password
 				String username = request.getParameter("username");
 				String password = request.getParameter("password");
-				
-				// TODO more sanization?
-				ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '" + username 
-						+ "' AND PASSWORD = '" + password + "'");
-				out.print("<br>Data Fetched");
-				out.print("<br> Printing data: ");
 
-				//Constructs new User for session.
-				//TODO sql throws error: Ugyldig funktion til læsning på aktuel cursorposition
-//				rs.next();
-//				User user = new User(rs.getString("FULLNAME"), rs.getString("USERNAME"),
-//						rs.getString("PASSWORD"));
-						
-//				
-				out.println("<br> Welcome "); //+user.toString());
-//				
+				// TODO more sanization?
+				ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '" + username
+						+ "' AND PASSWORD = '" + password + "'");
+
+				// Constructs new User for session.
+				// TODO sql throws error: Ugyldig funktion til lï¿½sning pï¿½ aktuel
+				// cursorposition
+				// rs.next();
+				// User user = new User(rs.getString("FULLNAME"),
+				// rs.getString("USERNAME"),
+				// rs.getString("PASSWORD"));
+
+				if (rs.next()) {
+					User userLoggedIn = new User("<full name>", rs.getString("USERNAME"), rs.getString("PASSWORD"));
+					HttpSession session = request.getSession();
+					session.setAttribute("USER", userLoggedIn);
+					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+					rd.forward(request, response);
+					
+					
+				} else {
+					out.println("Incorrect username or password.");
+				}
 
 			} catch (SQLException e) {
 				e.printStackTrace();

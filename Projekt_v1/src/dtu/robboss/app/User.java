@@ -15,18 +15,20 @@ public class User {
 
 	// TODO new constructor? taking a ResultSet as argument?
 	public User(String name, String username, String password) {
-		this.username = username;
 		this.fullName = name;
+		this.username = username;
 		this.password = password;
 		this.userMessages = new HashSet<>();
-		mainAccount = new Account(this, "1"); // TODO id? connect to database
 		
 		//Creating account list and adding mainAccount.
 		this.accounts = new ArrayList<Account>();
-		accounts.add(mainAccount);
+		
+		mainAccount = new Account(this, "1"); // TODO id? connect to database
+//		accounts.add(mainAccount);
 
 	}
 
+	
 	////////////////////////
 	// ACCOUNT MANAGEMENT //
 	////////////////////////
