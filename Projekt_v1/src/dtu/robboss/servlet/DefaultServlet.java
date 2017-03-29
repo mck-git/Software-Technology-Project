@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import javax.annotation.Resource;
-import javax.ejb.Local;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -27,17 +26,17 @@ import dtu.robboss.app.*;
 public class DefaultServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	@Resource(name = "jdbc/DB2")
-	private DataSource ds1;
+	private DataSource dataSource;
 	private BankApplication app;
 
 	public void init() {
-		app = new BankApplication(ds1);
+		app = new BankApplication(dataSource);
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		response.getWriter().println("from doget");
-		
+
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -51,9 +50,10 @@ public class DefaultServlet extends HttpServlet {
 			out.println("Amount of users: " + app.userCount());
 		}
 
+		// TODO CANNOT CREATE PASSWORD AND USERNAME WITH SPACES
 		if (subject.equals("CreateNewUser")) {
 			try {
-				Connection con = ds1.getConnection();
+				Connection con = dataSource.getConnection();
 				Statement stmt = con.createStatement();
 
 				stmt.executeUpdate(
@@ -67,39 +67,25 @@ public class DefaultServlet extends HttpServlet {
 		}
 
 		if (subject.equals("Login")) {
-
 			try {
-				Connection con = ds1.getConnection();
-
-				Statement stmt = con.createStatement();
-
 				// Get request username and password
 				String username = request.getParameter("username");
 				String password = request.getParameter("password");
 
-				// TODO more sanization?
-				ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '" + username
-						+ "' AND PASSWORD = '" + password + "'");
+				
+				User user = app.database.getUser(username);
+				System.out.println(user.toString());
+				if (user != null && password.trim().equals(user.getPassword())) {
 
-				// Constructs new User for session.
-				// TODO sql throws error: Ugyldig funktion til l�sning p� aktuel
-				// cursorposition
-				// rs.next();
-				// User user = new User(rs.getString("FULLNAME"),
-				// rs.getString("USERNAME"),
-				// rs.getString("PASSWORD"));
-
-				if (rs.next()) {
-					User loggedInUser = new User(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
 					HttpSession session = request.getSession();
-					session.setAttribute("USER", loggedInUser);
+
+					session.setAttribute("USER", user);
+
 					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+
 					rd.forward(request, response);
-					
-					
-				} else {
+				} else
 					out.println("Incorrect username or password.");
-				}
 
 			} catch (SQLException e) {
 				e.printStackTrace();

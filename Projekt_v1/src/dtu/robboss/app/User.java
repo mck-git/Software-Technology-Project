@@ -14,6 +14,7 @@ public class User {
 	private HashSet<UserMessage> userMessages; // TODO maybe think more about this name? "user" is redundant?
 
 	// TODO new constructor? taking a ResultSet as argument?
+	// or just think about which arguments User should have
 	public User(String name, String username, String password) {
 		this.fullName = name;
 		this.username = username;

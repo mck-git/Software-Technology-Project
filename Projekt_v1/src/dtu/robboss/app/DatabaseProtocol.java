@@ -1,7 +1,6 @@
 package dtu.robboss.app;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -19,8 +18,8 @@ public class DatabaseProtocol {
 
 	int accountCount = 0;
 
-	List<User> users = new ArrayList<>();
-	List<Account> accounts = new ArrayList<>();
+	 List<User> users = new ArrayList<>();
+	 List<Account> accounts = new ArrayList<>();
 
 	////////////
 	// AMOUNT //
@@ -31,25 +30,43 @@ public class DatabaseProtocol {
 	}
 
 	public int userCount() throws SQLException {
-		try {
-			startConnection();
-			ResultSet rs = stmt.executeQuery("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.USERS");
+		startConnection();
+		ResultSet rs = stmt.executeQuery("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.USERS");
 
-			if (rs.next()) {
-				int userCount = Integer.parseInt(rs.getString("USERCOUNT"));
-				closeConnection();
-				return userCount;
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		if (rs.next()) {
+			int userCount = Integer.parseInt(rs.getString("USERCOUNT"));
+			closeConnection();
+			return userCount;
 		}
 		closeConnection();
 		return -1;
 	}
 
-	public Object accountCount() {
-		return accountCount;
+	/**
+	 * Fetches user from database
+	 * @param username
+	 * @return
+	 * @throws SQLException
+	 */
+	public User getUser(String username) throws SQLException {
+		Connection con = dataSource.getConnection();
+		Statement stmt = con.createStatement();
+		// TODO more sanization?
+		ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '"
+				+ username + "'");
+		if (rs.next()){
+			return new User(rs.getString("FULLNAME").trim(),
+					 		rs.getString("USERNAME").trim(),
+					 		rs.getString("PASSWORD").trim());
+		}
+		else 
+			return null;				
 	}
+
+	// TODO Implement this for bragging.
+	// public Object accountCount() {
+	// return accountCount;
+	// }
 
 	///////////////
 	// SEARCHING //
@@ -71,8 +88,8 @@ public class DatabaseProtocol {
 
 		try {
 
-			stmt.executeUpdate(
-					"INSERT INTO DTUGRP04.USERS VALUES(1, '" + user.getUsername() + "', '<Full Name>', '" + user.getPassword() + "', 0, 1)");
+			stmt.executeUpdate("INSERT INTO DTUGRP04.USERS VALUES(1, '" + user.getUsername() + "', '<Full Name>', '"
+					+ user.getPassword() + "', 0, 1)");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -88,7 +105,7 @@ public class DatabaseProtocol {
 
 	public void removeUser(User user) {
 		users.remove(user);
-		
+
 	}
 
 	public void removeAccount(Account account) {
