@@ -284,7 +284,7 @@ public class DatabaseProtocol {
 		try {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE ID = '" + accountNumber + "'");
 			if (rs.next()) {
-				Customer customer = getCustomer(rs.getString("USER"));
+				Customer customer = getCustomer(rs.getString("USERNAME"));
 				Account account = new Account(customer, accountNumber, rs.getInt("BALANCE"), rs.getInt("CREDIT"));
 				closeConnection();
 				return account;
