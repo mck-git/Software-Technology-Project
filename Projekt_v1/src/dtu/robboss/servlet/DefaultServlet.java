@@ -86,7 +86,7 @@ public class DefaultServlet extends HttpServlet {
 				// Checks if user logged in is a customer
 				if(userLoggedIn instanceof Customer) {
 					Customer customerLoggedIn = (Customer) userLoggedIn;
-					app.refreshAccountsForCustomer(customerLoggedIn); //TODO REDUNDANT?
+					app.refreshAccountsForCustomer(customerLoggedIn); 
 					session.setAttribute("USER", customerLoggedIn);					
 					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 					rd.forward(request, response);
@@ -114,14 +114,14 @@ public class DefaultServlet extends HttpServlet {
 			
 			HttpSession session = request.getSession();
 //			String recieverType = request.getParameter("recieverType");
-			Account sourceAccount = ((User) session.getAttribute("USER")).getMainAccount();
+			Account sourceAccount = ((Customer) session.getAttribute("USER")).getMainAccount();
 
 			try {
 //				if (recieverType.equals("account")) {
 //					app.transferFromAccountToAccount(sourceAccount, request.getParameter("targetAccountID"),
 //							transferAmount);
 //				} else if (recieverType.equals("user")) {
-					app.transferFromAccountToUser(sourceAccount, request.getParameter("targetUsername"),
+					app.transferFromAccountToCustomer(sourceAccount, request.getParameter("targetUsername"),
 							transferAmount);
 //				}
 					

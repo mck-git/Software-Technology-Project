@@ -20,7 +20,6 @@ public class BankApplication {
 
 	public User login(String username, String pass) throws UnknownLoginException {
 
-		
 		userLoggedIn = getUser(username);
 		
 		//checks if user login is customer
@@ -102,7 +101,7 @@ public class BankApplication {
 	
 	public Customer getCustomer(String username) {
 		Customer customerFromDatabase = database.getCustomer(username);
-		refreshAccountsForUser(customerFromDatabase);
+		refreshAccountsForCustomer(customerFromDatabase);
 		return customerFromDatabase;
 
 	}
@@ -149,18 +148,18 @@ public class BankApplication {
 
 	}
 	
-	public void transferFromAccountToUser(Account sourceAccount, String targetUsername, String transferAmount) throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
+	public void transferFromAccountToCustomer(Account sourceAccount, String targetUsername, String transferAmount) throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
 
-		User targetUser = getUser(targetUsername);
-		if(targetUser == null)
+		Customer targetCustomer = getCustomer(targetUsername);
+		if(targetCustomer == null)
 			throw new UserNotfoundException();
 		
-		transferFromAccountToAccount(sourceAccount, targetUser.getMainAccount().getAccountNumber(), transferAmount);
+		transferFromAccountToAccount(sourceAccount, targetCustomer.getMainAccount().getAccountNumber(), transferAmount);
 		
 	}	
 	
 	public void transferFromAccountToAccount(Account sourceAccount, String targetAccountID, String transferAmount) throws UserNotLoggedInException, TransferException, AccountNotfoundException {
-		if (userLoggedIn != sourceAccount.getUser()) {
+		if (userLoggedIn != sourceAccount.getCustomer()) {
 			throw new UserNotLoggedInException();
 		}
 		
