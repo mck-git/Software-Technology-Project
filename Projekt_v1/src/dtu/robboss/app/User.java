@@ -1,16 +1,10 @@
 package dtu.robboss.app;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 public class User {
 
-	private String username;
-	private String fullName;
-	private String password;
-	private String cpr; // TODO add CPR to USER database
-	private ArrayList<Account> accounts;
-	private Account mainAccount;
+	private String username, fullName, password;
 	private HashSet<UserMessage> userMessages; // TODO maybe think more about this name? "user" is redundant?
 
 	// TODO new constructor? taking a ResultSet as argument?
@@ -20,35 +14,6 @@ public class User {
 		this.username = username;
 		this.password = password;
 		this.userMessages = new HashSet<>();
-		
-		//Creating account list and adding mainAccount. 
-		//This has to be done before any account is created.
-		this.accounts = new ArrayList<Account>();
-		
-	}
-
-	////////////////////////
-	// ACCOUNT MANAGEMENT //
-	////////////////////////
-
-	public void addAccount(Account newAccount) {
-		accounts.add(newAccount);
-	}
-
-	public void removeAccount(Account account) {
-		accounts.remove(account);
-	}
-
-	public Account getMainAccount() {
-		return this.mainAccount;
-	}
-
-	public void setMainAccount(Account newMain) {
-		//needs sanitation?
-		if(accounts.contains(newMain))
-			this.mainAccount = newMain;
-		else
-			System.out.println("ERROR: account not found in accounts list.");
 	}
 
 	public String toString(){
@@ -84,15 +49,4 @@ public class User {
 		this.password = password;
 	}
 
-	public String getCpr() {
-		return cpr;
-	}
-
-	public void setCpr(String cpr) {
-		this.cpr = cpr;
-	}
-
-	public ArrayList<Account> getAccounts() {
-		return accounts;
-	}
 }

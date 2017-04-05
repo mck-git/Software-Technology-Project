@@ -16,6 +16,7 @@ import javax.sql.DataSource;
 import dtu.robboss.app.AdminNotLoggedInException;
 import dtu.robboss.app.AlreadyExistsException;
 import dtu.robboss.app.BankApplication;
+import dtu.robboss.app.Customer;
 import dtu.robboss.app.UnknownLoginException;
 import dtu.robboss.app.User;
 
@@ -54,7 +55,7 @@ public class DefaultServlet extends HttpServlet {
 					", cpr: " + cpr);
 			
 			try {
-				app.createUser(fullname, username, password, cpr);
+				app.createCustomer(fullname, username, password, cpr);
 				subject = "Login";
 			} catch (AdminNotLoggedInException e) {
 				e.printStackTrace();
@@ -73,11 +74,11 @@ public class DefaultServlet extends HttpServlet {
 			
 			
 			try {
-				User userLoggedIn = app.login(username, password);
-				app.refreshAccountsForUser(userLoggedIn);
+				Customer customerLoggedIn = (Customer) app.login(username, password);
+				app.refreshAccountsForCustomer(customerLoggedIn);
 				
 				HttpSession session = request.getSession();
-				session.setAttribute("USER", userLoggedIn);
+				session.setAttribute("USER", customerLoggedIn);
 				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 				rd.forward(request, response);
 
@@ -115,10 +116,10 @@ public class DefaultServlet extends HttpServlet {
 		}
 		
 		if(subject.equals("NewAccount")){
-			User loggedInUser = (User) request.getSession().getAttribute("USER");
+			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
 			try {
-				app.createAccount(loggedInUser, false);
-				app.refreshAccountsForUser(loggedInUser);
+				app.createAccount(loggedInCustomer, false);
+				app.refreshAccountsForCustomer(loggedInCustomer);
 				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 				rd.forward(request, response);
 			} catch (AdminNotLoggedInException e) {

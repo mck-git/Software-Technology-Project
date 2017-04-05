@@ -43,7 +43,7 @@ public class DatabaseProtocol {
 	///////////////
 
 	public boolean containsUser(User user) {
-		User userCheck = getUser(user.getUsername());
+		User userCheck = getCustomer(user.getUsername());
 
 		if (userCheck == null)
 			return false;
@@ -140,14 +140,14 @@ public class DatabaseProtocol {
 	 * @return User Object
 	 * @throws SQLException
 	 */
-	public User getUser(String username) {
+	public Customer getCustomer(String username) {
 		startConnection();
 		try {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '" + username + "'");
 			if (rs.next()) {
-				User user = new User(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
+				Customer customer = new Customer(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
 				closeConnection();
-				return user;
+				return customer;
 			} else {
 				closeConnection();
 				return null;
@@ -194,8 +194,8 @@ public class DatabaseProtocol {
 		try {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE ID = '" + accountNumber + "'");
 			if (rs.next()) {
-				User user = getUser(rs.getString("USER"));
-				Account account = new Account(user, accountNumber, rs.getInt("BALANCE"), rs.getInt("CREDIT"));
+				Customer customer = getCustomer(rs.getString("USER"));
+				Account account = new Account(customer, accountNumber, rs.getInt("BALANCE"), rs.getInt("CREDIT"));
 				closeConnection();
 				return account;
 			} else {
@@ -236,15 +236,15 @@ public class DatabaseProtocol {
 	}
 
 	//TODO: CHECK NAME
-	public void addAccountsToUser(User user) {
+	public void addAccountsToUser(Customer customer) {
 		startConnection();
 		try{
-			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '"+user.getUsername()+"'");
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '"+customer.getUsername()+"'");
 			
 			while(rs.next()){
-				Account newAccount = new Account(user, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"));
+				Account newAccount = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"));
 				if(rs.getString("TYPE").trim().equals("MAIN")){
-					user.setMainAccount(newAccount);
+					customer.setMainAccount(newAccount);
 				}
 			}
 		} catch(SQLException e){

@@ -64,15 +64,15 @@ public class BankApplication {
 		return -1;
 	}
 
-	public void createUser(String fullname, String username, String password, String cpr) throws AdminNotLoggedInException, AlreadyExistsException {
-		User newUser = new User(fullname, username, password);
-		newUser.setCpr(cpr);
+	public void createCustomer(String fullname, String username, String password, String cpr) throws AdminNotLoggedInException, AlreadyExistsException {
+		Customer newCustomer = new Customer(fullname, username, password);
+		newCustomer.setCpr(cpr);
 		
 		if (adminLoggedIn == null)
 			throw new AdminNotLoggedInException();
 
-		database.addUser(newUser);
-		createAccount(newUser, true);
+		database.addUser(newCustomer);
+		createAccount(newCustomer, true);
 		
 	}
 
@@ -89,7 +89,7 @@ public class BankApplication {
 	}
 
 	public User getUser(String username) {
-		return database.getUser(username);
+		return database.getCustomer(username);
 
 	}
 	private Admin getAdmin(String username) {
@@ -115,7 +115,7 @@ public class BankApplication {
 		if (adminLoggedIn == null)
 			throw new AdminNotLoggedInException();
 
-		account.getUser().removeAccount(account);
+		account.getCustomer().removeAccount(account);
 		database.removeAccount(account);
 	}
 
@@ -128,30 +128,30 @@ public class BankApplication {
 	// USER-ACCOUNT INTERACTION //
 	//////////////////////////////
 
-	public void setUserMainAccount(User user, Account newMain) throws AdminNotLoggedInException {
+	public void setCustomerMainAccount(Customer customer, Account newMain) throws AdminNotLoggedInException {
 
 		if (adminLoggedIn == null) {
 			throw new AdminNotLoggedInException();
 		}
 
-		user.setMainAccount(newMain);
+		customer.setMainAccount(newMain);
 	}
 
-	public void changeBalanceUser(User u, int amount) {
+//	public void changeBalanceUser(User u, int amount) {
+//
+//		u.getMainAccount().changeBalance(amount);
+//
+//	}
 
-		u.getMainAccount().changeBalance(amount);
-
-	}
-
-	public void transferMoneyUser(User source, User target, int amount) throws UserNotLoggedInException {
-		if (!(userLoggedIn == source)) {
-			throw new UserNotLoggedInException();
-		}
-
-		source.getMainAccount().changeBalance(-amount);
-		target.getMainAccount().changeBalance(amount);
-
-	}
+//	public void transferMoneyUser(User source, User target, int amount) throws UserNotLoggedInException {
+//		if (!(userLoggedIn == source)) {
+//			throw new UserNotLoggedInException();
+//		}
+//
+//		source.getMainAccount().changeBalance(-amount);
+//		target.getMainAccount().changeBalance(amount);
+//
+//	}
 
 	public void changeBalanceAccount(String accountNumber, int amount) {
 
@@ -159,10 +159,10 @@ public class BankApplication {
 
 	}
 
-	public void refreshAccountsForUser(User user) {
+	public void refreshAccountsForCustomer(Customer customer) {
 		
-		user.getAccounts().clear();
-		database.addAccountsToUser(user);
+		customer.getAccounts().clear();
+		database.addAccountsToUser(customer);
 		
 	}
 
