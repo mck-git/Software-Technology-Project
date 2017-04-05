@@ -14,7 +14,6 @@ public class DatabaseProtocol {
 	private Connection con = null;
 	private Statement stmt = null;
 
-
 	////////////
 	// AMOUNT //
 	////////////
@@ -35,8 +34,6 @@ public class DatabaseProtocol {
 		closeConnection();
 		return -1;
 	}
-
-
 
 	///////////////
 	// SEARCHING //
@@ -62,80 +59,74 @@ public class DatabaseProtocol {
 	////////////////////
 
 	public void addUser(User user) throws AlreadyExistsException {
-		//USERS columns: USERNAME, FULLNAME, PASSWORD, MAINACCOUNT
-		
+		// USERS columns: USERNAME, FULLNAME, PASSWORD, MAINACCOUNT
+
 		if (containsUser(user))
 			throw new AlreadyExistsException("User");
-		
+
 		try {
 			startConnection();
-			
-			stmt.executeUpdate("INSERT INTO DTUGRP04.USERS (USERNAME, FULLNAME, PASSWORD) VALUES('"+
-			user.getUsername() + 	"', '" +
-			user.getFullname() +	"', '" +
-			user.getPassword() + 	"')" );
-			
+
+			stmt.executeUpdate("INSERT INTO DTUGRP04.USERS (USERNAME, FULLNAME, PASSWORD) VALUES('" + user.getUsername()
+					+ "', '" + user.getFullname() + "', '" + user.getPassword() + "')");
+
 			closeConnection();
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void addAccount(User user, boolean main) {
-		//ACCOUNTS columns: ID, USER, TYPE, BALANCE, CREDIT (, HISTORY)
-		
+		// ACCOUNTS columns: ID, USER, TYPE, BALANCE, CREDIT (, HISTORY)
+
 		startConnection();
 		try {
-			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + 
-					"(USERNAME, TYPE, BALANCE, CREDIT)" + 
-					"VALUES ('" + user.getUsername() +"', '"+ (main? "MAIN" : "NORMAL") +"', 0, 0)"
-					);
+			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + "(USERNAME, TYPE, BALANCE, CREDIT)" + "VALUES ('"
+					+ user.getUsername() + "', '" + (main ? "MAIN" : "NORMAL") + "', 0, 0)");
 		} catch (SQLException e) {
 			System.out.println("Could not create account");
-//			e.printStackTrace();
+			// e.printStackTrace();
 		}
 		closeConnection();
-		
+
 	}
-	
 
 	public void removeUser(User user) {
-		
+
 		startConnection();
 		try {
 			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + user.getUsername() + "'");
 			stmt.executeUpdate("DELETE FROM DTUGRP04.USERS WHERE USERNAME = '" + user.getUsername() + "'");
 		} catch (SQLException e) {
 			System.out.println("Could not remove user.");
-//			 e.printStackTrace();
+			// e.printStackTrace();
 		}
 		closeConnection();
 
 	}
 
 	public void removeAccount(Account account) {
-		
+
 		startConnection();
 		try {
 			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = '" + account.getAccountNumber() + "'");
 		} catch (SQLException e) {
 			System.out.println("Could not remove account.");
-//			 e.printStackTrace();
+			// e.printStackTrace();
 		}
-		
+
 		closeConnection();
-		
 
 	}
 
 	////////////////////
-	//      Get       //
+	// Get //
 	////////////////////
 
-	
 	/**
 	 * Fetches user from database
+	 * 
 	 * @param username
 	 * @return User Object
 	 * @throws SQLException
@@ -160,14 +151,13 @@ public class DatabaseProtocol {
 		return null;
 	}
 
-	
 	public Account getAccount(String accountNumber) {
 		startConnection();
 		try {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE ID = '" + accountNumber + "'");
 			if (rs.next()) {
-				User user = getUser(rs.getString("USER"));
-				Account account = new Account(user, accountNumber, rs.getInt("BALANCE"), rs.getInt("CREDIT"));
+				User user = getUser(rs.getString("USERNAME"));
+				Account account = new Account(user, accountNumber, rs.getDouble("BALANCE"), rs.getDouble("CREDIT"));
 				closeConnection();
 				return account;
 			} else {
@@ -181,6 +171,41 @@ public class DatabaseProtocol {
 		closeConnection();
 		return null;
 
+	}
+	////////////
+	// Update //
+	////////////
+	
+	public void transferFromAccountToAccount(Account source, Account target, double amount){
+		System.out.println("Before:");
+		System.out.println("Source account: " + source.getBalance() );
+		System.out.println("Target account: " + target.getBalance() );
+		System.out.println("Amount: " + amount);
+		
+		
+		source.changeBalance(-amount);
+		target.changeBalance(amount);
+		
+
+		startConnection();
+		
+		try {
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + source.getBalance() +"' WHERE ID = '" +source.getAccountNumber()+ "'");
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + target.getBalance() +"' WHERE ID = '" +target.getAccountNumber()+ "'");
+			
+			System.out.println("\nAfter:");
+			System.out.println("Source account: " + source.getBalance() );
+			System.out.println("Target account: " + target.getBalance() );
+		} catch (SQLException e) {
+			closeConnection();
+			
+			source.changeBalance(amount);
+			target.changeBalance(-amount);
+			
+			System.out.println("Error in DatabaseProtocol::transferFromAccountToAccount");
+			e.printStackTrace();
+		}
+		closeConnection();
 	}
 
 	////////////////////
@@ -207,23 +232,23 @@ public class DatabaseProtocol {
 		}
 	}
 
-	//TODO: CHECK NAME
+	// TODO: CHECK NAME
 	public void addAccountsToUser(User user) {
 		startConnection();
-		try{
-			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '"+user.getUsername()+"'");
-			
-			while(rs.next()){
+		try {
+			ResultSet rs = stmt
+					.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + user.getUsername() + "'");
+
+			while (rs.next()) {
 				Account newAccount = new Account(user, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"));
-				if(rs.getString("TYPE").trim().equals("MAIN")){
+				if (rs.getString("TYPE").trim().equals("MAIN")) {
 					user.setMainAccount(newAccount);
 				}
 			}
-		} catch(SQLException e){
-			
+		} catch (SQLException e) {
+
 		}
-		
-		
+
 	}
 
 }

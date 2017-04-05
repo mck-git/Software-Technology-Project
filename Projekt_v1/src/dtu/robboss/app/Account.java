@@ -8,8 +8,8 @@ public class Account {
 
 	private User user;
 	private String accountNumber;
-	private int balance;
-	private int credit;
+	private double balance;
+	private double credit;
 
 	public Account(User user, String accountNumber) {
 		this.user = user;
@@ -20,7 +20,7 @@ public class Account {
 		user.addAccount(this);
 	}
 	
-	public Account(User user, String accountNumber, int balance, int credit) {
+	public Account(User user, String accountNumber, double balance, double credit) {
 		this.user = user;
 		this.accountNumber = accountNumber;
 		this.balance = balance;
@@ -42,17 +42,17 @@ public class Account {
 		return this.accountNumber;
 	}
 
-	public int getBalance() {
+	public double getBalance() {
 		return this.balance;
 	}
 
-	public int getCredit() {
+	public double getCredit() {
 		return this.credit;
 	}
 
-	public void changeBalance(int i) {
-		this.balance += i;
-
+	public void changeBalance(double d) {
+		this.balance += d;
+		this.balance = Math.round(this.balance*100.0)/100.0;
 	}
 
 }

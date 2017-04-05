@@ -95,13 +95,36 @@
 				<h3 align="center" style="margin-top: 0;">Accounts</h3>
 
 				<div class="inner">
-					<%  for(Account account: userLoggedIn.getAccounts()){%>
+					<%
+						String type;
+					%>
+					<%
+						for (Account account : userLoggedIn.getAccounts()) {
+					%>
+
+					AccountID:
+					<%=account.getAccountNumber()%>
 					
-					AccountID: <%=account.getAccountNumber()%> - balance: <%=account.getBalance()%> - credit: <%=account.getCredit() %> <br>
+					- balance:
+					<%=account.getBalance()%>
 					
-					<% } %>
-					
-					<%= (userLoggedIn.getAccounts().size()==0? "No accounts": "") %>
+					- credit:
+					<%=account.getCredit()%>
+					 
+					<%
+						if (account.equals(userLoggedIn.getMainAccount()))
+								type = "MAIN";
+							else
+								type = "NORMAL";
+					%>
+					 - type: <%=type%>
+					<br>
+
+					<%
+						}
+					%>
+
+					<%=(userLoggedIn.getAccounts().size() == 0 ? "No accounts" : "")%>
 
 				</div>
 			</div>
@@ -119,7 +142,15 @@
 				<h3 align="center" style="margin-top: 0;">Payment</h3>
 
 				<div class="inner">
-					payments <br>
+					<form method="post" action="DS" align="center" />
+					<input type="hidden" name="subject" value="transfermoney" /> Send
+					to User: <input type="text" name="targetUsername" /> <br> <br>
+					<input type="text" name="beforedecimalseperator"
+						style="width: 10em" />. <input type="text"
+						name="afterdecimalseperator" style="width: 3em" /> Kr. <input
+						type="submit" value="Transfer Money"
+						onclick="return confirm('Do you wish to transfer?')" />
+					</form>
 
 				</div>
 			</div>
@@ -146,19 +177,22 @@
 				<h3 align="center" style="margin-top: 0;">Menu</h3>
 
 				<div class="inner">
-					<form method = "post" action ="DS" align="center">
-					<input type="hidden" name = "subject" value = "DeleteUser"/> 
-					<input type="submit" value="Delete user" onclick="return confirm('Do you wish to delete user?')" />
+					<form method="post" action="DS" align="center">
+						<input type="hidden" name="subject" value="DeleteUser" /> <input
+							type="submit" value="Delete user"
+							onclick="return confirm('Do you wish to delete user?')" />
 					</form>
-					
-					<form method = "post" action ="DS" align="center">
-					<input type="hidden" name = "subject" value = "LogOutUser" "/> 
-					<input type="submit" value="Log out user" onclick="return confirm('Do you wish to log out?')" />
+
+					<form method="post" action="DS" align="center">
+						<input type="hidden" name="subject" value="LogOutUser" "/> <input
+							type="submit" value="Log out user"
+							onclick="return confirm('Do you wish to log out?')" />
 					</form>
-					
-					<form method = "post" action ="DS" align="center">
-					<input type="hidden" name = "subject" value = "NewAccount" "/> 
-					<input type="submit" value="Add new account" onclick="return confirm('Do you wish to create new account?')" />
+
+					<form method="post" action="DS" align="center">
+						<input type="hidden" name="subject" value="NewAccount" "/> <input
+							type="submit" value="Add new account"
+							onclick="return confirm('Do you wish to create new account?')" />
 					</form>
 
 				</div>

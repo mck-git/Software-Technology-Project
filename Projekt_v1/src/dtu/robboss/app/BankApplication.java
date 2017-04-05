@@ -33,6 +33,7 @@ public class BankApplication {
 		if (loggedInUser.getUsername().equals(adminUserName) && loggedInUser.getPassword().equals(adminPassWord))
 			adminLoggedIn = true;
 
+		userLoggedIn = loggedInUser;
 		return loggedInUser;
 	}
 
@@ -89,7 +90,9 @@ public class BankApplication {
 	}
 
 	public User getUser(String username) {
-		return database.getUser(username);
+		User userFromDatabase = database.getUser(username);
+		refreshAccountsForUser(userFromDatabase);
+		return userFromDatabase;
 		
 	}
 
@@ -140,14 +143,34 @@ public class BankApplication {
 
 	}
 
-	public void transferMoneyUser(User source, User target, int amount) throws UserNotLoggedInException {
-		if (!(userLoggedIn == source)) {
+	public void transferFromAccountToUser(Account sourceAccount, String targetUsername, String transferAmount) throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
+
+		User targetUser = getUser(targetUsername);
+		if(targetUser == null)
+			throw new UserNotfoundException();
+		
+		transferFromAccountToAccount(sourceAccount, targetUser.getMainAccount().getAccountNumber(), transferAmount);
+		
+	}
+	
+	public void transferFromAccountToAccount(Account sourceAccount, String targetAccountID, String transferAmount) throws UserNotLoggedInException, TransferException, AccountNotfoundException {
+		if (userLoggedIn != sourceAccount.getUser()) {
 			throw new UserNotLoggedInException();
 		}
-
-		source.getMainAccount().changeBalance(-amount);
-		target.getMainAccount().changeBalance(amount);
-
+		
+		double amount = Double.parseDouble(transferAmount);
+		
+		if(sourceAccount.getBalance() < amount || amount <= 0 || sourceAccount.getAccountNumber().equals(targetAccountID))
+			throw new TransferException();
+		
+		System.out.println("TAID: "+targetAccountID);	
+		
+		Account targetAccount = database.getAccount(targetAccountID);
+		if(targetAccount == null)
+			throw new AccountNotfoundException();
+		
+		database.transferFromAccountToAccount(sourceAccount, targetAccount, amount);
+		
 	}
 
 	public void changeBalanceAccount(String accountNumber, int amount) {

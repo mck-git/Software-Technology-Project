@@ -13,11 +13,16 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import dtu.robboss.app.Account;
+import dtu.robboss.app.AccountNotfoundException;
 import dtu.robboss.app.AdminNotLoggedInException;
 import dtu.robboss.app.AlreadyExistsException;
 import dtu.robboss.app.BankApplication;
+import dtu.robboss.app.TransferException;
 import dtu.robboss.app.UnknownLoginException;
 import dtu.robboss.app.User;
+import dtu.robboss.app.UserNotLoggedInException;
+import dtu.robboss.app.UserNotfoundException;
 
 /**
  * Servlet implementation class DefaultServlet
@@ -44,15 +49,15 @@ public class DefaultServlet extends HttpServlet {
 			out.println("Amount of users: " + app.userCount());
 		}
 
-		if(subject.equals("CreateNewUser")){
+		if (subject.equals("CreateNewUser")) {
 			String fullname = request.getParameter("fullname");
 			String username = request.getParameter("username");
 			String password = request.getParameter("password");
 			String cpr = request.getParameter("cpr");
-			
-			System.out.println("Full name: " + fullname + ", username: " + username + ", password: " + password + 
-					", cpr: " + cpr);
-			
+
+			System.out.println(
+					"Full name: " + fullname + ", username: " + username + ", password: " + password + ", cpr: " + cpr);
+
 			try {
 				app.createUser(fullname, username, password, cpr);
 				subject = "Login";
@@ -61,7 +66,7 @@ public class DefaultServlet extends HttpServlet {
 			} catch (AlreadyExistsException e) {
 				System.out.println("User already exist");
 				response.sendRedirect("login.html");
-//				e.printStackTrace();
+				// e.printStackTrace();
 			}
 		}
 
@@ -70,14 +75,14 @@ public class DefaultServlet extends HttpServlet {
 			// Get request username and password
 			String username = request.getParameter("username");
 			String password = request.getParameter("password");
-			
-			
+
 			try {
 				User userLoggedIn = app.login(username, password);
 				app.refreshAccountsForUser(userLoggedIn);
-				
+
 				HttpSession session = request.getSession();
 				session.setAttribute("USER", userLoggedIn);
+				
 				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 				rd.forward(request, response);
 
@@ -87,8 +92,38 @@ public class DefaultServlet extends HttpServlet {
 				// e.printStackTrace();
 			}
 		}
-		
 
+		if (subject.equals("transfermoney")) {
+			
+			String beforedecimalseperator = "0"+request.getParameter("beforedecimalseperator");
+			String afterdecimalseperator = request.getParameter("afterdecimalseperator") +"00";
+			String transferAmount = beforedecimalseperator + "." + afterdecimalseperator.substring(0, 2); 
+			
+			HttpSession session = request.getSession();
+//			String recieverType = request.getParameter("recieverType");
+			Account sourceAccount = ((User) session.getAttribute("USER")).getMainAccount();
+
+			try {
+//				if (recieverType.equals("account")) {
+//					app.transferFromAccountToAccount(sourceAccount, request.getParameter("targetAccountID"),
+//							transferAmount);
+//				} else if (recieverType.equals("user")) {
+					app.transferFromAccountToUser(sourceAccount, request.getParameter("targetUsername"),
+							transferAmount);
+//				}
+					
+					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+					rd.forward(request, response);
+			} catch (UserNotLoggedInException | TransferException | AccountNotfoundException | UserNotfoundException e) {
+				System.out.println("Error in DefaultServlet::doPost -> transfermoney");
+				e.printStackTrace();
+			}
+
+		}
+
+		if (subject.equals("paybill")) {
+
+		}
 
 		if (subject.equals("DeleteUser")) {
 			User userToDelete = (User) request.getSession().getAttribute("USER");
@@ -113,8 +148,8 @@ public class DefaultServlet extends HttpServlet {
 			rd.forward(request, response);
 
 		}
-		
-		if(subject.equals("NewAccount")){
+
+		if (subject.equals("NewAccount")) {
 			User loggedInUser = (User) request.getSession().getAttribute("USER");
 			try {
 				app.createAccount(loggedInUser, false);
@@ -123,9 +158,14 @@ public class DefaultServlet extends HttpServlet {
 				rd.forward(request, response);
 			} catch (AdminNotLoggedInException e) {
 				System.out.println("Could not create new account from defaultservlet");
-//				e.printStackTrace();
+				// e.printStackTrace();
 			}
 		}
+	}
+	
+	private void forward(HttpServletRequest request, HttpServletResponse response, String forwardTo) throws ServletException, IOException{
+		RequestDispatcher rd = request.getRequestDispatcher(forwardTo);
+		rd.forward(request, response);
 	}
 
 }
