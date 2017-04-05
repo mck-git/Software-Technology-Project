@@ -14,12 +14,17 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import dtu.robboss.app.Admin;
+import dtu.robboss.app.Account;
+import dtu.robboss.app.AccountNotfoundException;
 import dtu.robboss.app.AdminNotLoggedInException;
 import dtu.robboss.app.AlreadyExistsException;
 import dtu.robboss.app.BankApplication;
 import dtu.robboss.app.Customer;
 import dtu.robboss.app.UnknownLoginException;
 import dtu.robboss.app.User;
+import dtu.robboss.app.TransferException;
+import dtu.robboss.app.UserNotLoggedInException;
+import dtu.robboss.app.UserNotfoundException;
 
 /**
  * Servlet implementation class DefaultServlet
@@ -81,7 +86,7 @@ public class DefaultServlet extends HttpServlet {
 				// Checks if user logged in is a customer
 				if(userLoggedIn instanceof Customer) {
 					Customer customerLoggedIn = (Customer) userLoggedIn;
-					app.refreshAccountsForCustomer(customerLoggedIn);
+					app.refreshAccountsForCustomer(customerLoggedIn); //TODO REDUNDANT?
 					session.setAttribute("USER", customerLoggedIn);					
 					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 					rd.forward(request, response);
@@ -101,7 +106,37 @@ public class DefaultServlet extends HttpServlet {
 				// e.printStackTrace();
 			}
 		}
-		
+		if (subject.equals("transfermoney")) {
+			
+			String beforedecimalseperator = "0"+request.getParameter("beforedecimalseperator");
+			String afterdecimalseperator = request.getParameter("afterdecimalseperator") +"00";
+			String transferAmount = beforedecimalseperator + "." + afterdecimalseperator.substring(0, 2); 
+			
+			HttpSession session = request.getSession();
+//			String recieverType = request.getParameter("recieverType");
+			Account sourceAccount = ((User) session.getAttribute("USER")).getMainAccount();
+
+			try {
+//				if (recieverType.equals("account")) {
+//					app.transferFromAccountToAccount(sourceAccount, request.getParameter("targetAccountID"),
+//							transferAmount);
+//				} else if (recieverType.equals("user")) {
+					app.transferFromAccountToUser(sourceAccount, request.getParameter("targetUsername"),
+							transferAmount);
+//				}
+					
+					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+					rd.forward(request, response);
+			} catch (UserNotLoggedInException | TransferException | AccountNotfoundException | UserNotfoundException e) {
+				System.out.println("Error in DefaultServlet::doPost -> transfermoney");
+				e.printStackTrace();
+			}
+
+		}
+
+		if (subject.equals("paybill")) {
+
+		}
 
 
 		if (subject.equals("DeleteUser")) {

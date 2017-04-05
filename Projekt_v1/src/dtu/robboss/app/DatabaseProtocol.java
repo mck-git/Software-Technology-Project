@@ -300,7 +300,43 @@ public class DatabaseProtocol {
 		return null;
 
 	}
+	
+	////////////
+	// Update //
+	////////////
+	
+	public void transferFromAccountToAccount(Account source, Account target, double amount){
+		System.out.println("Before:");
+		System.out.println("Source account: " + source.getBalance() );
+		System.out.println("Target account: " + target.getBalance() );
+		System.out.println("Amount: " + amount);
+		
+		
+		source.changeBalance(-amount);
+		target.changeBalance(amount);
+		
 
+		startConnection();
+		
+		try {
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + source.getBalance() +"' WHERE ID = '" +source.getAccountNumber()+ "'");
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + target.getBalance() +"' WHERE ID = '" +target.getAccountNumber()+ "'");
+			
+			System.out.println("\nAfter:");
+			System.out.println("Source account: " + source.getBalance() );
+			System.out.println("Target account: " + target.getBalance() );
+		} catch (SQLException e) {
+			closeConnection();
+			
+			source.changeBalance(amount);
+			target.changeBalance(-amount);
+			
+			System.out.println("Error in DatabaseProtocol::transferFromAccountToAccount");
+			e.printStackTrace();
+		}
+		closeConnection();
+	}
+	
 	////////////////////
 	// Connection     //
 	////////////////////

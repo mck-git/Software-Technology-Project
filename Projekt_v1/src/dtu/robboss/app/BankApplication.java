@@ -21,11 +21,11 @@ public class BankApplication {
 	public User login(String username, String pass) throws UnknownLoginException {
 
 		
-		User loggedInUser = getUser(username);
+		userLoggedIn = getUser(username);
 		
 		//checks if user login is customer
-		if (loggedInUser != null && pass.equals(loggedInUser.getPassword().trim())) 
-			return loggedInUser;
+		if (userLoggedIn != null && pass.equals(userLoggedIn.getPassword().trim())) 
+			return userLoggedIn;
 			
 		// If login failed, throw exception
 		throw new UnknownLoginException();	
@@ -96,12 +96,14 @@ public class BankApplication {
 
 	}
 
-	private User getUser(String username) {
+	public User getUser(String username) {
 		return database.getUser(username);
 	}
 	
 	public Customer getCustomer(String username) {
-		return database.getCustomer(username);
+		Customer customerFromDatabase = database.getCustomer(username);
+		refreshAccountsForUser(customerFromDatabase);
+		return customerFromDatabase;
 
 	}
 	private Admin getAdmin(String username) {
@@ -146,16 +148,36 @@ public class BankApplication {
 		c.getMainAccount().changeBalance(amount);
 
 	}
+	
+	public void transferFromAccountToUser(Account sourceAccount, String targetUsername, String transferAmount) throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
 
-	public void transferMoneyUser(Customer source, Customer target, int amount) throws UserNotLoggedInException {
-		if (!(userLoggedIn == source)) {
+		User targetUser = getUser(targetUsername);
+		if(targetUser == null)
+			throw new UserNotfoundException();
+		
+		transferFromAccountToAccount(sourceAccount, targetUser.getMainAccount().getAccountNumber(), transferAmount);
+		
+	}	
+	
+	public void transferFromAccountToAccount(Account sourceAccount, String targetAccountID, String transferAmount) throws UserNotLoggedInException, TransferException, AccountNotfoundException {
+		if (userLoggedIn != sourceAccount.getUser()) {
 			throw new UserNotLoggedInException();
 		}
-
-		source.getMainAccount().changeBalance(-amount);
-		target.getMainAccount().changeBalance(amount);
-
-	}
+		
+		double amount = Double.parseDouble(transferAmount);
+		
+		if(sourceAccount.getBalance() < amount || amount <= 0 || sourceAccount.getAccountNumber().equals(targetAccountID))
+			throw new TransferException();
+		
+		System.out.println("TAID: "+targetAccountID);	
+		
+		Account targetAccount = database.getAccount(targetAccountID);
+		if(targetAccount == null)
+			throw new AccountNotfoundException();
+		
+		database.transferFromAccountToAccount(sourceAccount, targetAccount, amount);
+		
+	}	
 
 	public void changeBalanceAccount(String accountNumber, int amount) {
 
