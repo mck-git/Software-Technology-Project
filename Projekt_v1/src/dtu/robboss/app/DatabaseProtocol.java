@@ -160,6 +160,34 @@ public class DatabaseProtocol {
 		return null;
 	}
 
+
+	/**
+	 * Fetches admin from database
+	 * @param username
+	 * @return User Object
+	 * @throws SQLException
+	 */
+	public Admin getAdmin(String username) {
+		startConnection();
+		try {
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ADMINS WHERE USERNAME = '" + username + "'");
+			if (rs.next()) {
+				Admin admin = new Admin(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
+				closeConnection();
+				return admin;
+			} else {
+				closeConnection();
+				return null;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+		return null;
+	}
+	
+	
 	
 	public Account getAccount(String accountNumber) {
 		startConnection();
