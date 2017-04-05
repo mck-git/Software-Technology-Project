@@ -33,7 +33,7 @@ public class BankApplication {
 	
 	
 	//////////////////
-	// Login Checks //
+	// LOGIN CHECKS //
 	//////////////////
 	
 	public boolean userLoggedIn() {

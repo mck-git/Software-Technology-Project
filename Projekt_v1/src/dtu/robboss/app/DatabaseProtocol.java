@@ -42,15 +42,19 @@ public class DatabaseProtocol {
 	// SEARCHING //
 	///////////////
 
+	/**
+	 * Checks if database contains a user with given users username.
+	 * Checks both CUSTOMERS and ADMINS tables. 
+	 * @param user - user to search for.
+	 * @return - true if user is found otherwise false.
+	 */
 	public boolean containsUser(User user) {
 		User userCheck = getUser(user.getUsername());
-
 		return !(userCheck == null);
 	}
 
 	public boolean containsAccount(Account account) {
 		// TODO: Need account table/tables.
-
 		return false;
 	}
 
@@ -58,29 +62,35 @@ public class DatabaseProtocol {
 	// ADD AND REMOVE //
 	////////////////////
 	
+	/**
+	 * Adds given admin to database in ADMINS table. username, full name and password is stored. 
+	 * @param admin - admin to be added.
+	 * @throws AlreadyExistsException - if a user with given username already exists in database. 
+	 */
 	public void addAdmin(Admin admin) throws AlreadyExistsException {
-		
+		//ADMINS columns: USERNAME, FULLNAME, PASSWORD
+
 		if (containsUser(admin))
 			throw new AlreadyExistsException("User");
-		
 		try {
 			startConnection();
-			
 			stmt.executeUpdate("INSERT INTO DTUGRP04.ADMINS (USERNAME, FULLNAME, PASSWORD) VALUES('"+
 			admin.getUsername() + 	"', '" +
 			admin.getFullname() +	"', '" +
 			admin.getPassword() + 	"')" );
-			
 			closeConnection();
-			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
 	}
 
+	/**
+	 * Adds given customer to database in CUSTOMERS table. username, full name and password is stored.
+	 * @param customer - customer to be added.
+	 * @throws AlreadyExistsException - if a user with given username already exists in database.
+	 */
 	public void addCustomer(Customer customer) throws AlreadyExistsException {
-		//USERS columns: USERNAME, FULLNAME, PASSWORD, MAINACCOUNT
+		//CUSTOMERS columns: USERNAME, FULLNAME, PASSWORD
 		
 		if (containsUser(customer))
 			throw new AlreadyExistsException("User");
@@ -100,6 +110,13 @@ public class DatabaseProtocol {
 		}
 	}
 
+	/**
+	 * Adds account to database in ACCOUNTS table.
+	 * TODO This needs to take an account as a argument
+	 * @param user
+	 * @param main
+	 */
+	//TODO This needs to take an account as a argument
 	public void addAccount(User user, boolean main) {
 		//ACCOUNTS columns: ID, USER, TYPE, BALANCE, CREDIT (, HISTORY)
 		
@@ -111,15 +128,19 @@ public class DatabaseProtocol {
 					);
 		} catch (SQLException e) {
 			System.out.println("Could not create account");
-//			e.printStackTrace();
+//			e.printStackTrace(); TODO ????????
 		}
 		closeConnection();
 		
 	}
 	
-
+	/**
+	 * Removes given user from database and all accounts associated with the user. 
+	 * Uses given users username to search through database in tables CUSTOMERS, ADMINS and ACCOUNTS.
+	 * @param user - user to be removed from database.
+	 */
 	public void removeUser(User user) {
-		
+	
 		startConnection();
 		try {
 			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + user.getUsername() + "'");
@@ -127,12 +148,17 @@ public class DatabaseProtocol {
 			stmt.executeUpdate("DELETE FROM DTUGRP04.ADMINS WHERE USERNAME = '" + user.getUsername() + "'");
 		} catch (SQLException e) {
 			System.out.println("Could not remove user.");
-//			 e.printStackTrace();
+//			 e.printStackTrace(); TODO ?????
 		}
 		closeConnection();
 
 	}
 
+	
+	/**
+	 * Removes given account from database. Uses given account's ID to search through the database.
+	 * @param account - account to be removed. 
+	 */
 	public void removeAccount(Account account) {
 		
 		startConnection();
@@ -140,14 +166,18 @@ public class DatabaseProtocol {
 			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = '" + account.getAccountNumber() + "'");
 		} catch (SQLException e) {
 			System.out.println("Could not remove account.");
-//			 e.printStackTrace();
+//			 e.printStackTrace(); TODO ???????
 		}
 		
 		closeConnection();
-		
 
 	}
 	
+	/**
+	 * Fetches all accounts from the database associated with given customer.
+	 * Also adds these accounts to local customer instance. 
+	 * @param customer - customer whose acccounts to fetch.
+	 */
 	//TODO: CHECK NAME
 	public void addAccountsToUser(Customer customer) {
 		startConnection();
@@ -243,6 +273,12 @@ public class DatabaseProtocol {
 		
 	}
 	
+	
+	/**
+	 * Fetches account from table ACCOUNTS in the database with the given account number.
+	 * @param accountNumber
+	 * @return
+	 */
 	public Account getAccount(String accountNumber) {
 		startConnection();
 		try {
@@ -266,7 +302,7 @@ public class DatabaseProtocol {
 	}
 
 	////////////////////
-	// Connection //
+	// Connection     //
 	////////////////////
 
 	private void closeConnection() {
