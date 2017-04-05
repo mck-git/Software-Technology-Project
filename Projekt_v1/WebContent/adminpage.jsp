@@ -1,10 +1,9 @@
 <!DOCTYPE HTML><%@page language="java"
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="dtu.robboss.app.Customer"%>
-<%@ page import="dtu.robboss.app.Account"%>
+<%@ page import="dtu.robboss.app.Admin"%>
 <html>
 <head>
-<title>userpage</title>
+<title>adminpage</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <style>
 #container {
@@ -72,7 +71,7 @@
 
 <!-- Get current logged in user -->
 <%
-	Customer userLoggedIn = (Customer) session.getAttribute("USER");
+	Admin userLoggedIn = (Admin) session.getAttribute("USER");
 %>
 
 </head>
@@ -84,46 +83,12 @@
 		<div id="header">
 			<h1>
 				Welcome
-				<%=userLoggedIn.getUsername()%>
+				<%=userLoggedIn.getUsername()%>, you are so smart and amazing!
 			</h1>
 		</div>
 
 		<!-- CONTENT AREA -->
 		<div id="content_area">
-
-			<div id="accounts" class="outer">
-				<h3 align="center" style="margin-top: 0;">Accounts</h3>
-
-				<div class="inner">
-					<%  for(Account account: userLoggedIn.getAccounts()){%>
-					
-					AccountID: <%=account.getAccountNumber()%> - balance: <%=account.getBalance()%> - credit: <%=account.getCredit() %> <br>
-					
-					<% } %>
-					
-					<%= (userLoggedIn.getAccounts().size()==0? "No accounts": "") %>
-
-				</div>
-			</div>
-
-			<div id="currency" class="outer">
-				<h3 align="center" style="margin-top: 0;">Currency</h3>
-
-				<div class="inner">
-					forms <br>
-
-				</div>
-			</div>
-
-			<div id="payment" class="outer">
-				<h3 align="center" style="margin-top: 0;">Payment</h3>
-
-				<div class="inner">
-					payments <br>
-
-				</div>
-			</div>
-
 			<div id="messages" class="outer">
 				<h3 align="center" style="margin-top: 0;">Messages</h3>
 
@@ -156,11 +121,6 @@
 					<input type="submit" value="Log out user" onclick="return confirm('Do you wish to log out?')" />
 					</form>
 					
-					<form method = "post" action ="DS" align="center">
-					<input type="hidden" name = "subject" value = "NewAccount" "/> 
-					<input type="submit" value="Add new account" onclick="return confirm('Do you wish to create new account?')" />
-					</form>
-
 				</div>
 			</div>
 

@@ -13,9 +13,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import dtu.robboss.app.Admin;
 import dtu.robboss.app.AdminNotLoggedInException;
 import dtu.robboss.app.AlreadyExistsException;
 import dtu.robboss.app.BankApplication;
+import dtu.robboss.app.Customer;
 import dtu.robboss.app.UnknownLoginException;
 import dtu.robboss.app.User;
 
@@ -54,10 +56,8 @@ public class DefaultServlet extends HttpServlet {
 					", cpr: " + cpr);
 			
 			try {
-				app.createUser(fullname, username, password, cpr);
+				app.createCustomer(fullname, username, password, cpr);
 				subject = "Login";
-			} catch (AdminNotLoggedInException e) {
-				e.printStackTrace();
 			} catch (AlreadyExistsException e) {
 				System.out.println("User already exist");
 				response.sendRedirect("login.html");
@@ -73,14 +73,28 @@ public class DefaultServlet extends HttpServlet {
 			
 			
 			try {
-				User userLoggedIn = app.login(username, password);
-				app.refreshAccountsForUser(userLoggedIn);
-				
 				HttpSession session = request.getSession();
-				session.setAttribute("USER", userLoggedIn);
-				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
-				rd.forward(request, response);
 
+				
+				User userLoggedIn = app.login(username, password);
+
+				// Checks if user logged in is a customer
+				if(userLoggedIn instanceof Customer) {
+					Customer customerLoggedIn = (Customer) userLoggedIn;
+					app.refreshAccountsForCustomer(customerLoggedIn);
+					session.setAttribute("USER", customerLoggedIn);					
+					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+					rd.forward(request, response);
+				}
+				
+				// Checks if user logged in is an admin
+				if(userLoggedIn instanceof Admin) {
+					Admin adminLoggedIn = (Admin) userLoggedIn;
+					session.setAttribute("USER", adminLoggedIn);
+					RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+					rd.forward(request, response);
+				}
+				
 			} catch (UnknownLoginException e) {
 				System.out.println("Failed to login in defaultservlet ");
 				response.sendRedirect("login.html");
@@ -115,16 +129,11 @@ public class DefaultServlet extends HttpServlet {
 		}
 		
 		if(subject.equals("NewAccount")){
-			User loggedInUser = (User) request.getSession().getAttribute("USER");
-			try {
-				app.createAccount(loggedInUser, false);
-				app.refreshAccountsForUser(loggedInUser);
-				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
-				rd.forward(request, response);
-			} catch (AdminNotLoggedInException e) {
-				System.out.println("Could not create new account from defaultservlet");
-//				e.printStackTrace();
-			}
+			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
+			app.createAccount(loggedInCustomer, false);
+			app.refreshAccountsForCustomer(loggedInCustomer);
+			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+			rd.forward(request, response);
 		}
 	}
 

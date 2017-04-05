@@ -7,11 +7,8 @@ import javax.sql.DataSource;
 public class BankApplication {
 
 	public DatabaseProtocol database;
-	private boolean adminLoggedIn = true;
-
-	String adminUserName = "admin", adminPassWord = "admin";
-
 	private User userLoggedIn = null;
+
 
 	public BankApplication(DataSource ds1){
 		database = new DatabaseProtocol(ds1);
@@ -26,27 +23,34 @@ public class BankApplication {
 		
 		User loggedInUser = getUser(username);
 		
-		if ( loggedInUser == null || !pass.equals(loggedInUser.getPassword().trim())) 
-			throw new UnknownLoginException();
-
-		
-		if (loggedInUser.getUsername().equals(adminUserName) && loggedInUser.getPassword().equals(adminPassWord))
-			adminLoggedIn = true;
-
-		return loggedInUser;
+		//checks if user login is customer
+		if (loggedInUser != null && pass.equals(loggedInUser.getPassword().trim())) 
+			return loggedInUser;
+			
+		// If login failed, throw exception
+		throw new UnknownLoginException();	
 	}
-
-	public boolean adminLoggedIn() {
-		return adminLoggedIn;
-	}
-
+	
+	
+	//////////////////
+	// LOGIN CHECKS //
+	//////////////////
+	
 	public boolean userLoggedIn() {
 		return userLoggedIn != null;
 	}
 
+	public boolean adminLoggedIn() {
+		return userLoggedIn instanceof Admin;
+	}
+
+	public boolean customerLoggedIn(){
+		return userLoggedIn instanceof Customer;
+	}
+	
+
 	public void logOut() {
 		userLoggedIn = null;
-		adminLoggedIn = false;
 	}
 
 	/////////////////////
@@ -64,42 +68,52 @@ public class BankApplication {
 		return -1;
 	}
 
-	public void createUser(String fullname, String username, String password, String cpr) throws AdminNotLoggedInException, AlreadyExistsException {
-		User newUser = new User(fullname, username, password);
-		newUser.setCpr(cpr);
+	public void createCustomer(String fullname, String username, String password, String cpr) throws AlreadyExistsException {
+		Customer newCustomer = new Customer(fullname, username, password);
+		newCustomer.setCpr(cpr);
 		
-		if (!adminLoggedIn)
-			throw new AdminNotLoggedInException();
-
-		database.addUser(newUser);
-		createAccount(newUser, true);
+		database.addCustomer(newCustomer);
+		createAccount(newCustomer, true);
 		
 	}
 
+	public void createAdmin(String fullname, String username, String password, String cpr) throws AlreadyExistsException {
+		Admin newAdmin = new Admin(fullname, username, password);
+		
+		database.addAdmin(newAdmin);
+	}
+	
+	
+	
 	public void deleteUser(User user) throws AdminNotLoggedInException {
 		//TODO: Administer admin.
 //		if (!adminLoggedIn)
 //			throw new AdminNotLoggedInException();
 		
 		//TODO: Sanitation - brugeren må kun slettes hvis alle balance på konti er 0.
-		
-		
+	
 		database.removeUser(user);
 
 	}
 
-	public User getUser(String username) {
+	private User getUser(String username) {
 		return database.getUser(username);
-		
+	}
+	
+	public Customer getCustomer(String username) {
+		return database.getCustomer(username);
+
+	}
+	private Admin getAdmin(String username) {
+		return database.getAdmin(username);
 	}
 
+	
 	////////////////////////
 	// ACCOUNT MANAGEMENT //
 	////////////////////////
 
-	public void createAccount(User user, boolean main) throws AdminNotLoggedInException {
-		if (!adminLoggedIn)
-			throw new AdminNotLoggedInException();
+	public void createAccount(User user, boolean main) {
 		database.addAccount(user, main);
 	}
 
@@ -108,11 +122,9 @@ public class BankApplication {
 //		return database.accountCount();
 //	}
 
-	public void deleteAccount(Account account) throws AdminNotLoggedInException {
-		if (!adminLoggedIn)
-			throw new AdminNotLoggedInException();
-
-		account.getUser().removeAccount(account);
+	public void deleteAccount(Account account) {
+		
+		account.getCustomer().removeAccount(account);
 		database.removeAccount(account);
 	}
 
@@ -125,22 +137,17 @@ public class BankApplication {
 	// USER-ACCOUNT INTERACTION //
 	//////////////////////////////
 
-	public void setUserMainAccount(User user, Account newMain) throws AdminNotLoggedInException {
-
-		if (!adminLoggedIn) {
-			throw new AdminNotLoggedInException();
-		}
-
-		user.setMainAccount(newMain);
+	public void setCustomerMainAccount(Customer customer, Account newMain) {
+		customer.setMainAccount(newMain);
 	}
 
-	public void changeBalanceUser(User u, int amount) {
+	public void changeBalanceUser(Customer c, int amount) {
 
-		u.getMainAccount().changeBalance(amount);
+		c.getMainAccount().changeBalance(amount);
 
 	}
 
-	public void transferMoneyUser(User source, User target, int amount) throws UserNotLoggedInException {
+	public void transferMoneyUser(Customer source, Customer target, int amount) throws UserNotLoggedInException {
 		if (!(userLoggedIn == source)) {
 			throw new UserNotLoggedInException();
 		}
@@ -156,10 +163,10 @@ public class BankApplication {
 
 	}
 
-	public void refreshAccountsForUser(User user) {
+	public void refreshAccountsForCustomer(Customer customer) {
 		
-		user.getAccounts().clear();
-		database.addAccountsToUser(user);
+		customer.getAccounts().clear();
+		database.addAccountsToUser(customer);
 		
 	}
 

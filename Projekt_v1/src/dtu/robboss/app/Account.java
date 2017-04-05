@@ -6,36 +6,36 @@ package dtu.robboss.app;
 
 public class Account {
 
-	private User user;
+	private Customer customer;
 	private String accountNumber;
 	private int balance;
 	private int credit;
 
-	public Account(User user, String accountNumber) {
-		this.user = user;
+	public Account(Customer customer, String accountNumber) {
+		this.customer = customer;
 		this.accountNumber = accountNumber;
 		this.balance = 0;
 		this.credit = 0;
 
-		user.addAccount(this);
+		customer.addAccount(this);
 	}
 	
-	public Account(User user, String accountNumber, int balance, int credit) {
-		this.user = user;
+	public Account(Customer customer, String accountNumber, int balance, int credit) {
+		this.customer = customer;
 		this.accountNumber = accountNumber;
 		this.balance = balance;
 		this.credit = credit;
 
-		user.addAccount(this);
+		customer.addAccount(this);
 	}
 
 	
 	public boolean isMainAccount() {
-		return this.getUser().getMainAccount().equals(this);
+		return this.getCustomer().getMainAccount().equals(this);
 	}
 
-	public User getUser() {
-		return this.user;
+	public Customer getCustomer() {
+		return this.customer;
 	}
 
 	public String getAccountNumber() {

@@ -42,38 +42,66 @@ public class DatabaseProtocol {
 	// SEARCHING //
 	///////////////
 
+	/**
+	 * Checks if database contains a user with given users username.
+	 * Checks both CUSTOMERS and ADMINS tables. 
+	 * @param user - user to search for.
+	 * @return - true if user is found otherwise false.
+	 */
 	public boolean containsUser(User user) {
 		User userCheck = getUser(user.getUsername());
-
-		if (userCheck == null)
-			return false;
-		else
-			return true;
+		return !(userCheck == null);
 	}
 
 	public boolean containsAccount(Account account) {
 		// TODO: Need account table/tables.
-
 		return false;
 	}
 
 	////////////////////
 	// ADD AND REMOVE //
 	////////////////////
+	
+	/**
+	 * Adds given admin to database in ADMINS table. username, full name and password is stored. 
+	 * @param admin - admin to be added.
+	 * @throws AlreadyExistsException - if a user with given username already exists in database. 
+	 */
+	public void addAdmin(Admin admin) throws AlreadyExistsException {
+		//ADMINS columns: USERNAME, FULLNAME, PASSWORD
 
-	public void addUser(User user) throws AlreadyExistsException {
-		//USERS columns: USERNAME, FULLNAME, PASSWORD, MAINACCOUNT
+		if (containsUser(admin))
+			throw new AlreadyExistsException("User");
+		try {
+			startConnection();
+			stmt.executeUpdate("INSERT INTO DTUGRP04.ADMINS (USERNAME, FULLNAME, PASSWORD) VALUES('"+
+			admin.getUsername() + 	"', '" +
+			admin.getFullname() +	"', '" +
+			admin.getPassword() + 	"')" );
+			closeConnection();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Adds given customer to database in CUSTOMERS table. username, full name and password is stored.
+	 * @param customer - customer to be added.
+	 * @throws AlreadyExistsException - if a user with given username already exists in database.
+	 */
+	public void addCustomer(Customer customer) throws AlreadyExistsException {
+		//CUSTOMERS columns: USERNAME, FULLNAME, PASSWORD
 		
-		if (containsUser(user))
+		if (containsUser(customer))
 			throw new AlreadyExistsException("User");
 		
 		try {
 			startConnection();
 			
 			stmt.executeUpdate("INSERT INTO DTUGRP04.USERS (USERNAME, FULLNAME, PASSWORD) VALUES('"+
-			user.getUsername() + 	"', '" +
-			user.getFullname() +	"', '" +
-			user.getPassword() + 	"')" );
+			customer.getUsername() + 	"', '" +
+			customer.getFullname() +	"', '" +
+			customer.getPassword() + 	"')" );
 			
 			closeConnection();
 			
@@ -82,6 +110,13 @@ public class DatabaseProtocol {
 		}
 	}
 
+	/**
+	 * Adds account to database in ACCOUNTS table.
+	 * TODO This needs to take an account as a argument
+	 * @param user
+	 * @param main
+	 */
+	//TODO This needs to take an account as a argument
 	public void addAccount(User user, boolean main) {
 		//ACCOUNTS columns: ID, USER, TYPE, BALANCE, CREDIT (, HISTORY)
 		
@@ -93,27 +128,37 @@ public class DatabaseProtocol {
 					);
 		} catch (SQLException e) {
 			System.out.println("Could not create account");
-//			e.printStackTrace();
+//			e.printStackTrace(); TODO ????????
 		}
 		closeConnection();
 		
 	}
 	
-
+	/**
+	 * Removes given user from database and all accounts associated with the user. 
+	 * Uses given users username to search through database in tables CUSTOMERS, ADMINS and ACCOUNTS.
+	 * @param user - user to be removed from database.
+	 */
 	public void removeUser(User user) {
-		
+	
 		startConnection();
 		try {
 			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + user.getUsername() + "'");
 			stmt.executeUpdate("DELETE FROM DTUGRP04.USERS WHERE USERNAME = '" + user.getUsername() + "'");
+			stmt.executeUpdate("DELETE FROM DTUGRP04.ADMINS WHERE USERNAME = '" + user.getUsername() + "'");
 		} catch (SQLException e) {
 			System.out.println("Could not remove user.");
-//			 e.printStackTrace();
+//			 e.printStackTrace(); TODO ?????
 		}
 		closeConnection();
 
 	}
 
+	
+	/**
+	 * Removes given account from database. Uses given account's ID to search through the database.
+	 * @param account - account to be removed. 
+	 */
 	public void removeAccount(Account account) {
 		
 		startConnection();
@@ -121,12 +166,35 @@ public class DatabaseProtocol {
 			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = '" + account.getAccountNumber() + "'");
 		} catch (SQLException e) {
 			System.out.println("Could not remove account.");
-//			 e.printStackTrace();
+//			 e.printStackTrace(); TODO ???????
 		}
 		
 		closeConnection();
-		
 
+	}
+	
+	/**
+	 * Fetches all accounts from the database associated with given customer.
+	 * Also adds these accounts to local customer instance. 
+	 * @param customer - customer whose acccounts to fetch.
+	 */
+	//TODO: CHECK NAME
+	public void addAccountsToUser(Customer customer) {
+		startConnection();
+		try{
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '"+customer.getUsername()+"'");
+			
+			while(rs.next()){
+				Account newAccount = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"));
+				if(rs.getString("TYPE").trim().equals("MAIN")){
+					customer.setMainAccount(newAccount);
+				}
+			}
+		} catch(SQLException e){
+			
+		}
+		
+		
 	}
 
 	////////////////////
@@ -135,19 +203,19 @@ public class DatabaseProtocol {
 
 	
 	/**
-	 * Fetches user from database
+	 * Fetches customer from database
 	 * @param username
 	 * @return User Object
 	 * @throws SQLException
 	 */
-	public User getUser(String username) {
+	public Customer getCustomer(String username) {
 		startConnection();
 		try {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '" + username + "'");
 			if (rs.next()) {
-				User user = new User(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
+				Customer customer = new Customer(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
 				closeConnection();
-				return user;
+				return customer;
 			} else {
 				closeConnection();
 				return null;
@@ -160,14 +228,64 @@ public class DatabaseProtocol {
 		return null;
 	}
 
+
+	/**
+	 * Fetches admin from database
+	 * @param username
+	 * @return User Object
+	 * @throws SQLException
+	 */
+	public Admin getAdmin(String username) {
+		startConnection();
+		try {
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ADMINS WHERE USERNAME = '" + username + "'");
+			if (rs.next()) {
+				Admin admin = new Admin(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
+				closeConnection();
+				return admin;
+			} else {
+				closeConnection();
+				return null;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+		return null;
+	}
 	
+	/**
+	 * Finds user in the database with the given username. Searches through both USERS and ADMINS tables.
+	 * @param username - Username of user we want to find
+	 */
+	public User getUser(String username) {
+	
+		// Checks if a customer exists with the given username
+		Customer c = getCustomer(username);
+		if(! (c == null)){
+			return c;
+		}
+
+		// If customer does not exist, returns the admin with the given username. 
+		// If no admin with given username exists, returns null
+		return getAdmin(username);
+		
+	}
+	
+	
+	/**
+	 * Fetches account from table ACCOUNTS in the database with the given account number.
+	 * @param accountNumber
+	 * @return
+	 */
 	public Account getAccount(String accountNumber) {
 		startConnection();
 		try {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE ID = '" + accountNumber + "'");
 			if (rs.next()) {
-				User user = getUser(rs.getString("USER"));
-				Account account = new Account(user, accountNumber, rs.getInt("BALANCE"), rs.getInt("CREDIT"));
+				Customer customer = getCustomer(rs.getString("USER"));
+				Account account = new Account(customer, accountNumber, rs.getInt("BALANCE"), rs.getInt("CREDIT"));
 				closeConnection();
 				return account;
 			} else {
@@ -184,7 +302,7 @@ public class DatabaseProtocol {
 	}
 
 	////////////////////
-	// Connection //
+	// Connection     //
 	////////////////////
 
 	private void closeConnection() {
@@ -207,23 +325,5 @@ public class DatabaseProtocol {
 		}
 	}
 
-	//TODO: CHECK NAME
-	public void addAccountsToUser(User user) {
-		startConnection();
-		try{
-			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '"+user.getUsername()+"'");
-			
-			while(rs.next()){
-				Account newAccount = new Account(user, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"));
-				if(rs.getString("TYPE").trim().equals("MAIN")){
-					user.setMainAccount(newAccount);
-				}
-			}
-		} catch(SQLException e){
-			
-		}
-		
-		
-	}
 
 }
