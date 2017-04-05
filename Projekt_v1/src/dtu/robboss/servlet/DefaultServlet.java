@@ -58,8 +58,6 @@ public class DefaultServlet extends HttpServlet {
 			try {
 				app.createCustomer(fullname, username, password, cpr);
 				subject = "Login";
-			} catch (AdminNotLoggedInException e) {
-				e.printStackTrace();
 			} catch (AlreadyExistsException e) {
 				System.out.println("User already exist");
 				response.sendRedirect("login.html");
@@ -132,15 +130,10 @@ public class DefaultServlet extends HttpServlet {
 		
 		if(subject.equals("NewAccount")){
 			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
-			try {
-				app.createAccount(loggedInCustomer, false);
-				app.refreshAccountsForCustomer(loggedInCustomer);
-				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
-				rd.forward(request, response);
-			} catch (AdminNotLoggedInException e) {
-				System.out.println("Could not create new account from defaultservlet");
-//				e.printStackTrace();
-			}
+			app.createAccount(loggedInCustomer, false);
+			app.refreshAccountsForCustomer(loggedInCustomer);
+			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+			rd.forward(request, response);
 		}
 	}
 

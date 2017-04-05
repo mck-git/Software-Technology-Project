@@ -7,7 +7,6 @@ import javax.sql.DataSource;
 public class BankApplication {
 
 	public DatabaseProtocol database;
-	private Admin adminLoggedIn = null;
 	private User userLoggedIn = null;
 
 
@@ -31,19 +30,27 @@ public class BankApplication {
 		// If login failed, throw exception
 		throw new UnknownLoginException();	
 	}
-
-
-	public boolean adminLoggedIn() {
-		return adminLoggedIn != null;
-	}
-
+	
+	
+	//////////////////
+	// Login Checks //
+	//////////////////
+	
 	public boolean userLoggedIn() {
 		return userLoggedIn != null;
 	}
 
+	public boolean adminLoggedIn() {
+		return userLoggedIn instanceof Admin;
+	}
+
+	public boolean customerLoggedIn(){
+		return userLoggedIn instanceof Customer;
+	}
+	
+
 	public void logOut() {
 		userLoggedIn = null;
-		adminLoggedIn = null;
 	}
 
 	/////////////////////
@@ -61,7 +68,7 @@ public class BankApplication {
 		return -1;
 	}
 
-	public void createCustomer(String fullname, String username, String password, String cpr) throws AdminNotLoggedInException, AlreadyExistsException {
+	public void createCustomer(String fullname, String username, String password, String cpr) throws AlreadyExistsException {
 		Customer newCustomer = new Customer(fullname, username, password);
 		newCustomer.setCpr(cpr);
 		
@@ -70,18 +77,29 @@ public class BankApplication {
 		
 	}
 
+	public void createAdmin(String fullname, String username, String password, String cpr) throws AlreadyExistsException {
+		Admin newAdmin = new Admin(fullname, username, password);
+		
+		database.addAdmin(newAdmin);
+	}
+	
+	
+	
 	public void deleteUser(User user) throws AdminNotLoggedInException {
 		//TODO: Administer admin.
 //		if (!adminLoggedIn)
 //			throw new AdminNotLoggedInException();
 		
 		//TODO: Sanitation - brugeren må kun slettes hvis alle balance på konti er 0.
-		
-		
+	
 		database.removeUser(user);
 
 	}
 
+	private User getUser(String username) {
+		return database.getUser(username);
+	}
+	
 	public Customer getCustomer(String username) {
 		return database.getCustomer(username);
 
@@ -90,15 +108,12 @@ public class BankApplication {
 		return database.getAdmin(username);
 	}
 
-	private User getUser(String username) {
-		return database.getUser(username);
-	}
 	
 	////////////////////////
 	// ACCOUNT MANAGEMENT //
 	////////////////////////
 
-	public void createAccount(User user, boolean main) throws AdminNotLoggedInException {
+	public void createAccount(User user, boolean main) {
 		database.addAccount(user, main);
 	}
 

@@ -45,10 +45,7 @@ public class DatabaseProtocol {
 	public boolean containsUser(User user) {
 		User userCheck = getUser(user.getUsername());
 
-		if (userCheck == null)
-			return false;
-		else
-			return true;
+		return !(userCheck == null);
 	}
 
 	public boolean containsAccount(Account account) {
@@ -60,20 +57,41 @@ public class DatabaseProtocol {
 	////////////////////
 	// ADD AND REMOVE //
 	////////////////////
+	
+	public void addAdmin(Admin admin) throws AlreadyExistsException {
+		
+		if (containsUser(admin))
+			throw new AlreadyExistsException("User");
+		
+		try {
+			startConnection();
+			
+			stmt.executeUpdate("INSERT INTO DTUGRP04.ADMINS (USERNAME, FULLNAME, PASSWORD) VALUES('"+
+			admin.getUsername() + 	"', '" +
+			admin.getFullname() +	"', '" +
+			admin.getPassword() + 	"')" );
+			
+			closeConnection();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
 
-	public void addCustomer(User user) throws AlreadyExistsException {
+	public void addCustomer(Customer customer) throws AlreadyExistsException {
 		//USERS columns: USERNAME, FULLNAME, PASSWORD, MAINACCOUNT
 		
-		if (containsUser(user))
+		if (containsUser(customer))
 			throw new AlreadyExistsException("User");
 		
 		try {
 			startConnection();
 			
 			stmt.executeUpdate("INSERT INTO DTUGRP04.USERS (USERNAME, FULLNAME, PASSWORD) VALUES('"+
-			user.getUsername() + 	"', '" +
-			user.getFullname() +	"', '" +
-			user.getPassword() + 	"')" );
+			customer.getUsername() + 	"', '" +
+			customer.getFullname() +	"', '" +
+			customer.getPassword() + 	"')" );
 			
 			closeConnection();
 			
@@ -128,6 +146,25 @@ public class DatabaseProtocol {
 		closeConnection();
 		
 
+	}
+	
+	//TODO: CHECK NAME
+	public void addAccountsToUser(Customer customer) {
+		startConnection();
+		try{
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '"+customer.getUsername()+"'");
+			
+			while(rs.next()){
+				Account newAccount = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"));
+				if(rs.getString("TYPE").trim().equals("MAIN")){
+					customer.setMainAccount(newAccount);
+				}
+			}
+		} catch(SQLException e){
+			
+		}
+		
+		
 	}
 
 	////////////////////
@@ -252,23 +289,5 @@ public class DatabaseProtocol {
 		}
 	}
 
-	//TODO: CHECK NAME
-	public void addAccountsToUser(Customer customer) {
-		startConnection();
-		try{
-			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '"+customer.getUsername()+"'");
-			
-			while(rs.next()){
-				Account newAccount = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"));
-				if(rs.getString("TYPE").trim().equals("MAIN")){
-					customer.setMainAccount(newAccount);
-				}
-			}
-		} catch(SQLException e){
-			
-		}
-		
-		
-	}
 
 }
