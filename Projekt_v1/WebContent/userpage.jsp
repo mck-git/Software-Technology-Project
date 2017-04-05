@@ -1,6 +1,6 @@
 <!DOCTYPE HTML><%@page language="java"
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="dtu.robboss.app.User"%>
+<%@ page import="dtu.robboss.app.Customer"%>
 <%@ page import="dtu.robboss.app.Account"%>
 <html>
 <head>
@@ -72,7 +72,7 @@
 
 <!-- Get current logged in user -->
 <%
-	User userLoggedIn = (User) session.getAttribute("USER");
+	Customer userLoggedIn = (Customer) session.getAttribute("USER");
 %>
 
 </head>

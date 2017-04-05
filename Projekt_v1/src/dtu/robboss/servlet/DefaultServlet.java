@@ -82,14 +82,17 @@ public class DefaultServlet extends HttpServlet {
 
 				// Checks if user logged in is a customer
 				if(userLoggedIn instanceof Customer) {
-					app.refreshAccountsForCustomer((Customer) userLoggedIn);
-					session.setAttribute("USER", (Customer) userLoggedIn);
+					Customer customerLoggedIn = (Customer) userLoggedIn;
+					app.refreshAccountsForCustomer(customerLoggedIn);
+					session.setAttribute("USER", customerLoggedIn);					
 					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 					rd.forward(request, response);
 				}
 				
+				// Checks if user logged in is an admin
 				if(userLoggedIn instanceof Admin) {
-					session.setAttribute("USER", (Admin) userLoggedIn);
+					Admin adminLoggedIn = (Admin) userLoggedIn;
+					session.setAttribute("USER", adminLoggedIn);
 					RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 					rd.forward(request, response);
 				}

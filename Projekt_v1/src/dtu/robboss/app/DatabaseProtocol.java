@@ -43,7 +43,7 @@ public class DatabaseProtocol {
 	///////////////
 
 	public boolean containsUser(User user) {
-		User userCheck = getCustomer(user.getUsername());
+		User userCheck = getUser(user.getUsername());
 
 		if (userCheck == null)
 			return false;
@@ -61,7 +61,7 @@ public class DatabaseProtocol {
 	// ADD AND REMOVE //
 	////////////////////
 
-	public void addUser(User user) throws AlreadyExistsException {
+	public void addCustomer(User user) throws AlreadyExistsException {
 		//USERS columns: USERNAME, FULLNAME, PASSWORD, MAINACCOUNT
 		
 		if (containsUser(user))
@@ -106,6 +106,7 @@ public class DatabaseProtocol {
 		try {
 			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + user.getUsername() + "'");
 			stmt.executeUpdate("DELETE FROM DTUGRP04.USERS WHERE USERNAME = '" + user.getUsername() + "'");
+			stmt.executeUpdate("DELETE FROM DTUGRP04.ADMINS WHERE USERNAME = '" + user.getUsername() + "'");
 		} catch (SQLException e) {
 			System.out.println("Could not remove user.");
 //			 e.printStackTrace();
@@ -135,7 +136,7 @@ public class DatabaseProtocol {
 
 	
 	/**
-	 * Fetches user from database
+	 * Fetches customer from database
 	 * @param username
 	 * @return User Object
 	 * @throws SQLException
@@ -187,7 +188,23 @@ public class DatabaseProtocol {
 		return null;
 	}
 	
+	/**
+	 * Finds user in the database with the given username. Searches through both USERS and ADMINS tables.
+	 * @param username - Username of user we want to find
+	 */
+	public User getUser(String username) {
 	
+		// Checks if a customer exists with the given username
+		Customer c = getCustomer(username);
+		if(! (c == null)){
+			return c;
+		}
+
+		// If customer does not exist, returns the admin with the given username. 
+		// If no admin with given username exists, returns null
+		return getAdmin(username);
+		
+	}
 	
 	public Account getAccount(String accountNumber) {
 		startConnection();
