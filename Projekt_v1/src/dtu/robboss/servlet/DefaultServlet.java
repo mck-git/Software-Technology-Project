@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import dtu.robboss.app.Admin;
 import dtu.robboss.app.AdminNotLoggedInException;
 import dtu.robboss.app.AlreadyExistsException;
 import dtu.robboss.app.BankApplication;
@@ -74,14 +75,25 @@ public class DefaultServlet extends HttpServlet {
 			
 			
 			try {
-				Customer customerLoggedIn = (Customer) app.login(username, password);
-				app.refreshAccountsForCustomer(customerLoggedIn);
-				
 				HttpSession session = request.getSession();
-				session.setAttribute("USER", customerLoggedIn);
-				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
-				rd.forward(request, response);
 
+				
+				User userLoggedIn = app.login(username, password);
+
+				// Checks if user logged in is a customer
+				if(userLoggedIn instanceof Customer) {
+					app.refreshAccountsForCustomer((Customer) userLoggedIn);
+					session.setAttribute("USER", (Customer) userLoggedIn);
+					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+					rd.forward(request, response);
+				}
+				
+				if(userLoggedIn instanceof Admin) {
+					session.setAttribute("USER", (Admin) userLoggedIn);
+					RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+					rd.forward(request, response);
+				}
+				
 			} catch (UnknownLoginException e) {
 				System.out.println("Failed to login in defaultservlet ");
 				response.sendRedirect("login.html");
