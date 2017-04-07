@@ -5,11 +5,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 public class DatabaseProtocol {
-	@Resource(name = "jdbc/DB2")
 	private DataSource dataSource;
 	private Connection con = null;
 	private Statement stmt = null;
@@ -54,8 +52,8 @@ public class DatabaseProtocol {
 	}
 
 	public boolean containsAccount(Account account) {
-		// TODO: Need account table/tables.
-		return false;
+		Account accountCheck = getAccount(account.getAccountNumber());
+		return !(accountCheck == null);
 	}
 
 	////////////////////
@@ -78,10 +76,11 @@ public class DatabaseProtocol {
 			admin.getUsername() + 	"', '" +
 			admin.getFullname() +	"', '" +
 			admin.getPassword() + 	"')" );
-			closeConnection();
 		} catch (SQLException e) {
+			closeConnection();
 			e.printStackTrace();
 		}
+		closeConnection();
 	}
 
 	/**
@@ -103,32 +102,33 @@ public class DatabaseProtocol {
 			customer.getFullname() +	"', '" +
 			customer.getPassword() + 	"')" );
 			
-			closeConnection();
-			
 		} catch (SQLException e) {
+			closeConnection();
 			e.printStackTrace();
 		}
+		closeConnection();
 	}
 
 	/**
-	 * Adds account to database in ACCOUNTS table.
-	 * TODO This needs to take an account as a argument
-	 * @param user
+	 * Adds account to database in ACCOUNTS table. This does not take an Account as parameter
+	 * as the AccountID is unknown until the account is generated in the database.
+	 * Accounts are generated with values as 0.0, and added to the costumer given.
+	 * @param customer
 	 * @param main
 	 */
-	//TODO This needs to take an account as a argument
-	public void addAccount(User user, boolean main) {
-		//ACCOUNTS columns: ID, USER, TYPE, BALANCE, CREDIT (, HISTORY)
+	public void addAccount(Customer customer, boolean main) {
+		//ACCOUNTS columns: ID, USERNAME, TYPE, BALANCE, CREDIT (, HISTORY)
 		
 		startConnection();
 		try {
 			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + 
 					"(USERNAME, TYPE, BALANCE, CREDIT)" + 
-					"VALUES ('" + user.getUsername() +"', '"+ (main? "MAIN" : "NORMAL") +"', 0, 0)"
+					"VALUES ('" + customer.getUsername() +"', '"+ (main? "MAIN" : "NORMAL") +"', 0, 0)"
 					);
 		} catch (SQLException e) {
+			closeConnection();
 			System.out.println("Could not create account");
-//			e.printStackTrace(); TODO ????????
+//			e.printStackTrace(); 
 		}
 		closeConnection();
 		
@@ -147,8 +147,9 @@ public class DatabaseProtocol {
 			stmt.executeUpdate("DELETE FROM DTUGRP04.USERS WHERE USERNAME = '" + user.getUsername() + "'");
 			stmt.executeUpdate("DELETE FROM DTUGRP04.ADMINS WHERE USERNAME = '" + user.getUsername() + "'");
 		} catch (SQLException e) {
+			closeConnection();
 			System.out.println("Could not remove user.");
-//			 e.printStackTrace(); TODO ?????
+//			 e.printStackTrace(); 
 		}
 		closeConnection();
 
@@ -165,8 +166,9 @@ public class DatabaseProtocol {
 		try {
 			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = '" + account.getAccountNumber() + "'");
 		} catch (SQLException e) {
+			closeConnection();
 			System.out.println("Could not remove account.");
-//			 e.printStackTrace(); TODO ???????
+//			 e.printStackTrace(); 
 		}
 		
 		closeConnection();
@@ -176,10 +178,9 @@ public class DatabaseProtocol {
 	/**
 	 * Fetches all accounts from the database associated with given customer.
 	 * Also adds these accounts to local customer instance. 
-	 * @param customer - customer whose acccounts to fetch.
+	 * @param customer - customer whose accounts to fetch.
 	 */
-	//TODO: CHECK NAME
-	public void addAccountsToUser(Customer customer) {
+	public void addAccountsToLocalCustomer(Customer customer) {
 		startConnection();
 		try{
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '"+customer.getUsername()+"'");
@@ -191,10 +192,12 @@ public class DatabaseProtocol {
 				}
 			}
 		} catch(SQLException e){
-			
+			closeConnection();
+			System.out.println("Error: DatabaseProtocol::addAccountsToLocalCostumer");
+//			e.printStackTrace();
 		}
 		
-		
+		closeConnection();
 	}
 
 	////////////////////
@@ -221,6 +224,7 @@ public class DatabaseProtocol {
 				return null;
 			}
 		} catch (SQLException e) {
+			closeConnection();
 			e.printStackTrace();
 		}
 
@@ -248,6 +252,7 @@ public class DatabaseProtocol {
 				return null;
 			}
 		} catch (SQLException e) {
+			closeConnection();
 			e.printStackTrace();
 		}
 
@@ -293,6 +298,7 @@ public class DatabaseProtocol {
 				return null;
 			}
 		} catch (SQLException e) {
+			closeConnection();
 			e.printStackTrace();
 		}
 
@@ -306,25 +312,16 @@ public class DatabaseProtocol {
 	////////////
 	
 	public void transferFromAccountToAccount(Account source, Account target, double amount){
-		System.out.println("Before:");
-		System.out.println("Source account: " + source.getBalance() );
-		System.out.println("Target account: " + target.getBalance() );
-		System.out.println("Amount: " + amount);
-		
 		
 		source.changeBalance(-amount);
 		target.changeBalance(amount);
 		
-
 		startConnection();
 		
 		try {
 			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + source.getBalance() +"' WHERE ID = '" +source.getAccountNumber()+ "'");
 			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + target.getBalance() +"' WHERE ID = '" +target.getAccountNumber()+ "'");
 			
-			System.out.println("\nAfter:");
-			System.out.println("Source account: " + source.getBalance() );
-			System.out.println("Target account: " + target.getBalance() );
 		} catch (SQLException e) {
 			closeConnection();
 			

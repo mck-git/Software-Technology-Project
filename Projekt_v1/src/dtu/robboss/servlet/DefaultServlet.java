@@ -57,8 +57,6 @@ public class DefaultServlet extends HttpServlet {
 			String password = request.getParameter("password");
 			String cpr = request.getParameter("cpr");
 			
-			System.out.println("Full name: " + fullname + ", username: " + username + ", password: " + password + 
-					", cpr: " + cpr);
 			
 			try {
 				app.createCustomer(fullname, username, password, cpr);
@@ -79,7 +77,7 @@ public class DefaultServlet extends HttpServlet {
 			
 			try {
 				HttpSession session = request.getSession();
-
+				
 				
 				User userLoggedIn = app.login(username, password);
 
@@ -91,6 +89,7 @@ public class DefaultServlet extends HttpServlet {
 					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 					rd.forward(request, response);
 				}
+				
 				
 				// Checks if user logged in is an admin
 				if(userLoggedIn instanceof Admin) {

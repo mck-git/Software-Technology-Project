@@ -105,23 +105,18 @@ public class BankApplication {
 		return customerFromDatabase;
 
 	}
+	
 	private Admin getAdmin(String username) {
 		return database.getAdmin(username);
 	}
-
 	
 	////////////////////////
 	// ACCOUNT MANAGEMENT //
 	////////////////////////
 
-	public void createAccount(User user, boolean main) {
-		database.addAccount(user, main);
+	public void createAccount(Customer customer, boolean main) {
+		database.addAccount(customer, main);
 	}
-
-	//TODO implement this if bragging
-//	public Object accountCount() {
-//		return database.accountCount();
-//	}
 
 	public void deleteAccount(Account account) {
 		
@@ -138,14 +133,8 @@ public class BankApplication {
 	// USER-ACCOUNT INTERACTION //
 	//////////////////////////////
 
-	public void setCustomerMainAccount(Customer customer, Account newMain) {
+	public void setMainAccount(Customer customer, Account newMain) {
 		customer.setMainAccount(newMain);
-	}
-
-	public void changeBalanceUser(Customer c, int amount) {
-
-		c.getMainAccount().changeBalance(amount);
-
 	}
 	
 	public void transferFromAccountToCustomer(Account sourceAccount, String targetUsername, String transferAmount) throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
@@ -168,7 +157,6 @@ public class BankApplication {
 		if(sourceAccount.getBalance() < amount || amount <= 0 || sourceAccount.getAccountNumber().equals(targetAccountID))
 			throw new TransferException();
 		
-		System.out.println("TAID: "+targetAccountID);	
 		
 		Account targetAccount = database.getAccount(targetAccountID);
 		if(targetAccount == null)
@@ -178,16 +166,10 @@ public class BankApplication {
 		
 	}	
 
-	public void changeBalanceAccount(String accountNumber, int amount) {
-
-		getAccount(accountNumber).changeBalance(amount);
-
-	}
-
 	public void refreshAccountsForCustomer(Customer customer) {
 		
 		customer.getAccounts().clear();
-		database.addAccountsToUser(customer);
+		database.addAccountsToLocalCustomer(customer);
 		
 	}
 

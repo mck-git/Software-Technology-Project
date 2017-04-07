@@ -25,6 +25,8 @@
 	width: 100%;
 	background: rgba(240, 230, 255, 0.9);
 	border-radius: 2px;
+	max-height: 160px;
+	overflow: scroll;
 }
 
 .outer {
