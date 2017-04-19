@@ -144,14 +144,17 @@
 				<h3 align="center" style="margin-top: 0;">Payment</h3>
 
 				<div class="inner">
-					<form method="post" action="DS" align="center" />
-					<input type="hidden" name="subject" value="transfermoney" /> Send
-					to User: <input type="text" name="targetUsername" /> <br> <br>
-					<input type="text" name="beforedecimalseperator"
-						style="width: 10em" />. <input type="text"
-						name="afterdecimalseperator" style="width: 3em" /> Kr. <input
-						type="submit" value="Transfer Money"
-						onclick="return confirm('Do you wish to transfer?')" />
+					<form method="post" action="DS" style="display: inline-block; text-align: center; width: 100%;" >
+						<input type="hidden" name="subject" value="transfermoney" /> 
+						Send to: 
+						<input type="radio" name="recieverType" value="account" /> Account
+						<input type="radio" name="recieverType" value="user" /> User <br>
+						Reciever: <input type="text" name="reciever" /> <br> <br>
+						<input type="text" name="beforedecimalseperator"
+							style="width: 10em" />. <input type="text"
+							name="afterdecimalseperator" style="width: 3em" /> Kr. <input
+							type="submit" value="Transfer Money"
+							onclick="return confirm('Do you wish to transfer?')" />
 					</form>
 
 				</div>

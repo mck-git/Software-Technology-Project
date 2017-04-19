@@ -99,9 +99,14 @@ public class BankApplication {
 		return database.getUser(username);
 	}
 	
-	public Customer getCustomer(String username) {
+	public Customer getCustomer(String username) throws UserNotfoundException {
 		Customer customerFromDatabase = database.getCustomer(username);
+		
+		if(customerFromDatabase == null)
+			throw new UserNotfoundException();
+		
 		refreshAccountsForCustomer(customerFromDatabase);
+		
 		return customerFromDatabase;
 
 	}
@@ -138,13 +143,8 @@ public class BankApplication {
 	}
 	
 	public void transferFromAccountToCustomer(Account sourceAccount, String targetUsername, String transferAmount) throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
-
 		Customer targetCustomer = getCustomer(targetUsername);
-		if(targetCustomer == null)
-			throw new UserNotfoundException();
-		
 		transferFromAccountToAccount(sourceAccount, targetCustomer.getMainAccount().getAccountNumber(), transferAmount);
-		
 	}	
 	
 	public void transferFromAccountToAccount(Account sourceAccount, String targetAccountID, String transferAmount) throws UserNotLoggedInException, TransferException, AccountNotfoundException {
@@ -157,9 +157,8 @@ public class BankApplication {
 		if(sourceAccount.getBalance() < amount || amount <= 0 || sourceAccount.getAccountNumber().equals(targetAccountID))
 			throw new TransferException();
 		
-		
 		Account targetAccount = database.getAccount(targetAccountID);
-		if(targetAccount == null)
+		if(targetAccount == null) 
 			throw new AccountNotfoundException();
 		
 		database.transferFromAccountToAccount(sourceAccount, targetAccount, amount);

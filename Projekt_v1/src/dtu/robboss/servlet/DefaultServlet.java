@@ -112,17 +112,17 @@ public class DefaultServlet extends HttpServlet {
 			String transferAmount = beforedecimalseperator + "." + afterdecimalseperator.substring(0, 2); 
 			
 			HttpSession session = request.getSession();
-//			String recieverType = request.getParameter("recieverType");
+			String recieverType = request.getParameter("recieverType");
 			Account sourceAccount = ((Customer) session.getAttribute("USER")).getMainAccount();
 
 			try {
-//				if (recieverType.equals("account")) {
-//					app.transferFromAccountToAccount(sourceAccount, request.getParameter("targetAccountID"),
-//							transferAmount);
-//				} else if (recieverType.equals("user")) {
-					app.transferFromAccountToCustomer(sourceAccount, request.getParameter("targetUsername"),
+				if (recieverType.equals("account")) {
+					app.transferFromAccountToAccount(sourceAccount, request.getParameter("reciever"),
 							transferAmount);
-//				}
+				} else if (recieverType.equals("user")) {
+					app.transferFromAccountToCustomer(sourceAccount, request.getParameter("reciever"),
+							transferAmount);
+				}
 					
 					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 					rd.forward(request, response);
