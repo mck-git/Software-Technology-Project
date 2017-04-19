@@ -143,8 +143,8 @@
 			<div id="payment" class="outer">
 				<h3 align="center" style="margin-top: 0;">Payment</h3>
 
-				<div class="inner">
-					<form method="post" action="DS" style="display: inline-block; text-align: center; width: 100%;" >
+				<div class="inner" style="display: inline-block; text-align: center; width: 100%;">
+					<form method="post" action="DS"  >
 						<input type="hidden" name="subject" value="transfermoney" /> 
 						Send to: 
 						<input type="radio" name="recieverType" value="account" /> Account
@@ -181,20 +181,20 @@
 			<div id="menu" class="outer">
 				<h3 align="center" style="margin-top: 0;">Menu</h3>
 
-				<div class="inner">
-					<form method="post" action="DS" align="center">
+				<div class="inner" style="display: inline-block; text-align: center; width: 100%;">
+					<form method="post" action="DS">
 						<input type="hidden" name="subject" value="DeleteUser" /> <input
 							type="submit" value="Delete user"
 							onclick="return confirm('Do you wish to delete user?')" />
 					</form>
 
-					<form method="post" action="DS" align="center">
+					<form method="post" action="DS">
 						<input type="hidden" name="subject" value="LogOutUser" "/> <input
 							type="submit" value="Log out user"
 							onclick="return confirm('Do you wish to log out?')" />
 					</form>
 
-					<form method="post" action="DS" align="center">
+					<form method="post" action="DS">
 						<input type="hidden" name="subject" value="NewAccount" "/> <input
 							type="submit" value="Add new account"
 							onclick="return confirm('Do you wish to create new account?')" />
