@@ -148,8 +148,8 @@
 						<input type="hidden" name="subject" value="transfermoney" /> 
 						Send to: 
 						<input type="radio" name="recieverType" value="account" /> Account
-						<input type="radio" name="recieverType" value="user" /> User <br>
-						Reciever: <input type="text" name="reciever" /> <br> <br>
+						<input type="radio" checked="checked" name="recieverType" value="user" /> User <br>
+						Receiver: <input type="text" name="reciever" /> <br> <br>
 						<input type="text" name="beforedecimalseperator"
 							style="width: 10em" />. <input type="text"
 							name="afterdecimalseperator" style="width: 3em" /> Kr. <input

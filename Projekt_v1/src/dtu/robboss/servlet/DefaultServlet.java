@@ -2,6 +2,7 @@ package dtu.robboss.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import javax.annotation.Resource;
 import javax.servlet.RequestDispatcher;
@@ -51,20 +52,19 @@ public class DefaultServlet extends HttpServlet {
 			out.println("Amount of users: " + app.userCount());
 		}
 
-		if(subject.equals("CreateNewUser")){
+		if (subject.equals("CreateNewUser")) {
 			String fullname = request.getParameter("fullname");
 			String username = request.getParameter("username");
 			String password = request.getParameter("password");
 			String cpr = request.getParameter("cpr");
-			
-			
+
 			try {
 				app.createCustomer(fullname, username, password, cpr);
 				subject = "Login";
 			} catch (AlreadyExistsException e) {
 				System.out.println("User already exist");
 				response.sendRedirect("login.html");
-//				e.printStackTrace();
+				// e.printStackTrace();
 			}
 		}
 
@@ -73,32 +73,31 @@ public class DefaultServlet extends HttpServlet {
 			// Get request username and password
 			String username = request.getParameter("username");
 			String password = request.getParameter("password");
-			
-			
+
 			try {
 				HttpSession session = request.getSession();
-				
-				
+
 				User userLoggedIn = app.login(username, password);
 
 				// Checks if user logged in is a customer
-				if(userLoggedIn instanceof Customer) {
+				if (userLoggedIn instanceof Customer) {
 					Customer customerLoggedIn = (Customer) userLoggedIn;
-					app.refreshAccountsForCustomer(customerLoggedIn); 
-					session.setAttribute("USER", customerLoggedIn);					
+					app.refreshAccountsForCustomer(customerLoggedIn);
+					session.setAttribute("USER", customerLoggedIn);
 					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 					rd.forward(request, response);
 				}
-				
-				
+
 				// Checks if user logged in is an admin
-				if(userLoggedIn instanceof Admin) {
+				if (userLoggedIn instanceof Admin) {
 					Admin adminLoggedIn = (Admin) userLoggedIn;
 					session.setAttribute("USER", adminLoggedIn);
+					session.setAttribute("ACCOUNTSFOUND", new ArrayList<Account>());
+
 					RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 					rd.forward(request, response);
 				}
-				
+
 			} catch (UnknownLoginException e) {
 				System.out.println("Failed to login in defaultservlet ");
 				response.sendRedirect("login.html");
@@ -106,27 +105,26 @@ public class DefaultServlet extends HttpServlet {
 			}
 		}
 		if (subject.equals("transfermoney")) {
-			
-			String beforedecimalseperator = "0"+request.getParameter("beforedecimalseperator");
-			String afterdecimalseperator = request.getParameter("afterdecimalseperator") +"00";
-			String transferAmount = beforedecimalseperator + "." + afterdecimalseperator.substring(0, 2); 
-			
+
+			String beforedecimalseperator = "0" + request.getParameter("beforedecimalseperator");
+			String afterdecimalseperator = request.getParameter("afterdecimalseperator") + "00";
+			String transferAmount = beforedecimalseperator + "." + afterdecimalseperator.substring(0, 2);
+
 			HttpSession session = request.getSession();
 			String recieverType = request.getParameter("recieverType");
 			Account sourceAccount = ((Customer) session.getAttribute("USER")).getMainAccount();
 
 			try {
 				if (recieverType.equals("account")) {
-					app.transferFromAccountToAccount(sourceAccount, request.getParameter("reciever"),
-							transferAmount);
+					app.transferFromAccountToAccount(sourceAccount, request.getParameter("reciever"), transferAmount);
 				} else if (recieverType.equals("user")) {
-					app.transferFromAccountToCustomer(sourceAccount, request.getParameter("reciever"),
-							transferAmount);
+					app.transferFromAccountToCustomer(sourceAccount, request.getParameter("reciever"), transferAmount);
 				}
-					
-					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
-					rd.forward(request, response);
-			} catch (UserNotLoggedInException | TransferException | AccountNotfoundException | UserNotfoundException e) {
+
+				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+				rd.forward(request, response);
+			} catch (UserNotLoggedInException | TransferException | AccountNotfoundException
+					| UserNotfoundException e) {
 				System.out.println("Error in DefaultServlet::doPost -> transfermoney");
 				e.printStackTrace();
 			}
@@ -137,7 +135,6 @@ public class DefaultServlet extends HttpServlet {
 
 		}
 
-
 		if (subject.equals("DeleteUser")) {
 			User userToDelete = (User) request.getSession().getAttribute("USER");
 			try {
@@ -147,7 +144,7 @@ public class DefaultServlet extends HttpServlet {
 				RequestDispatcher rd = request.getRequestDispatcher("login.html");
 				rd.forward(request, response);
 
-			} catch (AdminNotLoggedInException e) {
+			} catch (NullPointerException e) {
 				// e.printStackTrace();
 				System.out.println("Could not remove user.");
 			}
@@ -161,14 +158,93 @@ public class DefaultServlet extends HttpServlet {
 			rd.forward(request, response);
 
 		}
-		
-		if(subject.equals("NewAccount")){
+
+		if (subject.equals("NewAccount")) {
 			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
 			app.createAccount(loggedInCustomer, false);
 			app.refreshAccountsForCustomer(loggedInCustomer);
 			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 			rd.forward(request, response);
 		}
+
+		// ADMIN ONLY
+		if (subject.equals("AccountLookUp")) {
+
+			HttpSession session = request.getSession();
+
+			String searchBy = request.getParameter("searchBy");
+			String searchToken = request.getParameter("searchToken");
+			ArrayList<Account> accounts = new ArrayList<Account>();
+
+			try {
+				if (searchBy.equals("account")) {
+
+					accounts.add(app.getAccount(searchToken));
+					session.setAttribute("ACCOUNTSFOUND", accounts);
+
+				} else if (searchBy.equals("user")) {
+					accounts.addAll(app.getAccountsByUser(searchToken));
+					session.setAttribute("ACCOUNTSFOUND", accounts);
+
+				}
+			} catch (NullPointerException e) {
+
+			}
+
+			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+			rd.forward(request, response);
+		}
+
+		if (subject.equals("CreateNewUserAdmin")) {
+
+			// ADMIN CREATES CUSTOMER
+			if (request.getParameter("userType").equals("customer")) {
+				String fullname = request.getParameter("fullname");
+				String username = request.getParameter("username");
+				String password = request.getParameter("password");
+				String cpr = request.getParameter("cpr");
+
+				try {
+					app.createCustomer(fullname, username, password, cpr);
+				} catch (AlreadyExistsException e) {
+					System.out.println("User already exist");
+				}
+			}
+
+			// ADMIN CREATES ADMIN
+			if (request.getParameter("userType").equals("admin")) {
+				String fullname = request.getParameter("fullname");
+				String username = request.getParameter("username");
+				String password = request.getParameter("password");
+
+				try {
+					app.createAdmin(fullname, username, password);
+				} catch (AlreadyExistsException e) {
+					System.out.println("User already exists");
+				}
+			}
+
+			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+			rd.forward(request, response);
+
+		}
+		
+		
+		if (subject.equals("DeleteUserAdmin")) {
+			User userToDelete = app.getUser(request.getParameter("username"));
+			try {
+				System.out.println("Removing " + userToDelete.getUsername() + ".");
+				app.deleteUser(userToDelete);
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
+
+			} catch (NullPointerException e) {
+				// e.printStackTrace();
+				System.out.println("Could not remove user.");
+			}
+		}
+		
+
 	}
 
 }
