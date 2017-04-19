@@ -60,7 +60,8 @@ public class DatabaseProtocol {
 	////////////////////
 
 	public void removeTransactionHistoryTable(Customer cos) {
-		String tableSQL = "DROP TABLE \"DTUGRP04\".\"" + cos.getUsername() + ".TH\";";
+//		String tableSQL = "DROP TABLE \"DTUGRP04\".\"" + cos.getUsername() + ".TH\";";
+		String tableSQL = "DROP TABLE \"DTUGRP04\".\"TH\";";
 		startConnection();
 		try {
 			stmt.execute(tableSQL);
@@ -77,28 +78,32 @@ public class DatabaseProtocol {
 	 */
 	public void addTransactionHistoryTable(Customer cos) {
 		// Transaction history = TH
-		String tableSQL = "SET CURRENT SQLID = 'DTUGRP04';\n" + "CREATE TABLE \"DTUGRP04\".\"" + cos.getUsername()
-				+ ".TH\" (" +
+		String tableSQL = "SET CURRENT SQLID = 'DTUGRP04'; " + 
+//				"CREATE TABLE \"DTUGRP04\".\"" + cos.getUsername() + "TH\"(" +
+						  "CREATE TABLE \"DTUGRP04\".\"TH\" (" +
+						  "id INTEGER not NULL" +
+//				"\"DATE\" CHAR(16) NOT NULL,\n" +
+//
+//				"\"FROM\" INTEGER NOT NULL, \n" +
+//
+//				"\"TO\" INTEGER NOT NULL, \n" +
+//
+//				"\"AMOUNT\" DOUBLE NOT NULL, \n" +
+//
+//				"\"MESSAGE\" VARCHAR(140) \n" +
 
-				"\"DATE\" CHAR(16) NOT NULL,\n" +
-
-				"\"FROM\" INTEGER NOT NULL, \n" +
-
-				"\"TO\" INTEGER NOT NULL, \n" +
-
-				"\"AMOUNT\" DOUBLE NOT NULL, \n" +
-
-				"\"MESSAGE\" VARCHAR(140) \n" +
-
-				") \n" + "IN \"DTUGRP04\".\"DTUGRP04\" \n" + "AUDIT NONE\n" + "DATA CAPTURE NONE\n" + "CCSID EBCDIC;";
-
+				")"; //+ " IN \"DTUGRP04\".\"DTUGRP04\";"; //\n"// + "AUDIT NONE\n" + "DATA CAPTURE NONE\n" 
+			//	+ "CCSID EBCDIC;";
+		System.out.println(tableSQL);
+		
 		// Starts connection with database and adds table
 		startConnection();
 		try {
-			stmt.execute(tableSQL);
+			stmt.executeUpdate(tableSQL);
 		} catch (SQLException e) {
 			closeConnection();
-			System.out.println("ERROR: Could not add table");
+			e.printStackTrace();
+			System.out.println("ERROR: Could not add TH table");
 		}
 		closeConnection();
 	}
