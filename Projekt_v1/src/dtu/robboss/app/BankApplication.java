@@ -1,6 +1,8 @@
 package dtu.robboss.app;
 
 import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import javax.sql.DataSource;
 
@@ -74,6 +76,8 @@ public class BankApplication {
 		database.addCustomer(newCustomer);
 		createAccount(newCustomer, true);
 		
+		//Creates TH table
+		database.addTransactionHistoryTable(newCustomer);
 	}
 
 	public void createAdmin(String fullname, String username, String password, String cpr) throws AlreadyExistsException {
@@ -142,19 +146,27 @@ public class BankApplication {
 		customer.setMainAccount(newMain);
 	}
 	
-	public void transferFromAccountToCustomer(Account sourceAccount, String targetUsername, String transferAmount) throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
+	public void transferFromAccountToCustomer(Account sourceAccount, String targetUsername, String transferAmount, String message) throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
 		Customer targetCustomer = getCustomer(targetUsername);
-		transferFromAccountToAccount(sourceAccount, targetCustomer.getMainAccount().getAccountNumber(), transferAmount);
+		transferFromAccountToAccount(sourceAccount, targetCustomer.getMainAccount().getAccountNumber(), transferAmount, message);
 	}	
-	
-	public void transferFromAccountToAccount(Account sourceAccount, String targetAccountID, String transferAmount) throws UserNotLoggedInException, TransferException, AccountNotfoundException {
+	/**
+	 * 
+	 * @param sourceAccount
+	 * @param targetAccountID
+	 * @param transferAmount
+	 * @throws UserNotLoggedInException
+	 * @throws TransferException
+	 * @throws AccountNotfoundException
+	 */
+	public void transferFromAccountToAccount(Account sourceAccount, String targetAccountID, String transferAmount, String message) throws UserNotLoggedInException, TransferException, AccountNotfoundException {
 		if (userLoggedIn != sourceAccount.getCustomer()) {
 			throw new UserNotLoggedInException();
 		}
 		
 		double amount = Double.parseDouble(transferAmount);
 		
-		if(sourceAccount.getBalance() < amount || amount <= 0 || sourceAccount.getAccountNumber().equals(targetAccountID))
+		if(sourceAccount.getBalance() + sourceAccount.getCredit() < amount || amount <= 0 || sourceAccount.getAccountNumber().equals(targetAccountID))
 			throw new TransferException();
 		
 		Account targetAccount = database.getAccount(targetAccountID);
@@ -162,8 +174,28 @@ public class BankApplication {
 			throw new AccountNotfoundException();
 		
 		database.transferFromAccountToAccount(sourceAccount, targetAccount, amount);
+		addTransactionToTH(sourceAccount, targetAccountID, amount, message);
 		
 	}	
+
+	private void addTransactionToTH(Account from, String to, Double amount, String message) {
+		
+		Calendar date = new GregorianCalendar();
+		
+		//date format for database: YYYY/MM/DD/hh/mm
+		
+		//Making sure that all values has correct length
+		String year = ""+ date.get(Calendar.YEAR);
+		String month = ""+ (date.get(Calendar.MONTH)+1 < 10? "0"+(date.get(Calendar.MONTH)+1) : date.get(Calendar.MONTH)+1);
+		String day = ""+ (date.get(Calendar.DAY_OF_MONTH) < 10? "0"+date.get(Calendar.DAY_OF_MONTH) : date.get(Calendar.DAY_OF_MONTH));
+		String hour = ""+ (date.get(Calendar.HOUR_OF_DAY) < 10? "0"+date.get(Calendar.HOUR_OF_DAY) : date.get(Calendar.HOUR_OF_DAY));
+		String minute = ""+ (date.get(Calendar.MINUTE) < 10? "0"+date.get(Calendar.MINUTE) : date.get(Calendar.MINUTE));
+		
+		String dateFormated = year + "/" + month + "/" + day + "-" + hour + ":" + minute;
+		
+		database.addTransactionToTH(dateFormated, from, to, amount, message);
+		
+	}
 
 	public void refreshAccountsForCustomer(Customer customer) {
 		

@@ -51,21 +51,33 @@ public class DefaultServlet extends HttpServlet {
 			out.println("Amount of users: " + app.userCount());
 		}
 
-		if(subject.equals("CreateNewUser")){
+		if (subject.equals("CreateNewUser")) {
 			String fullname = request.getParameter("fullname");
 			String username = request.getParameter("username");
-			String password = request.getParameter("password");
-			String cpr = request.getParameter("cpr");
-			
-			
+
 			try {
+				// checks if username is all lower case TODO make this viewable for the user
+				for (int i = 0; i < username.length(); i++) {
+					if (("" + username.charAt(i)).matches("[^a-z]"))
+						throw new InvalidUsernameException();
+				}
+				
+				// Sets password and cpr
+				String password = request.getParameter("password");
+				String cpr = request.getParameter("cpr");
+				
+				//Creates customer object and sets subject to login
 				app.createCustomer(fullname, username, password, cpr);
 				subject = "Login";
+
+			} catch (InvalidUsernameException e) {
+				System.out.println(e.getMessage());
 			} catch (AlreadyExistsException e) {
 				System.out.println("User already exist");
 				response.sendRedirect("login.html");
-//				e.printStackTrace();
+				// e.printStackTrace();
 			}
+
 		}
 
 		if (subject.equals("Login")) {
@@ -73,32 +85,29 @@ public class DefaultServlet extends HttpServlet {
 			// Get request username and password
 			String username = request.getParameter("username");
 			String password = request.getParameter("password");
-			
-			
+
 			try {
 				HttpSession session = request.getSession();
-				
-				
+
 				User userLoggedIn = app.login(username, password);
 
 				// Checks if user logged in is a customer
-				if(userLoggedIn instanceof Customer) {
+				if (userLoggedIn instanceof Customer) {
 					Customer customerLoggedIn = (Customer) userLoggedIn;
-					app.refreshAccountsForCustomer(customerLoggedIn); 
-					session.setAttribute("USER", customerLoggedIn);					
+					app.refreshAccountsForCustomer(customerLoggedIn);
+					session.setAttribute("USER", customerLoggedIn);
 					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 					rd.forward(request, response);
 				}
-				
-				
+
 				// Checks if user logged in is an admin
-				if(userLoggedIn instanceof Admin) {
+				if (userLoggedIn instanceof Admin) {
 					Admin adminLoggedIn = (Admin) userLoggedIn;
 					session.setAttribute("USER", adminLoggedIn);
 					RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 					rd.forward(request, response);
 				}
-				
+
 			} catch (UnknownLoginException e) {
 				System.out.println("Failed to login in defaultservlet ");
 				response.sendRedirect("login.html");
@@ -106,27 +115,29 @@ public class DefaultServlet extends HttpServlet {
 			}
 		}
 		if (subject.equals("transfermoney")) {
-			
-			String beforedecimalseperator = "0"+request.getParameter("beforedecimalseperator");
-			String afterdecimalseperator = request.getParameter("afterdecimalseperator") +"00";
-			String transferAmount = beforedecimalseperator + "." + afterdecimalseperator.substring(0, 2); 
-			
+
+			String beforedecimalseperator = "0" + request.getParameter("beforedecimalseperator");
+			String afterdecimalseperator = request.getParameter("afterdecimalseperator") + "00";
+			String transferAmount = beforedecimalseperator + "." + afterdecimalseperator.substring(0, 2);
+
 			HttpSession session = request.getSession();
-			String recieverType = request.getParameter("recieverType");
+			String recieverType = request.getParameter("receiverType");
+			String message = request.getParameter("message");
 			Account sourceAccount = ((Customer) session.getAttribute("USER")).getMainAccount();
 
 			try {
 				if (recieverType.equals("account")) {
-					app.transferFromAccountToAccount(sourceAccount, request.getParameter("reciever"),
-							transferAmount);
+					app.transferFromAccountToAccount(sourceAccount, request.getParameter("receiver"), transferAmount,
+							message);
 				} else if (recieverType.equals("user")) {
-					app.transferFromAccountToCustomer(sourceAccount, request.getParameter("reciever"),
-							transferAmount);
+					app.transferFromAccountToCustomer(sourceAccount, request.getParameter("receiver"), transferAmount,
+							message);
 				}
-					
-					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
-					rd.forward(request, response);
-			} catch (UserNotLoggedInException | TransferException | AccountNotfoundException | UserNotfoundException e) {
+
+				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+				rd.forward(request, response);
+			} catch (UserNotLoggedInException | TransferException | AccountNotfoundException
+					| UserNotfoundException e) {
 				System.out.println("Error in DefaultServlet::doPost -> transfermoney");
 				e.printStackTrace();
 			}
@@ -136,7 +147,6 @@ public class DefaultServlet extends HttpServlet {
 		if (subject.equals("paybill")) {
 
 		}
-
 
 		if (subject.equals("DeleteUser")) {
 			User userToDelete = (User) request.getSession().getAttribute("USER");
@@ -161,8 +171,8 @@ public class DefaultServlet extends HttpServlet {
 			rd.forward(request, response);
 
 		}
-		
-		if(subject.equals("NewAccount")){
+
+		if (subject.equals("NewAccount")) {
 			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
 			app.createAccount(loggedInCustomer, false);
 			app.refreshAccountsForCustomer(loggedInCustomer);
