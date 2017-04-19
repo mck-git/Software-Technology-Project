@@ -60,14 +60,13 @@ public class DatabaseProtocol {
 	////////////////////
 
 	public void removeTransactionHistoryTable(Customer cos) {
-//		String tableSQL = "DROP TABLE \"DTUGRP04\".\"" + cos.getUsername() + ".TH\";";
-		String tableSQL = "DROP TABLE \"DTUGRP04\".\"TH\";";
+		String tableSQL = "DROP TABLE DTUGRP04." + cos.getUsername() + "TH ";
 		startConnection();
 		try {
-			stmt.execute(tableSQL);
+			stmt.executeUpdate(tableSQL);
 		} catch (SQLException e) {
-			closeConnection();
 			e.printStackTrace();
+			closeConnection();
 		}
 		closeConnection();
 	}
@@ -78,23 +77,16 @@ public class DatabaseProtocol {
 	 */
 	public void addTransactionHistoryTable(Customer cos) {
 		// Transaction history = TH
-		String tableSQL = "SET CURRENT SQLID = 'DTUGRP04'; " + 
-//				"CREATE TABLE \"DTUGRP04\".\"" + cos.getUsername() + "TH\"(" +
-						  "CREATE TABLE \"DTUGRP04\".\"TH\" (" +
-						  "id INTEGER not NULL" +
-//				"\"DATE\" CHAR(16) NOT NULL,\n" +
-//
-//				"\"FROM\" INTEGER NOT NULL, \n" +
-//
-//				"\"TO\" INTEGER NOT NULL, \n" +
-//
-//				"\"AMOUNT\" DOUBLE NOT NULL, \n" +
-//
-//				"\"MESSAGE\" VARCHAR(140) \n" +
-
-				")"; //+ " IN \"DTUGRP04\".\"DTUGRP04\";"; //\n"// + "AUDIT NONE\n" + "DATA CAPTURE NONE\n" 
-			//	+ "CCSID EBCDIC;";
-		System.out.println(tableSQL);
+		String tableSQL = "CREATE TABLE DTUGRP04." + cos.getUsername() + "TH " +
+                "( DATE CHAR(16) NOT NULL, "  +
+                " FROM INTEGER NOT NULL, " + 
+                " TO INTEGER NOT NULL, "  + 
+                " AMOUNT DOUBLE NOT NULL, "  + 
+                " MESSAGE VARCHAR(140))" + 
+                " IN DTUGRP04.DTUGRP04" + 
+                " AUDIT NONE " + 
+                " DATA CAPTURE NONE " + 
+				" CCSID EBCDIC;";	
 		
 		// Starts connection with database and adds table
 		startConnection();
@@ -103,7 +95,7 @@ public class DatabaseProtocol {
 		} catch (SQLException e) {
 			closeConnection();
 			e.printStackTrace();
-			System.out.println("ERROR: Could not add TH table");
+			System.out.println("ERROR: Could not add TH table with username " + cos.getUsername());
 		}
 		closeConnection();
 	}
@@ -201,16 +193,16 @@ public class DatabaseProtocol {
 		try {
 			// Removes TH table
 			if (user instanceof Customer) {
-				removeTransactionHistoryTable((Customer) user);
 				stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + user.getUsername() + "'");
 				stmt.executeUpdate("DELETE FROM DTUGRP04.USERS WHERE USERNAME = '" + user.getUsername() + "'");
+				removeTransactionHistoryTable((Customer) user);
 			} else
 				stmt.executeUpdate("DELETE FROM DTUGRP04.ADMINS WHERE USERNAME = '" + user.getUsername() + "'");
 
 		} catch (SQLException e) {
 			closeConnection();
 			System.out.println("Could not remove user.");
-			// e.printStackTrace();
+			e.printStackTrace();
 		}
 		closeConnection();
 
