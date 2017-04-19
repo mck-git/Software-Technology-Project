@@ -59,6 +59,28 @@ public class DatabaseProtocol {
 	// ADD AND REMOVE //
 	////////////////////
 
+	public void addTransactionToTH(String date, Account from, String toID, Double amount, String message) {
+		//TABLECOLUMNS:  DATE, FROM, TO, AMOUNT, MESSAGE
+		Account to = getAccount(toID);
+		
+		try {
+			startConnection();
+			//From TH
+			stmt.executeUpdate("INSERT INTO DTUGRP04."+from.getCustomer().getUsername()+"TH (DATE, FROM, TO, AMOUNT, MESSAGE) VALUES('"
+					+ date + "', '" + from.getAccountNumber() + "', '" + toID + "', '" + amount + "', '" + message + "')");
+			
+			//To TH
+			stmt.executeUpdate("INSERT INTO DTUGRP04."+to.getCustomer().getUsername()+"TH (DATE, FROM, TO, AMOUNT, MESSAGE) VALUES('"
+					+ date + "', '" + from.getAccountNumber() + "', '" + toID + "', '" + amount + "', '" + message + "')");
+			
+		} catch (SQLException e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+		closeConnection();
+		
+	}
+	
 	public void removeTransactionHistoryTable(Customer cos) {
 		String tableSQL = "DROP TABLE DTUGRP04." + cos.getUsername() + "TH ";
 		startConnection();
@@ -424,5 +446,7 @@ public class DatabaseProtocol {
 			e.printStackTrace();
 		}
 	}
+
+
 
 }

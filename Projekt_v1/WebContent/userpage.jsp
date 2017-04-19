@@ -21,6 +21,10 @@
 	margin-bottom: 10px;
 }
 
+table, th, td {
+    border: 1px solid black;
+}
+
 .inner {
 	width: 100%;
 	background: rgba(240, 230, 255, 0.9);
@@ -140,21 +144,27 @@
 				</div>
 			</div>
 
-			<div id="payment" class="outer">
+			<div id="payment" class="outer" style="height:300px; max-height: 260px;">
 				<h3 align="center" style="margin-top: 0;">Payment</h3>
 
-				<div class="inner" style="display: inline-block; text-align: center; width: 100%;">
+				<div class="inner" style="display: inline-block; text-align: center; width: 100%; height: 220px; max-height: 220px;">
 					<form method="post" action="DS"  >
 						<input type="hidden" name="subject" value="transfermoney" /> 
+						<br>
 						Send to: 
-						<input type="radio" name="recieverType" value="account" /> Account
-						<input type="radio" name="recieverType" value="user" /> User <br>
-						Reciever: <input type="text" name="reciever" /> <br> <br>
+						<input type="radio" name="receiverType" value="account" /> Account
+						<input type="radio" name="receiverType" value="user" /> User <br>
+						Receiver: <input type="text" name="receiver" /> <br> <br>
+						Message: <textarea name="message" style="height: 4em; width:90%;" maxlength="140"></textarea> <br> <br>
+						Amount <br>
 						<input type="text" name="beforedecimalseperator"
 							style="width: 10em" />. <input type="text"
-							name="afterdecimalseperator" style="width: 3em" /> Kr. <input
+							name="afterdecimalseperator" style="width: 3em" /> Kr. 
+						
+						<input
 							type="submit" value="Transfer Money"
-							onclick="return confirm('Do you wish to transfer?')" />
+							onclick="return confirm('Do you wish to transfer?')" /> <br>
+							
 					</form>
 
 				</div>
@@ -170,10 +180,44 @@
 			</div>
 
 			<div id="news" class="outer">
-				<h3 align="center" style="margin-top: 0;">News</h3>
+				<h3 align="center" style="margin-top: 0;">Transaction Histrory</h3>
 
 				<div class="inner">
-					news <br>
+					
+					<table style="width:100%">
+					  <tr>
+					    <th>Date</th>
+					    <th>From (account)</th> 
+					    <th>To (account)</th>
+					    <th>Amount</th>
+					    <th>Message</th>
+					  </tr>
+					  
+					  <tr>
+					    <td>2017/04/19-15:41</td>
+					    <td>11</td> 
+					    <td>12</td>
+					    <td>20</td>
+					    <td>hey med dig</td>
+					  </tr>
+					  
+					  <tr>
+					    <td>2017/04/19-15:41</td>
+					    <td>11</td> 
+					    <td>12</td>
+					    <td>20</td>
+					    <td>hey med dig</td>
+					  </tr>
+					  
+					  <tr>
+					    <td>2017/04/19-15:41</td>
+					    <td>11</td> 
+					    <td>12</td>
+					    <td>20</td>
+					    <td>hey med dig</td>
+					    
+					  </tr>
+					</table>
 
 				</div>
 			</div>
