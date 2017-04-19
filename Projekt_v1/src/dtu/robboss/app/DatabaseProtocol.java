@@ -267,8 +267,7 @@ public class DatabaseProtocol {
 					.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + customer.getUsername() + "'");
 
 			while (rs.next()) {
-				Account newAccount = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"),
-						rs.getInt("CREDIT"));
+				Account newAccount = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"),rs.getInt("CREDIT"), rs.getString("TYPE"));
 				if (rs.getString("TYPE").trim().equals("MAIN")) {
 					customer.setMainAccount(newAccount);
 				}
