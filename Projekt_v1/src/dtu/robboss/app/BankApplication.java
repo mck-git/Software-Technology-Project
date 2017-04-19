@@ -3,6 +3,7 @@ package dtu.robboss.app;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.ArrayList;
 
 import javax.sql.DataSource;
 
@@ -80,7 +81,7 @@ public class BankApplication {
 		database.addTransactionHistoryTable(newCustomer);
 	}
 
-	public void createAdmin(String fullname, String username, String password, String cpr) throws AlreadyExistsException {
+	public void createAdmin(String fullname, String username, String password) throws AlreadyExistsException {
 		Admin newAdmin = new Admin(fullname, username, password);
 		
 		database.addAdmin(newAdmin);
@@ -88,7 +89,7 @@ public class BankApplication {
 	
 	
 	
-	public void deleteUser(User user) throws AdminNotLoggedInException {
+	public void deleteUser(User user) {
 		//TODO: Administer admin.
 //		if (!adminLoggedIn)
 //			throw new AdminNotLoggedInException();
@@ -136,6 +137,13 @@ public class BankApplication {
 	public Account getAccount(String accountNumber) {
 		
 		return database.getAccount(accountNumber);
+	}
+	
+	public ArrayList<Account> getAccountsByUser(String username) {
+		if(username.equals(""))
+			return null;
+		
+		return database.getAccountsByUser(username);
 	}
 
 	//////////////////////////////

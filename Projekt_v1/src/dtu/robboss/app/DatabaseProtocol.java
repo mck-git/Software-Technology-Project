@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import javax.sql.DataSource;
 
@@ -80,7 +81,7 @@ public class DatabaseProtocol {
 		closeConnection();
 		
 	}
-	
+
 	public void removeTransactionHistoryTable(Customer cos) {
 		String tableSQL = "DROP TABLE DTUGRP04." + cos.getUsername() + "TH ";
 		startConnection();
@@ -377,13 +378,37 @@ public class DatabaseProtocol {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE ID = '" + accountNumber + "'");
 			if (rs.next()) {
 				Customer customer = getCustomer(rs.getString("USERNAME"));
-				Account account = new Account(customer, accountNumber, rs.getInt("BALANCE"), rs.getInt("CREDIT"));
+				Account account = new Account(customer, accountNumber, rs.getInt("BALANCE"), rs.getInt("CREDIT"), rs.getString("TYPE"));
 				closeConnection();
 				return account;
 			} else {
 				closeConnection();
 				return null;
 			}
+		} catch (SQLException e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+
+		closeConnection();
+		return null;
+
+	}
+
+
+	public ArrayList<Account> getAccountsByUser(String username) {
+		startConnection();
+
+		ArrayList<Account> accounts = new ArrayList<Account>();
+		try {
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + username + "'");
+			Customer customer = getCustomer(username);
+			while (rs.next()) {
+				Account account = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"), rs.getString("TYPE"));
+				accounts.add(account);
+			}
+			closeConnection();
+			return accounts;
 		} catch (SQLException e) {
 			closeConnection();
 			e.printStackTrace();
@@ -446,7 +471,6 @@ public class DatabaseProtocol {
 			e.printStackTrace();
 		}
 	}
-
 
 
 }

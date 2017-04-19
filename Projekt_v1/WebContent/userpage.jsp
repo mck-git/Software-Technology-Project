@@ -153,7 +153,7 @@ table, th, td {
 						<br>
 						Send to: 
 						<input type="radio" name="receiverType" value="account" /> Account
-						<input type="radio" name="receiverType" value="user" /> User <br>
+						<input type="radio" checked="checked" name="receiverType" value="user" /> User <br>
 						Receiver: <input type="text" name="receiver" /> <br> <br>
 						Message: <textarea name="message" style="height: 4em; width:90%;" maxlength="140"></textarea> <br> <br>
 						Amount <br>

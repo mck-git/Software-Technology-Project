@@ -2,6 +2,7 @@ package dtu.robboss.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import javax.annotation.Resource;
 import javax.servlet.RequestDispatcher;
@@ -104,6 +105,8 @@ public class DefaultServlet extends HttpServlet {
 				if (userLoggedIn instanceof Admin) {
 					Admin adminLoggedIn = (Admin) userLoggedIn;
 					session.setAttribute("USER", adminLoggedIn);
+					session.setAttribute("ACCOUNTSFOUND", new ArrayList<Account>());
+
 					RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 					rd.forward(request, response);
 				}
@@ -157,7 +160,7 @@ public class DefaultServlet extends HttpServlet {
 				RequestDispatcher rd = request.getRequestDispatcher("login.html");
 				rd.forward(request, response);
 
-			} catch (AdminNotLoggedInException e) {
+			} catch (NullPointerException e) {
 				// e.printStackTrace();
 				System.out.println("Could not remove user.");
 			}
@@ -179,6 +182,85 @@ public class DefaultServlet extends HttpServlet {
 			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 			rd.forward(request, response);
 		}
+
+		// ADMIN ONLY
+		if (subject.equals("AccountLookUp")) {
+
+			HttpSession session = request.getSession();
+
+			String searchBy = request.getParameter("searchBy");
+			String searchToken = request.getParameter("searchToken");
+			ArrayList<Account> accounts = new ArrayList<Account>();
+
+			try {
+				if (searchBy.equals("account")) {
+
+					accounts.add(app.getAccount(searchToken));
+					session.setAttribute("ACCOUNTSFOUND", accounts);
+
+				} else if (searchBy.equals("user")) {
+					accounts.addAll(app.getAccountsByUser(searchToken));
+					session.setAttribute("ACCOUNTSFOUND", accounts);
+
+				}
+			} catch (NullPointerException e) {
+
+			}
+
+			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+			rd.forward(request, response);
+		}
+
+		if (subject.equals("CreateNewUserAdmin")) {
+
+			// ADMIN CREATES CUSTOMER
+			if (request.getParameter("userType").equals("customer")) {
+				String fullname = request.getParameter("fullname");
+				String username = request.getParameter("username");
+				String password = request.getParameter("password");
+				String cpr = request.getParameter("cpr");
+
+				try {
+					app.createCustomer(fullname, username, password, cpr);
+				} catch (AlreadyExistsException e) {
+					System.out.println("User already exist");
+				}
+			}
+
+			// ADMIN CREATES ADMIN
+			if (request.getParameter("userType").equals("admin")) {
+				String fullname = request.getParameter("fullname");
+				String username = request.getParameter("username");
+				String password = request.getParameter("password");
+
+				try {
+					app.createAdmin(fullname, username, password);
+				} catch (AlreadyExistsException e) {
+					System.out.println("User already exists");
+				}
+			}
+
+			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+			rd.forward(request, response);
+
+		}
+		
+		
+		if (subject.equals("DeleteUserAdmin")) {
+			User userToDelete = app.getUser(request.getParameter("username"));
+			try {
+				System.out.println("Removing " + userToDelete.getUsername() + ".");
+				app.deleteUser(userToDelete);
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
+
+			} catch (NullPointerException e) {
+				// e.printStackTrace();
+				System.out.println("Could not remove user.");
+			}
+		}
+		
+
 	}
 
 }
