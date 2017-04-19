@@ -166,7 +166,7 @@ public class BankApplication {
 		
 		double amount = Double.parseDouble(transferAmount);
 		
-		if(sourceAccount.getBalance() < amount || amount <= 0 || sourceAccount.getAccountNumber().equals(targetAccountID))
+		if(sourceAccount.getBalance() + sourceAccount.getCredit() < amount || amount <= 0 || sourceAccount.getAccountNumber().equals(targetAccountID))
 			throw new TransferException();
 		
 		Account targetAccount = database.getAccount(targetAccountID);

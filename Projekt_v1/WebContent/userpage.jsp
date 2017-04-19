@@ -59,7 +59,7 @@ table, th, td {
 	float: right;
 }
 
-#news {
+#TH {
 	clear: left;
 	float: left;
 }
@@ -179,7 +179,7 @@ table, th, td {
 				</div>
 			</div>
 
-			<div id="news" class="outer">
+			<div id="TH" class="outer">
 				<h3 align="center" style="margin-top: 0;">Transaction Histrory</h3>
 
 				<div class="inner">
