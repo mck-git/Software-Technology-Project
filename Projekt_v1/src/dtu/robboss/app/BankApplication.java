@@ -148,7 +148,15 @@ public class BankApplication {
 		Customer targetCustomer = getCustomer(targetUsername);
 		transferFromAccountToAccount(sourceAccount, targetCustomer.getMainAccount().getAccountNumber(), transferAmount);
 	}	
-	
+	/**
+	 * 
+	 * @param sourceAccount
+	 * @param targetAccountID
+	 * @param transferAmount
+	 * @throws UserNotLoggedInException
+	 * @throws TransferException
+	 * @throws AccountNotfoundException
+	 */
 	public void transferFromAccountToAccount(Account sourceAccount, String targetAccountID, String transferAmount) throws UserNotLoggedInException, TransferException, AccountNotfoundException {
 		if (userLoggedIn != sourceAccount.getCustomer()) {
 			throw new UserNotLoggedInException();
