@@ -74,6 +74,8 @@ public class BankApplication {
 		database.addCustomer(newCustomer);
 		createAccount(newCustomer, true);
 		
+		//Creates TH table
+		database.addTransactionHistoryTable(newCustomer);
 	}
 
 	public void createAdmin(String fullname, String username, String password, String cpr) throws AlreadyExistsException {
