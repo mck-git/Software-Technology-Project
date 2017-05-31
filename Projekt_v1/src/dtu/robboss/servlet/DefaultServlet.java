@@ -14,16 +14,15 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import dtu.robboss.app.Admin;
 import dtu.robboss.app.Account;
 import dtu.robboss.app.AccountNotfoundException;
-import dtu.robboss.app.AdminNotLoggedInException;
+import dtu.robboss.app.Admin;
 import dtu.robboss.app.AlreadyExistsException;
 import dtu.robboss.app.BankApplication;
 import dtu.robboss.app.Customer;
+import dtu.robboss.app.TransferException;
 import dtu.robboss.app.UnknownLoginException;
 import dtu.robboss.app.User;
-import dtu.robboss.app.TransferException;
 import dtu.robboss.app.UserNotLoggedInException;
 import dtu.robboss.app.UserNotfoundException;
 
@@ -33,14 +32,18 @@ import dtu.robboss.app.UserNotfoundException;
 @WebServlet(description = "default servlet", urlPatterns = { "/DS" })
 public class DefaultServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	@Resource(name = "jdbc/DB2")
+	@Resource(name = "jdbc/exampleDS") 
+	// local: jdbc/DB2
+	// IBM: jdbc/exampleDS
 	private DataSource dataSource;
 	private BankApplication app;
 
+	@Override
 	public void init() {
 		app = new BankApplication(dataSource);
 	}
 
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		response.setContentType("text/html");
@@ -57,17 +60,18 @@ public class DefaultServlet extends HttpServlet {
 			String username = request.getParameter("username");
 
 			try {
-				// checks if username is all lower case TODO make this viewable for the user
+				// checks if username is all lower case TODO make this viewable
+				// for the user
 				for (int i = 0; i < username.length(); i++) {
 					if (("" + username.charAt(i)).matches("[^a-z]"))
 						throw new InvalidUsernameException();
 				}
-				
+
 				// Sets password and cpr
 				String password = request.getParameter("password");
 				String cpr = request.getParameter("cpr");
-				
-				//Creates customer object and sets subject to login
+
+				// Creates customer object and sets subject to login
 				app.createCustomer(fullname, username, password, cpr);
 				subject = "Login";
 
@@ -244,8 +248,7 @@ public class DefaultServlet extends HttpServlet {
 			rd.forward(request, response);
 
 		}
-		
-		
+
 		if (subject.equals("DeleteUserAdmin")) {
 			User userToDelete = app.getUser(request.getParameter("username"));
 			try {
@@ -259,7 +262,6 @@ public class DefaultServlet extends HttpServlet {
 				System.out.println("Could not remove user.");
 			}
 		}
-		
 
 	}
 
