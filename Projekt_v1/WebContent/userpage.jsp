@@ -2,6 +2,8 @@
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dtu.robboss.app.Customer"%>
 <%@ page import="dtu.robboss.app.Account"%>
+<%@ page import="java.sql.ResultSet"%>
+
 <html>
 <head>
 <title>userpage</title>
@@ -79,6 +81,7 @@ table, th, td {
 <!-- Get current logged in user -->
 <%
 	Customer userLoggedIn = (Customer) session.getAttribute("USER");
+	ResultSet th = (ResultSet) session.getAttribute("TRANSACTIONHISTORY");
 %>
 
 </head>
@@ -204,30 +207,16 @@ table, th, td {
 					    <th>Message</th>
 					  </tr>
 					  
-					  <tr>
-					    <td>2017/04/19-15:41</td>
-					    <td>11</td> 
-					    <td>12</td>
-					    <td>20</td>
-					    <td>hey med dig</td>
-					  </tr>
+					  <% while(th.next()) { %>
+					  	<tr>
+					    <td><%=th.getString("DATE")%></td>
+					    <td><%=th.getString("FROM")%></td> 
+					    <td><%=th.getString("TO")%></td>
+					    <td><%=th.getString("AMOUNT")%></td>
+					    <td><%=th.getString("MESSAGE")%></td>
+					  	</tr>
+					  <%}%>
 					  
-					  <tr>
-					    <td>2017/04/19-15:41</td>
-					    <td>11</td> 
-					    <td>12</td>
-					    <td>20</td>
-					    <td>hey med dig</td>
-					  </tr>
-					  
-					  <tr>
-					    <td>2017/04/19-15:41</td>
-					    <td>11</td> 
-					    <td>12</td>
-					    <td>20</td>
-					    <td>hey med dig</td>
-					    
-					  </tr>
 					</table>
 
 				</div>
