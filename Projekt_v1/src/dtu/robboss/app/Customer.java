@@ -38,7 +38,7 @@ public class Customer extends User {
 		if(accounts.contains(newMain))
 			this.mainAccount = newMain;
 		else
-			System.out.println("ERROR: account not found in accounts list.");
+			System.out.println("Customer::setMainAccount (account not found in accounts list)");
 	}
 
 	
@@ -56,5 +56,16 @@ public class Customer extends User {
 
 	public ArrayList<Account> getAccounts() {
 		return accounts;
+	}
+	
+	public Account getAccountByID(String accountID){
+		
+		for(Account acc: this.accounts){
+			if(acc.getAccountNumber().equals(accountID))
+				return acc;
+		}
+		
+		return null;
+		
 	}
 }

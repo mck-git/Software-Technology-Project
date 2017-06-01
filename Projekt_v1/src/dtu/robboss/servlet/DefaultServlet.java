@@ -186,6 +186,20 @@ public class DefaultServlet extends HttpServlet {
 			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 			rd.forward(request, response);
 		}
+		
+		if (subject.equals("SetAsMain")) {
+			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
+			
+			String accountID = request.getParameter("accountSelected").trim();
+			System.out.println(accountID);
+			Account newMain = loggedInCustomer.getAccountByID(accountID);
+			
+			app.setNewMainAccount(loggedInCustomer, newMain);
+			
+			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+			rd.forward(request, response);
+			
+		}
 
 		// ADMIN ONLY
 		if (subject.equals("AccountLookUp")) {

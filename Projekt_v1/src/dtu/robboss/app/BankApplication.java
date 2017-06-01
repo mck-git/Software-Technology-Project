@@ -145,6 +145,16 @@ public class BankApplication {
 		
 		return database.getAccountsByUser(username);
 	}
+	
+	
+	public void setNewMainAccount(Customer customer, Account newMain){
+		
+		Account oldMain = customer.getMainAccount();
+		database.setNewMainAccount(oldMain, newMain);
+		customer.setMainAccount(newMain);
+		
+		
+	}
 
 	//////////////////////////////
 	// USER-ACCOUNT INTERACTION //

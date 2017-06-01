@@ -421,6 +421,26 @@ public class DatabaseProtocol {
 	////////////
 	// Update //
 	////////////
+	
+	public void setNewMainAccount(Account oldMain, Account newMain){
+		
+		oldMain.setType("NORMAL");
+		newMain.setType("MAIN");
+		
+		startConnection();
+		
+		try{
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET TYPE = '" + oldMain.getType() + "' WHERE ID = '"
+					+ oldMain.getAccountNumber() + "'");
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET TYPE = '" + newMain.getType() + "' WHERE ID = '"
+					+ newMain.getAccountNumber() + "'");
+		} catch(SQLException e) {
+			closeConnection();
+			System.out.println("Error in DatabaseProtocol::selectNewMainAccount");
+		}
+		closeConnection();
+		
+	}
 
 	public void transferFromAccountToAccount(Account source, Account target, double amount) {
 

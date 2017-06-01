@@ -171,16 +171,33 @@ table, th, td {
 			</div>
 
 			<div id="messages" class="outer">
-				<h3 align="center" style="margin-top: 0;">Messages</h3>
+				<h3 align="center" style="margin-top: 0;">Edit Account</h3>
 
-				<div class="inner">
-					message <br>
-
-				</div>
+				<form method="post" action="DS">
+				
+				Select account to edit: 
+				<select name="accountSelected">
+				
+					<%
+						for (Account account : userLoggedIn.getAccounts()) {
+						String accountID = "" + account.getAccountNumber();
+					%>
+					
+					 <option value= <%=accountID%> > AccountID: <%=accountID%> </option>
+					 
+					<% } %>
+				
+				</select>
+				
+				
+						<input type="hidden" name="subject" value="SetAsMain" /> 
+						<input type="submit" value="Set as main account"/>
+				</form>
+				
 			</div>
 
 			<div id="TH" class="outer">
-				<h3 align="center" style="margin-top: 0;">Transaction Histrory</h3>
+				<h3 align="center" style="margin-top: 0;">Transaction History</h3>
 
 				<div class="inner">
 					
