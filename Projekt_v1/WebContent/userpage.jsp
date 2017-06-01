@@ -58,6 +58,7 @@ table, th, td {
 }
 
 #payment {
+	clear: both;
 	float: right;
 }
 
@@ -175,7 +176,7 @@ table, th, td {
 				<div class="inner" style="display: inline-block; text-align: center; width: 100%; height: 220px; max-height: 220px;">
 					<form method="post" action="DS"  >
 						<input type="hidden" name="subject" value="transfermoney" /> 
-						<br>
+						
 						Send to: 
 						<input type="radio" name="receiverType" value="account" /> Account
 						<input type="radio" checked="checked" name="receiverType" value="user" /> User <br>
