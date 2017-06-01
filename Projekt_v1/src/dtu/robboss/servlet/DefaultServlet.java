@@ -38,6 +38,7 @@ public class DefaultServlet extends HttpServlet {
 	// IBM: jdbc/exampleDS
 	private DataSource dataSource;
 	private BankApplication app;
+	private final double DKK = 1, USD = 0.15, EUR = 0.13, GBP = 0.12, JPY = 16.81;
 
 	@Override
 	public void init() {
@@ -68,10 +69,28 @@ public class DefaultServlet extends HttpServlet {
 						throw new InvalidUsernameException();
 				}
 
-				// Sets password and cpr
+				// Sets password and currency
 				String password = request.getParameter("password");
-				String currency = request.getParameter("currency");
+				String currencyString = request.getParameter("currency");
 
+				double currency;
+				switch (currencyString) {
+				case "EUR":
+					currency = EUR;
+					break;
+				case "USD":
+					currency = USD;
+					break;
+				case "GBP":
+					currency = GBP;
+					break;
+				case "JPY":
+					currency = JPY;
+					break;
+				default:
+					currency = DKK;
+				}
+				
 				// Creates customer object and sets subject to login
 				app.createCustomer(fullname, username, password, currency);
 				subject = "Login";
