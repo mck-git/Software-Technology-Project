@@ -149,6 +149,10 @@ public class DefaultServlet extends HttpServlet {
 							message);
 				}
 
+				// Get transaction history for customer
+				ResultSet th = app.getTransactionHistory((Customer) session.getAttribute("USER"));
+				session.setAttribute("TRANSACTIONHISTORY", th);
+
 				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 				rd.forward(request, response);
 			} catch (UserNotLoggedInException | TransferException | AccountNotfoundException
