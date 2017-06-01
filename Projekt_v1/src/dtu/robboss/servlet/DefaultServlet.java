@@ -187,11 +187,11 @@ public class DefaultServlet extends HttpServlet {
 			rd.forward(request, response);
 		}
 		
-		if (subject.equals("SetAsMain")) {
+		if (subject.equals("Set as main account")) {
 			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
 			
-			String accountID = request.getParameter("accountSelected").trim();
-			System.out.println(accountID);
+			String accountID = request.getParameter("accountSelected");
+			System.out.println("Setting " + accountID + " as MAIN"); 
 			Account newMain = loggedInCustomer.getAccountByID(accountID);
 			
 			app.setNewMainAccount(loggedInCustomer, newMain);
@@ -199,6 +199,19 @@ public class DefaultServlet extends HttpServlet {
 			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 			rd.forward(request, response);
 			
+		}
+		
+		if (subject.equals("Delete account")){
+			// get current user
+			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
+			// getting account to be deleted
+			String accountID = request.getParameter("accountSelected");
+			
+			Account delete = loggedInCustomer.getAccountByID(accountID);
+			app.deleteAccount(delete);
+			
+			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+			rd.forward(request, response);
 		}
 
 		// ADMIN ONLY

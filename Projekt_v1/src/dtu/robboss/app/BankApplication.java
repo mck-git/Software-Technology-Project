@@ -129,9 +129,16 @@ public class BankApplication {
 	}
 
 	public void deleteAccount(Account account) {
-		
-		account.getCustomer().removeAccount(account);
-		database.removeAccount(account);
+		//Account has to have a balance of 0 and it can't be the users main account. 
+		//TODO should this check be in DefaultServelet instead?
+		if(account.getBalance() == 0 && !account.getType().equals("MAIN")){
+			account.getCustomer().removeAccount(account);
+			database.removeAccount(account);
+			System.out.println("BankApplication::deleteAccount -> Deleted account");
+		}
+		else {
+			System.out.println("BankApplication::deleteAccount -> Account not deleted.");
+		}
 	}
 
 	public Account getAccount(String accountNumber) {

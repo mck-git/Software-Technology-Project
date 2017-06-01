@@ -51,7 +51,7 @@ table, th, td {
 	float: right;
 }
 
-#messages {
+#editAccounts {
 	float: left;
 }
 
@@ -131,7 +131,6 @@ table, th, td {
 					%>
 
 					<%=(userLoggedIn.getAccounts().size() == 0 ? "No accounts" : "")%>
-
 				</div>
 			</div>
 
@@ -170,28 +169,23 @@ table, th, td {
 				</div>
 			</div>
 
-			<div id="messages" class="outer">
+			<div id="editAccounts" class="outer">
 				<h3 align="center" style="margin-top: 0;">Edit Account</h3>
 
-				<form method="post" action="DS">
 				
+				<form method="post" action="DS">
 				Select account to edit: 
 				<select name="accountSelected">
-				
 					<%
 						for (Account account : userLoggedIn.getAccounts()) {
 						String accountID = "" + account.getAccountNumber();
 					%>
-					
 					 <option value= <%=accountID%> > AccountID: <%=accountID%> </option>
-					 
 					<% } %>
-				
 				</select>
 				
-				
-						<input type="hidden" name="subject" value="SetAsMain" /> 
-						<input type="submit" value="Set as main account"/>
+						<input type="submit" name="subject" value="Set as main account"/>
+						<input type="submit" name="subject" value="Delete account"	/>					
 				</form>
 				
 			</div>
