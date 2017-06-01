@@ -78,8 +78,8 @@ public class BankApplication {
 		return -1;
 	}
 
-	public void createCustomer(String fullname, String username, String password, String currency) throws AlreadyExistsException {
-		Customer newCustomer = new Customer(fullname, username, password);
+	public void createCustomer(String fullname, String username, String password, double currency) throws AlreadyExistsException {
+		Customer newCustomer = new Customer(fullname, username, password, currency);
 		newCustomer.setCurrency(currency);
 		
 		database.addCustomer(newCustomer);

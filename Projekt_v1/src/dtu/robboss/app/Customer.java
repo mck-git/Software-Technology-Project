@@ -3,14 +3,15 @@ import java.util.ArrayList;
 
 public class Customer extends User {
 
-	private String currency; 
+	private double currency; 
 	private ArrayList<Account> accounts;
 	private Account mainAccount;
 
 	// TODO new constructor? taking a ResultSet as argument?
 	// or just think about which arguments User should have
-	public Customer(String name, String username, String password) {
+	public Customer(String name, String username, String password, double currency) {
 		super(name, username, password);
+		this.currency = currency;
 		//Creating account list and adding mainAccount. 
 		//This has to be done before any account is created.
 		this.accounts = new ArrayList<Account>();
@@ -46,11 +47,11 @@ public class Customer extends User {
 	// GETTERS AND SETTERS //
 	/////////////////////////
 
-	public String getCurrency() {
+	public double getCurrency() {
 		return currency;
 	}
 
-	public void setCurrency(String currency) {
+	public void setCurrency(double currency) {
 		this.currency = currency;
 	}
 

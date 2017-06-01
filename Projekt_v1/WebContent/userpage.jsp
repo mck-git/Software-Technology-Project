@@ -82,6 +82,8 @@ table, th, td {
 <%
 	Customer userLoggedIn = (Customer) session.getAttribute("USER");
 	ArrayList<String[]> th = (ArrayList<String[]>) session.getAttribute("TRANSACTIONHISTORY");
+	final double DKK = 1, USD = 0.15, EUR = 0.13, GBP = 0.12, JPY = 16.81;
+	
 %>
 
 </head>
@@ -160,7 +162,10 @@ table, th, td {
 					<input type="submit" name="subject" value="Select currency" />
 					
 					</form>
+					
+					<br>
 
+					Current relative currency: <%=userLoggedIn.getCurrency()%>
 				</div>
 			</div>
 

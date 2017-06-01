@@ -270,15 +270,15 @@ public class DefaultServlet extends HttpServlet {
 				String fullname = request.getParameter("fullname");
 				String username = request.getParameter("username");
 				String password = request.getParameter("password");
-				String cpr = request.getParameter("cpr");
+				double currency = Double.parseDouble(request.getParameter("currency"));
 
 				try {
-					app.createCustomer(fullname, username, password, cpr);
+					app.createCustomer(fullname, username, password, currency);
 				} catch (AlreadyExistsException e) {
 					System.out.println("User already exist");
 				}
 			}
-
+			else
 			// ADMIN CREATES ADMIN
 			if (request.getParameter("userType").equals("admin")) {
 				String fullname = request.getParameter("fullname");
