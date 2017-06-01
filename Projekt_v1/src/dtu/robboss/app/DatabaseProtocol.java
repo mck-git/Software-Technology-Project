@@ -417,6 +417,26 @@ public class DatabaseProtocol {
 		return null;
 
 	}
+	
+	public ResultSet getTransactionHistory(Customer customer) {
+		startConnection();
+		
+		System.out.println(customer.getUsername());
+		try {
+			String query = "SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE ";
+			for(Account acc : customer.getAccounts())
+				query+= " FROM = " + acc.getAccountNumber() + " OR TO = " + acc.getAccountNumber() + " ";
+			
+			ResultSet th = stmt.executeQuery(query);
+			return th;
+					
+		} catch (SQLException e){
+			e.printStackTrace();
+		}
+		
+		closeConnection();
+		return null;
+	}
 
 	////////////
 	// Update //
@@ -490,6 +510,8 @@ public class DatabaseProtocol {
 			e.printStackTrace();
 		}
 	}
+
+	
 
 
 }

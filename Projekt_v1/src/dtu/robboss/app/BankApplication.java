@@ -1,5 +1,6 @@
 package dtu.robboss.app;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -202,6 +203,11 @@ public class BankApplication {
 		addTransactionToTH(sourceAccount, targetAccountID, amount, message);
 		
 	}	
+	
+	public ResultSet getTransactionHistory(Customer customer) {
+		ResultSet th = database.getTransactionHistory(customer);
+		return th;
+	}
 
 	private void addTransactionToTH(Account from, String to, Double amount, String message) {
 		
@@ -228,5 +234,6 @@ public class BankApplication {
 		database.addAccountsToLocalCustomer(customer);
 		
 	}
+
 
 }

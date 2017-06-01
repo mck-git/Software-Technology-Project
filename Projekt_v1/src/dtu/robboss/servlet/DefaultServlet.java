@@ -2,6 +2,8 @@ package dtu.robboss.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.annotation.Resource;
@@ -101,6 +103,12 @@ public class DefaultServlet extends HttpServlet {
 					Customer customerLoggedIn = (Customer) userLoggedIn;
 					app.refreshAccountsForCustomer(customerLoggedIn);
 					session.setAttribute("USER", customerLoggedIn);
+					
+					// Get transaction history for customer
+					ResultSet th = app.getTransactionHistory(customerLoggedIn);
+					session.setAttribute("TRANSACTIONHISTORY", th);
+					
+					System.out.println(session.getAttribute("TRANSACTIONHISTORY"));
 					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 					rd.forward(request, response);
 				}
@@ -119,7 +127,7 @@ public class DefaultServlet extends HttpServlet {
 				System.out.println("Failed to login in defaultservlet ");
 				response.sendRedirect("login.html");
 				// e.printStackTrace();
-			}
+			} 
 		}
 		if (subject.equals("transfermoney")) {
 
