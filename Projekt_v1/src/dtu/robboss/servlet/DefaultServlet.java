@@ -3,6 +3,7 @@ package dtu.robboss.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.servlet.RequestDispatcher;
@@ -32,11 +33,12 @@ import dtu.robboss.app.UserNotfoundException;
 @WebServlet(description = "default servlet", urlPatterns = { "/DS" })
 public class DefaultServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	@Resource(name = "jdbc/exampleDS") 
+	@Resource(name = "jdbc/DB2") 
 	// local: jdbc/DB2
 	// IBM: jdbc/exampleDS
 	private DataSource dataSource;
 	private BankApplication app;
+	private final double DKK = 1, USD = 0.15, EUR = 0.13, GBP = 0.12, JPY = 16.81;
 
 	@Override
 	public void init() {
@@ -67,12 +69,30 @@ public class DefaultServlet extends HttpServlet {
 						throw new InvalidUsernameException();
 				}
 
-				// Sets password and cpr
+				// Sets password and currency
 				String password = request.getParameter("password");
-				String cpr = request.getParameter("cpr");
+				String currencyString = request.getParameter("currency");
 
+				double currency;
+				switch (currencyString) {
+				case "EUR":
+					currency = EUR;
+					break;
+				case "USD":
+					currency = USD;
+					break;
+				case "GBP":
+					currency = GBP;
+					break;
+				case "JPY":
+					currency = JPY;
+					break;
+				default:
+					currency = DKK;
+				}
+				
 				// Creates customer object and sets subject to login
-				app.createCustomer(fullname, username, password, cpr);
+				app.createCustomer(fullname, username, password, currency);
 				subject = "Login";
 
 			} catch (InvalidUsernameException e) {
@@ -101,6 +121,12 @@ public class DefaultServlet extends HttpServlet {
 					Customer customerLoggedIn = (Customer) userLoggedIn;
 					app.refreshAccountsForCustomer(customerLoggedIn);
 					session.setAttribute("USER", customerLoggedIn);
+					
+					// Get transaction history for customer
+					List<String[]> th = app.getTransactionHistory(customerLoggedIn);
+					session.setAttribute("TRANSACTIONHISTORY", th);
+					
+					System.out.println(session.getAttribute("TRANSACTIONHISTORY"));
 					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 					rd.forward(request, response);
 				}
@@ -119,8 +145,18 @@ public class DefaultServlet extends HttpServlet {
 				System.out.println("Failed to login in defaultservlet ");
 				response.sendRedirect("login.html");
 				// e.printStackTrace();
-			}
+			} 
 		}
+		
+		if(subject.equals("Select currency")){
+			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
+			String currency = request.getParameter("currency");
+			app.setCurrency(loggedInCustomer, currency);
+			
+			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+			rd.forward(request, response);
+		}
+		
 		if (subject.equals("transfermoney")) {
 
 			String beforedecimalseperator = "0" + request.getParameter("beforedecimalseperator");
@@ -140,6 +176,10 @@ public class DefaultServlet extends HttpServlet {
 					app.transferFromAccountToCustomer(sourceAccount, request.getParameter("receiver"), transferAmount,
 							message);
 				}
+
+				// Get transaction history for customer
+				List<String[]> th = app.getTransactionHistory((Customer) session.getAttribute("USER"));
+				session.setAttribute("TRANSACTIONHISTORY", th);
 
 				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 				rd.forward(request, response);
@@ -186,6 +226,33 @@ public class DefaultServlet extends HttpServlet {
 			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 			rd.forward(request, response);
 		}
+		
+		if (subject.equals("Set as main account")) {
+			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
+			
+			String accountID = request.getParameter("accountSelected");
+			System.out.println("Setting " + accountID + " as MAIN"); 
+			Account newMain = loggedInCustomer.getAccountByID(accountID);
+			
+			app.setNewMainAccount(loggedInCustomer, newMain);
+			
+			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+			rd.forward(request, response);
+			
+		}
+		
+		if (subject.equals("Delete account")){
+			// get current user
+			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
+			// getting account to be deleted
+			String accountID = request.getParameter("accountSelected");
+			
+			Account delete = loggedInCustomer.getAccountByID(accountID);
+			app.deleteAccount(delete);
+			
+			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+			rd.forward(request, response);
+		}
 
 		// ADMIN ONLY
 		if (subject.equals("AccountLookUp")) {
@@ -222,15 +289,15 @@ public class DefaultServlet extends HttpServlet {
 				String fullname = request.getParameter("fullname");
 				String username = request.getParameter("username");
 				String password = request.getParameter("password");
-				String cpr = request.getParameter("cpr");
+				double currency = Double.parseDouble(request.getParameter("currency"));
 
 				try {
-					app.createCustomer(fullname, username, password, cpr);
+					app.createCustomer(fullname, username, password, currency);
 				} catch (AlreadyExistsException e) {
 					System.out.println("User already exist");
 				}
 			}
-
+			else
 			// ADMIN CREATES ADMIN
 			if (request.getParameter("userType").equals("admin")) {
 				String fullname = request.getParameter("fullname");

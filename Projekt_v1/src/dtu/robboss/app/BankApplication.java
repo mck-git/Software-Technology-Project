@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -59,6 +60,13 @@ public class BankApplication {
 	// USER MANAGEMENT //
 	/////////////////////
 
+	public void setCurrency(Customer customer, String currency){
+		
+		if(currency.equals("DKK") || currency.equals("EUR") || currency.equals("USD") || currency.equals("GBP") || currency.equals("JPY"))
+			database.setCurrency(customer, currency);
+		
+	}
+	
 	public int userCount() {
 
 		try {
@@ -70,15 +78,15 @@ public class BankApplication {
 		return -1;
 	}
 
-	public void createCustomer(String fullname, String username, String password, String cpr) throws AlreadyExistsException {
-		Customer newCustomer = new Customer(fullname, username, password);
-		newCustomer.setCpr(cpr);
+	public void createCustomer(String fullname, String username, String password, double currency) throws AlreadyExistsException {
+		Customer newCustomer = new Customer(fullname, username, password, currency);
+		newCustomer.setCurrency(currency);
 		
 		database.addCustomer(newCustomer);
 		createAccount(newCustomer, true);
 		
-		//Creates TH table
-		database.addTransactionHistoryTable(newCustomer);
+		//Creates TH table TODO: OLD
+//		database.addTransactionHistoryTable(newCustomer);
 	}
 
 	public void createAdmin(String fullname, String username, String password) throws AlreadyExistsException {
@@ -116,8 +124,13 @@ public class BankApplication {
 
 	}
 	
-	private Admin getAdmin(String username) {
-		return database.getAdmin(username);
+	private Admin getAdmin(String username) throws UserNotfoundException {
+		Admin adminFromDatabase = database.getAdmin(username);
+		
+		if(adminFromDatabase == null)
+			throw new UserNotfoundException();
+		
+		return adminFromDatabase;
 	}
 	
 	////////////////////////
@@ -129,9 +142,16 @@ public class BankApplication {
 	}
 
 	public void deleteAccount(Account account) {
-		
-		account.getCustomer().removeAccount(account);
-		database.removeAccount(account);
+		//Account has to have a balance of 0 and it can't be the users main account. 
+		//TODO should this check be in DefaultServelet instead?
+		if(account.getBalance() == 0 && !account.getType().equals("MAIN")){
+			account.getCustomer().removeAccount(account);
+			database.removeAccount(account);
+			System.out.println("BankApplication::deleteAccount -> Deleted account");
+		}
+		else {
+			System.out.println("BankApplication::deleteAccount -> Account not deleted.");
+		}
 	}
 
 	public Account getAccount(String accountNumber) {
@@ -144,6 +164,16 @@ public class BankApplication {
 			return null;
 		
 		return database.getAccountsByUser(username);
+	}
+	
+	
+	public void setNewMainAccount(Customer customer, Account newMain){
+		
+		Account oldMain = customer.getMainAccount();
+		database.setNewMainAccount(oldMain, newMain);
+		customer.setMainAccount(newMain);
+		
+		
 	}
 
 	//////////////////////////////
@@ -185,6 +215,10 @@ public class BankApplication {
 		addTransactionToTH(sourceAccount, targetAccountID, amount, message);
 		
 	}	
+	
+	public List<String[]> getTransactionHistory(Customer customer) {
+		return database.getTransactionHistory(customer);
+	}
 
 	private void addTransactionToTH(Account from, String to, Double amount, String message) {
 		
@@ -211,5 +245,6 @@ public class BankApplication {
 		database.addAccountsToLocalCustomer(customer);
 		
 	}
+
 
 }

@@ -35,7 +35,9 @@ input{
 margin: 20px;
 }
 </style>
-
+<%
+	final double DKK = 1, USD = 0.15, EUR = 0.13, GBP = 0.12, JPY = 16.81;
+%>
 
 </head>
 <body>
@@ -60,7 +62,15 @@ margin: 20px;
 		Full name: 	<input type="text" name ="fullname"/> 	<br>
 		User name: 	<input type="text" name ="username"/> 	<br>
 		Password: 	<input type="text" name ="password"/> 	<br>
-		CPR: 		<input type="text" name ="cpr"/> 		<br>
+		Currency: 	
+		
+		<select name="currency">
+		<option value ="DKK">DKK</option>
+		<option value ="EUR">EUR</option>
+		<option value ="USD">USD</option>
+		<option value ="=GBP">GBP</option>
+		<option value ="JPY">JPY</option>
+		</select>
 		
 		<input type="submit" value="Create User" >
 		</form>

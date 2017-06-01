@@ -2,6 +2,8 @@
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dtu.robboss.app.Customer"%>
 <%@ page import="dtu.robboss.app.Account"%>
+<%@ page import="java.util.ArrayList"%>
+
 <html>
 <head>
 <title>userpage</title>
@@ -51,11 +53,12 @@ table, th, td {
 	float: right;
 }
 
-#messages {
+#editAccounts {
 	float: left;
 }
 
 #payment {
+	clear: both;
 	float: right;
 }
 
@@ -79,6 +82,9 @@ table, th, td {
 <!-- Get current logged in user -->
 <%
 	Customer userLoggedIn = (Customer) session.getAttribute("USER");
+	ArrayList<String[]> th = (ArrayList<String[]>) session.getAttribute("TRANSACTIONHISTORY");
+	final double DKK = 1, USD = 0.15, EUR = 0.13, GBP = 0.12, JPY = 16.81;
+	
 %>
 
 </head>
@@ -131,7 +137,6 @@ table, th, td {
 					%>
 
 					<%=(userLoggedIn.getAccounts().size() == 0 ? "No accounts" : "")%>
-
 				</div>
 			</div>
 
@@ -139,8 +144,29 @@ table, th, td {
 				<h3 align="center" style="margin-top: 0;">Currency</h3>
 
 				<div class="inner">
-					forms <br>
+					
+					
+					<form method="post" action="DS">
+					
+					Select preferred currency: 
+					
+					<select name="currency">
+					
+						<option value="DKK" > DKK </option>
+						<option value="EURO" > EUR </option>
+						<option value="USD" > USD </option>
+						<option value="GBP" > GBP </option>
+						<option value="JPY" > JPY </option>
+					
+					</select>
+					
+					<input type="submit" name="subject" value="Select currency" />
+					
+					</form>
+					
+					<br>
 
+					Current relative currency: <%=userLoggedIn.getCurrency()%>
 				</div>
 			</div>
 
@@ -150,7 +176,7 @@ table, th, td {
 				<div class="inner" style="display: inline-block; text-align: center; width: 100%; height: 220px; max-height: 220px;">
 					<form method="post" action="DS"  >
 						<input type="hidden" name="subject" value="transfermoney" /> 
-						<br>
+						
 						Send to: 
 						<input type="radio" name="receiverType" value="account" /> Account
 						<input type="radio" checked="checked" name="receiverType" value="user" /> User <br>
@@ -170,17 +196,29 @@ table, th, td {
 				</div>
 			</div>
 
-			<div id="messages" class="outer">
-				<h3 align="center" style="margin-top: 0;">Messages</h3>
+			<div id="editAccounts" class="outer">
+				<h3 align="center" style="margin-top: 0;">Edit Account</h3>
 
-				<div class="inner">
-					message <br>
-
-				</div>
+				
+				<form method="post" action="DS">
+				Select account to edit: 
+				<select name="accountSelected">
+					<%
+						for (Account account : userLoggedIn.getAccounts()) {
+						String accountID = "" + account.getAccountNumber();
+					%>
+					 <option value= <%=accountID%> > AccountID: <%=accountID%> </option>
+					<% } %>
+				</select>
+				
+						<input type="submit" name="subject" value="Set as main account"/>
+						<input type="submit" name="subject" value="Delete account"	/>					
+				</form>
+				
 			</div>
 
 			<div id="TH" class="outer">
-				<h3 align="center" style="margin-top: 0;">Transaction Histrory</h3>
+				<h3 align="center" style="margin-top: 0;">Transaction History</h3>
 
 				<div class="inner">
 					
@@ -193,30 +231,16 @@ table, th, td {
 					    <th>Message</th>
 					  </tr>
 					  
-					  <tr>
-					    <td>2017/04/19-15:41</td>
-					    <td>11</td> 
-					    <td>12</td>
-					    <td>20</td>
-					    <td>hey med dig</td>
-					  </tr>
+					  <% for(int i = th.size()-1; i >= 0; i--) { %>
+					  	<tr>
+					    <td><%=th.get(i)[0]%></td>
+					    <td><%=th.get(i)[1]%></td> 
+					    <td><%=th.get(i)[2]%></td>
+					    <td><%=th.get(i)[3]%></td>
+					    <td><%=th.get(i)[4]%></td>
+					  	</tr>
+					  <%}%>
 					  
-					  <tr>
-					    <td>2017/04/19-15:41</td>
-					    <td>11</td> 
-					    <td>12</td>
-					    <td>20</td>
-					    <td>hey med dig</td>
-					  </tr>
-					  
-					  <tr>
-					    <td>2017/04/19-15:41</td>
-					    <td>11</td> 
-					    <td>12</td>
-					    <td>20</td>
-					    <td>hey med dig</td>
-					    
-					  </tr>
 					</table>
 
 				</div>

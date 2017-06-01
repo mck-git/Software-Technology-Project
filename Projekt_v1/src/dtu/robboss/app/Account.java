@@ -59,5 +59,17 @@ public class Account {
 	public String getType() {
 		return this.type;
 	}
+	
+	public void setType(String type){
+		
+		if(type.equals("MAIN"))
+			this.type = type;
+		
+		if(type.equals("NORMAL"))
+			this.type = type;
+		
+		
+		//TODO: If not?
+	}
 
 }

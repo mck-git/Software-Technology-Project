@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -12,6 +13,7 @@ public class DatabaseProtocol {
 	private DataSource dataSource;
 	private Connection con = null;
 	private Statement stmt = null;
+	private final double DKK = 1, USD = 0.15, EUR = 0.13, GBP = 0.12, JPY = 16.81;
 
 	////////////
 	// AMOUNT //
@@ -23,7 +25,8 @@ public class DatabaseProtocol {
 
 	public int userCount() throws SQLException {
 		startConnection();
-		ResultSet rs = stmt.executeQuery("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.USERS");
+		// TODO: OLD: USERS -> CUSTOMERS
+		ResultSet rs = stmt.executeQuery("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.CUSTOMERS");
 
 		if (rs.next()) {
 			int userCount = Integer.parseInt(rs.getString("USERCOUNT"));
@@ -61,67 +64,65 @@ public class DatabaseProtocol {
 	////////////////////
 
 	public void addTransactionToTH(String date, Account from, String toID, Double amount, String message) {
-		//TABLECOLUMNS:  DATE, FROM, TO, AMOUNT, MESSAGE
-		Account to = getAccount(toID);
-		
+		// TABLECOLUMNS: DATE, FROM, TO, AMOUNT, MESSAGE
+
 		try {
 			startConnection();
-			//From TH
-			stmt.executeUpdate("INSERT INTO DTUGRP04."+from.getCustomer().getUsername()+"TH (DATE, FROM, TO, AMOUNT, MESSAGE) VALUES('"
-					+ date + "', '" + from.getAccountNumber() + "', '" + toID + "', '" + amount + "', '" + message + "')");
-			
-			//To TH
-			stmt.executeUpdate("INSERT INTO DTUGRP04."+to.getCustomer().getUsername()+"TH (DATE, FROM, TO, AMOUNT, MESSAGE) VALUES('"
-					+ date + "', '" + from.getAccountNumber() + "', '" + toID + "', '" + amount + "', '" + message + "')");
-			
+			stmt.executeUpdate(
+					"INSERT INTO DTUGRP04.TRANSACTIONHISTORY (DATE, FROM, TO, AMOUNT, MESSAGE) VALUES('" + date + "', '"
+							+ from.getAccountNumber() + "', '" + toID + "', '" + amount + "', '" + message + "')");
+
 		} catch (SQLException e) {
 			closeConnection();
 			e.printStackTrace();
 		}
 		closeConnection();
-		
+
 	}
 
-	public void removeTransactionHistoryTable(Customer cos) {
-		String tableSQL = "DROP TABLE DTUGRP04." + cos.getUsername() + "TH ";
-		startConnection();
-		try {
-			stmt.executeUpdate(tableSQL);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			closeConnection();
-		}
-		closeConnection();
-	}
+	// TODO: OLD
+	// public void removeTransactionHistoryTable(Customer cos) {
+	// String tableSQL = "DROP TABLE DTUGRP04." + cos.getUsername() + "TH ";
+	// startConnection();
+	// try {
+	// stmt.executeUpdate(tableSQL);
+	// } catch (SQLException e) {
+	// e.printStackTrace();
+	// closeConnection();
+	// }
+	// closeConnection();
+	// }
 
-	/**
-	 * @throws SQLException
-	 * 
-	 */
-	public void addTransactionHistoryTable(Customer cos) {
-		// Transaction history = TH
-		String tableSQL = "CREATE TABLE DTUGRP04." + cos.getUsername() + "TH " +
-                "( DATE CHAR(16) NOT NULL, "  +
-                " FROM INTEGER NOT NULL, " + 
-                " TO INTEGER NOT NULL, "  + 
-                " AMOUNT DOUBLE NOT NULL, "  + 
-                " MESSAGE VARCHAR(140))" + 
-                " IN DTUGRP04.DTUGRP04" + 
-                " AUDIT NONE " + 
-                " DATA CAPTURE NONE " + 
-				" CCSID EBCDIC;";	
-		
-		// Starts connection with database and adds table
-		startConnection();
-		try {
-			stmt.executeUpdate(tableSQL);
-		} catch (SQLException e) {
-			closeConnection();
-			e.printStackTrace();
-			System.out.println("ERROR: Could not add TH table with username " + cos.getUsername());
-		}
-		closeConnection();
-	}
+	// TODO: OLD
+	// /**
+	// * @throws SQLException
+	// *
+	// */
+	// public void addTransactionHistoryTable(Customer cos) {
+	// // Transaction history = TH
+	// String tableSQL = "CREATE TABLE DTUGRP04." + cos.getUsername() + "TH " +
+	// "( DATE CHAR(16) NOT NULL, " +
+	// " FROM INTEGER NOT NULL, " +
+	// " TO INTEGER NOT NULL, " +
+	// " AMOUNT DOUBLE NOT NULL, " +
+	// " MESSAGE VARCHAR(140))" +
+	// " IN DTUGRP04.DTUGRP04" +
+	// " AUDIT NONE " +
+	// " DATA CAPTURE NONE " +
+	// " CCSID EBCDIC;";
+	//
+	// // Starts connection with database and adds table
+	// startConnection();
+	// try {
+	// stmt.executeUpdate(tableSQL);
+	// } catch (SQLException e) {
+	// closeConnection();
+	// e.printStackTrace();
+	// System.out.println("ERROR: Could not add TH table with username " +
+	// cos.getUsername());
+	// }
+	// closeConnection();
+	// }
 
 	/**
 	 * Adds given admin to database in ADMINS table. username, full name and
@@ -166,9 +167,10 @@ public class DatabaseProtocol {
 		try {
 			startConnection();
 
-			stmt.executeUpdate(
-					"INSERT INTO DTUGRP04.USERS (USERNAME, FULLNAME, PASSWORD) VALUES('" + customer.getUsername()
-							+ "', '" + customer.getFullname() + "', '" + customer.getPassword() + "')");
+			// TODO: OLD: USERS -> CUSTOMERS
+			stmt.executeUpdate("INSERT INTO DTUGRP04.CUSTOMERS (USERNAME, FULLNAME, PASSWORD, CURRENCY) VALUES('"
+					+ customer.getUsername() + "', '" + customer.getFullname() + "', '" + customer.getPassword()
+					+ "', '" + customer.getCurrency() + "')");
 
 		} catch (SQLException e) {
 			closeConnection();
@@ -187,19 +189,18 @@ public class DatabaseProtocol {
 	 * @param main
 	 */
 	public void addAccount(Customer customer, boolean main) {
-		// ACCOUNTS columns: ID, USERNAME, TYPE, BALANCE, CREDIT (, HISTORY)
+		// ACCOUNTS columns: ID, USERNAME, TYPE, BALANCE, CREDIT, INTEREST
 
 		startConnection();
 		try {
-			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + "(USERNAME, TYPE, BALANCE, CREDIT)" + "VALUES ('"
-					+ customer.getUsername() + "', '" + (main ? "MAIN" : "NORMAL") + "', 0, 0)");
+			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + "(USERNAME, TYPE, BALANCE, CREDIT, INTEREST)"
+					+ "VALUES ('" + customer.getUsername() + "', '" + (main ? "MAIN" : "NORMAL") + "', 0, 0 , 1.0)");
 		} catch (SQLException e) {
 			closeConnection();
 			System.out.println("Could not create account");
 			// e.printStackTrace();
 		}
 		closeConnection();
-
 	}
 
 	/**
@@ -217,8 +218,10 @@ public class DatabaseProtocol {
 			// Removes TH table
 			if (user instanceof Customer) {
 				stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + user.getUsername() + "'");
-				stmt.executeUpdate("DELETE FROM DTUGRP04.USERS WHERE USERNAME = '" + user.getUsername() + "'");
-				removeTransactionHistoryTable((Customer) user);
+				// TODO: OLD: USERS -> CUSTOMERS
+				stmt.executeUpdate("DELETE FROM DTUGRP04.CUSTOMERS WHERE USERNAME = '" + user.getUsername() + "'");
+				// TODO: OLD: NO LONGER REMOVES TABLE DYNAMICALLY
+				// removeTransactionHistoryTable((Customer) user);
 			} else
 				stmt.executeUpdate("DELETE FROM DTUGRP04.ADMINS WHERE USERNAME = '" + user.getUsername() + "'");
 
@@ -267,7 +270,8 @@ public class DatabaseProtocol {
 					.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + customer.getUsername() + "'");
 
 			while (rs.next()) {
-				Account newAccount = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"),rs.getInt("CREDIT"), rs.getString("TYPE"));
+				Account newAccount = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"),
+						rs.getInt("CREDIT"), rs.getString("TYPE"));
 				if (rs.getString("TYPE").trim().equals("MAIN")) {
 					customer.setMainAccount(newAccount);
 				}
@@ -295,10 +299,30 @@ public class DatabaseProtocol {
 	public Customer getCustomer(String username) {
 		startConnection();
 		try {
-			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.USERS WHERE USERNAME = '" + username + "'");
+			// TODO: OLD: USERS -> CUSTOMER
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.CUSTOMERS WHERE USERNAME = '" + username + "'");
 			if (rs.next()) {
+
+				double currency;
+				switch (rs.getString("CURRENCY")) {
+				case "EUR":
+					currency = EUR;
+					break;
+				case "USD":
+					currency = USD;
+					break;
+				case "GBP":
+					currency = GBP;
+					break;
+				case "JPY":
+					currency = JPY;
+					break;
+				default:
+					currency = DKK;
+				}
+
 				Customer customer = new Customer(rs.getString("FULLNAME"), rs.getString("USERNAME"),
-						rs.getString("PASSWORD"));
+						rs.getString("PASSWORD"), currency);
 				closeConnection();
 				return customer;
 			} else {
@@ -377,7 +401,8 @@ public class DatabaseProtocol {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE ID = '" + accountNumber + "'");
 			if (rs.next()) {
 				Customer customer = getCustomer(rs.getString("USERNAME"));
-				Account account = new Account(customer, accountNumber, rs.getInt("BALANCE"), rs.getInt("CREDIT"), rs.getString("TYPE"));
+				Account account = new Account(customer, accountNumber, rs.getInt("BALANCE"), rs.getInt("CREDIT"),
+						rs.getString("TYPE"));
 				closeConnection();
 				return account;
 			} else {
@@ -394,7 +419,6 @@ public class DatabaseProtocol {
 
 	}
 
-
 	public ArrayList<Account> getAccountsByUser(String username) {
 		startConnection();
 
@@ -403,7 +427,9 @@ public class DatabaseProtocol {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + username + "'");
 			Customer customer = getCustomer(username);
 			while (rs.next()) {
-				Account account = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"), rs.getString("TYPE"));
+
+				Account account = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"),
+						rs.getString("TYPE"));
 				accounts.add(account);
 			}
 			closeConnection();
@@ -418,9 +444,73 @@ public class DatabaseProtocol {
 
 	}
 
+	public List<String[]> getTransactionHistory(Customer customer) {
+		startConnection();
+
+		List<String[]> table = new ArrayList<>();
+
+		System.out.println(customer.getUsername());
+		try {
+			String query = "SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE ";
+			ArrayList<Account> accounts = customer.getAccounts();
+			for (int i = 0; i < accounts.size(); i++) {
+				query += " FROM = " + accounts.get(i).getAccountNumber() + " OR TO = "
+						+ accounts.get(i).getAccountNumber() + " ";
+				if (i < accounts.size() - 1)
+					query += " OR ";
+			}
+
+			ResultSet th = stmt.executeQuery(query);
+			while (th.next()) {
+				String[] row = { th.getString("DATE"), th.getString("FROM"), th.getString("TO"), th.getString("AMOUNT"),
+						th.getString("MESSAGE") };
+				table.add(row);
+			}
+
+			return table;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+		return null;
+	}
+
 	////////////
 	// Update //
 	////////////
+
+	public void setCurrency(Customer customer, String currency) {
+		startConnection();
+		try {
+			stmt.executeUpdate("UPDATE DTUGRP04.CUSTOMERS SET CURRENCY = '" + currency + "' WHERE USERNAME = '"
+					+ customer.getUsername() + "'");
+		} catch (SQLException e) {
+
+			e.printStackTrace();
+		}
+		closeConnection();
+	}
+
+	public void setNewMainAccount(Account oldMain, Account newMain) {
+
+		oldMain.setType("NORMAL");
+		newMain.setType("MAIN");
+
+		startConnection();
+
+		try {
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET TYPE = '" + oldMain.getType() + "' WHERE ID = '"
+					+ oldMain.getAccountNumber() + "'");
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET TYPE = '" + newMain.getType() + "' WHERE ID = '"
+					+ newMain.getAccountNumber() + "'");
+		} catch (SQLException e) {
+			closeConnection();
+			System.out.println("Error in DatabaseProtocol::selectNewMainAccount");
+		}
+		closeConnection();
+
+	}
 
 	public void transferFromAccountToAccount(Account source, Account target, double amount) {
 
@@ -470,6 +560,5 @@ public class DatabaseProtocol {
 			e.printStackTrace();
 		}
 	}
-
 
 }
