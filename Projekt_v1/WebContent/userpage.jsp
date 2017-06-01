@@ -2,7 +2,7 @@
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dtu.robboss.app.Customer"%>
 <%@ page import="dtu.robboss.app.Account"%>
-<%@ page import="java.sql.ResultSet"%>
+<%@ page import="java.util.ArrayList"%>
 
 <html>
 <head>
@@ -81,7 +81,7 @@ table, th, td {
 <!-- Get current logged in user -->
 <%
 	Customer userLoggedIn = (Customer) session.getAttribute("USER");
-	ResultSet th = (ResultSet) session.getAttribute("TRANSACTIONHISTORY");
+	ArrayList<String[]> th = (ArrayList<String[]>) session.getAttribute("TRANSACTIONHISTORY");
 %>
 
 </head>
@@ -141,7 +141,25 @@ table, th, td {
 				<h3 align="center" style="margin-top: 0;">Currency</h3>
 
 				<div class="inner">
-					forms <br>
+					
+					
+					<form method="post" action="DS">
+					
+					Select preferred currency: 
+					
+					<select name="currency">
+					
+						<option value="DKK" > DKK </option>
+						<option value="EURO" > EUR </option>
+						<option value="USD" > USD </option>
+						<option value="GBP" > GBP </option>
+						<option value="JPY" > JPY </option>
+					
+					</select>
+					
+					<input type="submit" name="subject" value="Select currency" />
+					
+					</form>
 
 				</div>
 			</div>
@@ -207,13 +225,13 @@ table, th, td {
 					    <th>Message</th>
 					  </tr>
 					  
-					  <% while(th.next()) { %>
+					  <% for(int i = th.size()-1; i >= 0; i--) { %>
 					  	<tr>
-					    <td><%=th.getString("DATE")%></td>
-					    <td><%=th.getString("FROM")%></td> 
-					    <td><%=th.getString("TO")%></td>
-					    <td><%=th.getString("AMOUNT")%></td>
-					    <td><%=th.getString("MESSAGE")%></td>
+					    <td><%=th.get(i)[0]%></td>
+					    <td><%=th.get(i)[1]%></td> 
+					    <td><%=th.get(i)[2]%></td>
+					    <td><%=th.get(i)[3]%></td>
+					    <td><%=th.get(i)[4]%></td>
 					  	</tr>
 					  <%}%>
 					  

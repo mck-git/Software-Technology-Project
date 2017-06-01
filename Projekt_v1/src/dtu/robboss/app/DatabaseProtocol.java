@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -165,8 +166,8 @@ public class DatabaseProtocol {
 
 			//TODO: OLD: USERS -> CUSTOMERS
 			stmt.executeUpdate(
-					"INSERT INTO DTUGRP04.CUSTOMERS (USERNAME, FULLNAME, PASSWORD) VALUES('" + customer.getUsername()
-							+ "', '" + customer.getFullname() + "', '" + customer.getPassword() + "')");
+					"INSERT INTO DTUGRP04.CUSTOMERS (USERNAME, FULLNAME, PASSWORD, CURRENCY) VALUES('" + customer.getUsername()
+							+ "', '" + customer.getFullname() + "', '" + customer.getPassword() + "', '" + customer.getCurrency() + "')");
 
 		} catch (SQLException e) {
 			closeConnection();
@@ -418,18 +419,28 @@ public class DatabaseProtocol {
 
 	}
 	
-	public ResultSet getTransactionHistory(Customer customer) {
+	public List<String[]> getTransactionHistory(Customer customer) {
 		startConnection();
+		
+		List<String[]> table = new ArrayList<>();
 		
 		System.out.println(customer.getUsername());
 		try {
 			String query = "SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE ";
-			for(Account acc : customer.getAccounts())
-				query+= " FROM = " + acc.getAccountNumber() + " OR TO = " + acc.getAccountNumber() + " ";
+			ArrayList<Account> accounts = customer.getAccounts();
+			for(int i = 0; i < accounts.size(); i++){
+				query+= " FROM = " + accounts.get(i).getAccountNumber() + " OR TO = " + accounts.get(i).getAccountNumber() + " ";
+				if(i < accounts.size()-1)
+					query+= " OR ";
+			}
 			
 			ResultSet th = stmt.executeQuery(query);
-			return th;
+			while(th.next()){
+				String[] row = {th.getString("DATE"), th.getString("FROM"), th.getString("TO"), th.getString("AMOUNT"), th.getString("MESSAGE")};
+				table.add(row);
+			}
 					
+			return table;
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
@@ -441,6 +452,18 @@ public class DatabaseProtocol {
 	////////////
 	// Update //
 	////////////
+	
+	public void setCurrency(Customer customer, String currency){
+		startConnection();
+		try{
+			stmt.executeUpdate("UPDATE DTUGRP04.CUSTOMERS SET CURRENCY = '" + currency + "' WHERE USERNAME = '"
+					+ customer.getUsername() + "'");
+		} catch(SQLException e){
+			
+			e.printStackTrace();
+		}
+		closeConnection();
+	}
 	
 	public void setNewMainAccount(Account oldMain, Account newMain){
 		

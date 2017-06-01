@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public class Customer extends User {
 
-	private String cpr; // TODO add CPR to USER database
+	private String currency; 
 	private ArrayList<Account> accounts;
 	private Account mainAccount;
 
@@ -46,12 +46,12 @@ public class Customer extends User {
 	// GETTERS AND SETTERS //
 	/////////////////////////
 
-	public String getCpr() {
-		return cpr;
+	public String getCurrency() {
+		return currency;
 	}
 
-	public void setCpr(String cpr) {
-		this.cpr = cpr;
+	public void setCurrency(String currency) {
+		this.currency = currency;
 	}
 
 	public ArrayList<Account> getAccounts() {

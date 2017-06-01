@@ -60,7 +60,7 @@ margin: 20px;
 		Full name: 	<input type="text" name ="fullname"/> 	<br>
 		User name: 	<input type="text" name ="username"/> 	<br>
 		Password: 	<input type="text" name ="password"/> 	<br>
-		CPR: 		<input type="text" name ="cpr"/> 		<br>
+		Currency: 	<input type="text" name ="currency"/> 	<br>
 		
 		<input type="submit" value="Create User" >
 		</form>

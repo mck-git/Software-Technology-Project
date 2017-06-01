@@ -2,9 +2,8 @@ package dtu.robboss.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.servlet.RequestDispatcher;
@@ -71,10 +70,10 @@ public class DefaultServlet extends HttpServlet {
 
 				// Sets password and cpr
 				String password = request.getParameter("password");
-				String cpr = request.getParameter("cpr");
+				String currency = request.getParameter("currency");
 
 				// Creates customer object and sets subject to login
-				app.createCustomer(fullname, username, password, cpr);
+				app.createCustomer(fullname, username, password, currency);
 				subject = "Login";
 
 			} catch (InvalidUsernameException e) {
@@ -105,7 +104,7 @@ public class DefaultServlet extends HttpServlet {
 					session.setAttribute("USER", customerLoggedIn);
 					
 					// Get transaction history for customer
-					ResultSet th = app.getTransactionHistory(customerLoggedIn);
+					List<String[]> th = app.getTransactionHistory(customerLoggedIn);
 					session.setAttribute("TRANSACTIONHISTORY", th);
 					
 					System.out.println(session.getAttribute("TRANSACTIONHISTORY"));
@@ -129,6 +128,16 @@ public class DefaultServlet extends HttpServlet {
 				// e.printStackTrace();
 			} 
 		}
+		
+		if(subject.equals("Select currency")){
+			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
+			String currency = request.getParameter("currency");
+			app.setCurrency(loggedInCustomer, currency);
+			
+			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+			rd.forward(request, response);
+		}
+		
 		if (subject.equals("transfermoney")) {
 
 			String beforedecimalseperator = "0" + request.getParameter("beforedecimalseperator");
@@ -150,7 +159,7 @@ public class DefaultServlet extends HttpServlet {
 				}
 
 				// Get transaction history for customer
-				ResultSet th = app.getTransactionHistory((Customer) session.getAttribute("USER"));
+				List<String[]> th = app.getTransactionHistory((Customer) session.getAttribute("USER"));
 				session.setAttribute("TRANSACTIONHISTORY", th);
 
 				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
