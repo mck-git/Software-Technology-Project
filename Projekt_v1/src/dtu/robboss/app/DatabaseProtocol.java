@@ -13,7 +13,6 @@ public class DatabaseProtocol {
 	private DataSource dataSource;
 	private Connection con = null;
 	private Statement stmt = null;
-	private final double DKK = 1, USD = 0.15, EUR = 0.13, GBP = 0.12, JPY = 16.81;
 
 	////////////
 	// AMOUNT //
@@ -270,8 +269,8 @@ public class DatabaseProtocol {
 					.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + customer.getUsername() + "'");
 
 			while (rs.next()) {
-				Account newAccount = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"),
-						rs.getInt("CREDIT"), rs.getString("TYPE"));
+				Account newAccount = new Account(customer, rs.getString("ID"), rs.getDouble("BALANCE"),
+						rs.getDouble("CREDIT"), rs.getString("TYPE"));
 				if (rs.getString("TYPE").trim().equals("MAIN")) {
 					customer.setMainAccount(newAccount);
 				}
@@ -303,22 +302,22 @@ public class DatabaseProtocol {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.CUSTOMERS WHERE USERNAME = '" + username + "'");
 			if (rs.next()) {
 
-				double currency;
+				Valuta currency;
 				switch (rs.getString("CURRENCY")) {
 				case "EUR":
-					currency = EUR;
+					currency = Valuta.EUR;
 					break;
 				case "USD":
-					currency = USD;
+					currency = Valuta.USD;
 					break;
 				case "GBP":
-					currency = GBP;
+					currency = Valuta.GBP;
 					break;
 				case "JPY":
-					currency = JPY;
+					currency = Valuta.JPY;
 					break;
 				default:
-					currency = DKK;
+					currency = Valuta.DKK;
 				}
 
 				Customer customer = new Customer(rs.getString("FULLNAME"), rs.getString("USERNAME"),
@@ -401,7 +400,7 @@ public class DatabaseProtocol {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE ID = '" + accountNumber + "'");
 			if (rs.next()) {
 				Customer customer = getCustomer(rs.getString("USERNAME"));
-				Account account = new Account(customer, accountNumber, rs.getInt("BALANCE"), rs.getInt("CREDIT"),
+				Account account = new Account(customer, accountNumber, rs.getDouble("BALANCE"), rs.getDouble("CREDIT"),
 						rs.getString("TYPE"));
 				closeConnection();
 				return account;
@@ -428,7 +427,7 @@ public class DatabaseProtocol {
 			Customer customer = getCustomer(username);
 			while (rs.next()) {
 
-				Account account = new Account(customer, rs.getString("ID"), rs.getInt("BALANCE"), rs.getInt("CREDIT"),
+				Account account = new Account(customer, rs.getString("ID"), rs.getDouble("BALANCE"), rs.getDouble("CREDIT"),
 						rs.getString("TYPE"));
 				accounts.add(account);
 			}
@@ -480,10 +479,10 @@ public class DatabaseProtocol {
 	// Update //
 	////////////
 
-	public void setCurrency(Customer customer, String currency) {
+	public void setCurrency(Customer customer, Valuta currency) {
 		startConnection();
 		try {
-			stmt.executeUpdate("UPDATE DTUGRP04.CUSTOMERS SET CURRENCY = '" + currency + "' WHERE USERNAME = '"
+			stmt.executeUpdate("UPDATE DTUGRP04.CUSTOMERS SET CURRENCY = '" + currency.name() + "' WHERE USERNAME = '"
 					+ customer.getUsername() + "'");
 		} catch (SQLException e) {
 
