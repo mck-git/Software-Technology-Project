@@ -18,7 +18,7 @@ public class Account {
 		this.accountNumber = accountNumber;
 		this.balance = 0;
 		this.credit = 0;
-		this.interest = 1.0;
+		this.interest = 1.05;
 
 		customer.addAccount(this);
 	}
@@ -61,6 +61,10 @@ public class Account {
 
 	public double getBalance() {
 		return this.balance;
+	}
+
+	public void setBalance(double newBalance) {
+		this.balance = newBalance;
 	}
 
 	public double getCredit() {

@@ -376,6 +376,20 @@ public class DefaultServlet extends HttpServlet {
 				System.out.println("Could not remove user.");
 			}
 		}
+		
+		if (subject.equals("PerformBatch")) {
+			
+			try {
+				app.applyInterestToAllAccounts();
+				app.storeOldTransactionsInArchive();
+				
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
 	}
 

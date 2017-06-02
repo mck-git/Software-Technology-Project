@@ -240,7 +240,7 @@ public class BankApplication {
 				+ (date.get(Calendar.MINUTE) < 10 ? "0" + date.get(Calendar.MINUTE) : date.get(Calendar.MINUTE));
 
 		String dateFormated = year + "/" + month + "/" + day + "-" + hour + ":" + minute;
-
+	
 		database.addTransactionToTH(dateFormated, from, to, amount, message);
 
 	}
@@ -251,22 +251,39 @@ public class BankApplication {
 		database.addAccountsToLocalCustomer(customer);
 
 	}
-	
+
 	public List<Account> getAllAccounts() {
-	
+
 		return database.getAllAccounts();
-		
+
 	}
 
-	public void applyInterest() {
-		
+	public void applyInterestToAllAccounts() {
+
 		// 1: get all accounts
+		List<Account> allAccounts = database.getAllAccounts();
+
+		// 2update balances locally according to interest
+		// and update in database
+
+		for (Account account : allAccounts) {
+			database.setAccountBalance(account, account.getBalance() * account.getInterest());
+		}
+
+	}
+	
+	public void storeOldTransactionsInArchive() {
 		
-		// 2: update balances locally according to interest
+		// 1! Get all transactions in Transaction History
 		
-		// 3: update in database
+		// 2! Find ID interval for old transactions
+		
+		// 3.1! Delete old transactions from Transaction History
+		
+		// 3.a! Insert old transactions into Archive table
 		
 		
+		database.storeOldTransactionsInArchive();
 	}
 
 }

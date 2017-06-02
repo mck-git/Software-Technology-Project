@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -77,6 +79,72 @@ public class DatabaseProtocol {
 		}
 		closeConnection();
 
+	}
+	
+	public void storeOldTransactionsInArchive() {
+		
+		try {
+			startConnection();
+			
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY");
+			Calendar cal = new GregorianCalendar();
+			Calendar limit = new GregorianCalendar();
+			
+			limit.set(Calendar.DAY_OF_YEAR, limit.get(Calendar.DAY_OF_YEAR)-7);
+			
+			List<TransactionHistoryElement> transactions = new ArrayList<TransactionHistoryElement>();
+			
+			while(rs.next()) {
+				String date = rs.getString("DATE");
+				// 							 0123456789
+				// date format for database: YYYY/MM/DD/hh/mm
+				
+				int year = Integer.parseInt(date.substring(0, 4));
+				cal.set(Calendar.YEAR, year);
+
+				int month = Integer.parseInt(date.substring(5,7));
+				cal.set(Calendar.MONTH, month);
+				
+				int day = Integer.parseInt(date.substring(8, 10));
+				cal.set(Calendar.DAY_OF_MONTH, day);
+				
+				if ( cal.before(limit) ) {
+					String dateString = rs.getString("DATE");
+					int from = rs.getInt("FROM");
+					int to = rs.getInt("TO");
+					double amount = rs.getDouble("AMOUNT");
+					String msg = rs.getString("MESSAGE");
+					
+					transactions.add(new TransactionHistoryElement(dateString, from, to, amount, msg));
+				}
+					
+			}
+			closeConnection();
+			
+			startConnection();
+			
+			for (TransactionHistoryElement the : transactions) {
+				stmt.executeUpdate("INSERT INTO DTUGRP04.TRANSACTIONARCHIVE (DATE, FROM, TO, AMOUNT, MESSAGE) "
+						+ "VALUES"
+						+ "('" + the.getDate()+ "', '" + the.getFrom() + "', '" + the.getTo() + "', '" + the.getAmount() + "', '" + the.getMessage() + "')");			
+			}
+			
+			closeConnection();
+			
+			startConnection();
+			
+			for (TransactionHistoryElement the : transactions) {
+				stmt.executeUpdate("DELETE FROM DTUGRP04.TRANSACTIONHISTORY WHERE DATE = '" + the.getDate() + "'");			
+			}
+			
+			
+			closeConnection();
+			
+		} catch (Exception e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+		
 	}
 
 	// TODO: OLD
@@ -193,7 +261,7 @@ public class DatabaseProtocol {
 		startConnection();
 		try {
 			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + "(USERNAME, TYPE, BALANCE, CREDIT, INTEREST)"
-					+ "VALUES ('" + customer.getUsername() + "', '" + (main ? "MAIN" : "NORMAL") + "', 0, 0 , 1.0)");
+					+ "VALUES ('" + customer.getUsername() + "', '" + (main ? "MAIN" : "NORMAL") + "', 0, 0 , 1.05)");
 		} catch (SQLException e) {
 			closeConnection();
 			System.out.println("Could not create account");
@@ -431,6 +499,7 @@ public class DatabaseProtocol {
 
 			while (rs.next()) {
 				Customer customer = getCustomer(rs.getString("USERNAME"));
+				
 				Account account = new Account(customer, rs.getString("ID"), rs.getDouble("BALANCE"),
 						rs.getDouble("CREDIT"), rs.getString("TYPE"), rs.getDouble("INTEREST"));
 
@@ -566,6 +635,23 @@ public class DatabaseProtocol {
 			e.printStackTrace();
 		}
 		closeConnection();
+	}
+
+	public void setAccountBalance(Account account, double newBalance) {
+
+		startConnection();
+
+		try {
+			account.setBalance(newBalance);
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + account.getBalance() + "' WHERE ID = '"
+					+ account.getAccountNumber() + "'");
+
+		} catch (SQLException e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+		closeConnection();
+
 	}
 
 	////////////////////
