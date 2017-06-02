@@ -2,7 +2,7 @@
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dtu.robboss.app.Customer"%>
 <%@ page import="dtu.robboss.app.Account"%>
-<%@ page import="dtu.robboss.app.Valuta" %>
+<%@ page import="dtu.robboss.app.Valuta"%>
 <%@ page import="java.util.ArrayList"%>
 
 <html>
@@ -25,7 +25,7 @@
 }
 
 table, th, td {
-    border: 1px solid black;
+	border: 1px solid black;
 }
 
 .inner {
@@ -85,7 +85,6 @@ table, th, td {
 <%
 	Customer userLoggedIn = (Customer) session.getAttribute("USER");
 	ArrayList<String[]> th = (ArrayList<String[]>) session.getAttribute("TRANSACTIONHISTORY");
-	
 %>
 
 </head>
@@ -117,20 +116,24 @@ table, th, td {
 
 					AccountID:
 					<%=account.getAccountNumber()%>
-					
+
 					- balance:
 					<%=Valuta.convert(account.getBalance(), userLoggedIn)%>
-					
+
 					- credit:
 					<%=Valuta.convert(account.getCredit(), userLoggedIn)%>
-					 
+					
+					- interest:
+					<%=account.getInterest()%>
+
 					<%
 						if (account.equals(userLoggedIn.getMainAccount()))
 								type = "MAIN";
 							else
 								type = "NORMAL";
 					%>
-					 - type: <%=type%>
+					- type:
+					<%=type%>
 					<br>
 
 					<%
@@ -145,53 +148,67 @@ table, th, td {
 				<h3 align="center" style="margin-top: 0;">Currency</h3>
 
 				<div class="inner" style="text-align: center;">
-					
-					
-					<form method="post" action="DS">
-					
-					Select preferred currency: 
-					
-					<select name="currency">
-					
-						<option value="DKK" > DKK </option>
-						<option value="EUR" > EUR </option>
-						<option value="USD" > USD </option>
-						<option value="GBP" > GBP </option>
-						<option value="JPY" > JPY </option>
-					
-					</select>
-					
-					<input type="submit" name="subject" value="Select currency" />
-					
-					</form>
-					
-					<br>
 
-					Current currency: <%=userLoggedIn.getCurrency().name()%>
+
+					<form method="post" action="DS">
+
+						Select preferred currency: <select name="currency">
+
+							<option value="DKK">DKK</option>
+							<option value="EUR">EUR</option>
+							<option value="USD">USD</option>
+							<option value="GBP">GBP</option>
+							<option value="JPY">JPY</option>
+
+						</select> <input type="submit" name="subject" value="Select currency" />
+
+					</form>
+
+					<br> Current currency:
+					<%=userLoggedIn.getCurrency().name()%>
 				</div>
 			</div>
 
-			<div id="payment" class="outer" style="height:300px; max-height: 260px;">
+			<div id="payment" class="outer"
+				style="height: 300px; max-height: 260px;">
 				<h3 align="center" style="margin-top: 0;">Payment</h3>
 
-				<div class="inner" style="display: inline-block; text-align: center; width: 100%; height: 220px; max-height: 220px;">
-					<form method="post" action="DS"  >
-						<input type="hidden" name="subject" value="transfermoney" /> 
-						
-						Send to: 
-						<input type="radio" name="receiverType" value="account" /> Account
-						<input type="radio" checked="checked" name="receiverType" value="user" /> User <br>
-						Receiver: <input type="text" name="receiver" /> <br> <br>
-						Message: <textarea name="message" style="height: 4em; width:90%;" maxlength="140"></textarea> <br> <br>
-						Amount <br>
-						<input type="text" name="beforedecimalseperator"
-							style="width: 10em" />. <input type="text"
-							name="afterdecimalseperator" style="width: 3em" /> <%=userLoggedIn.getCurrency().name()%> 
-						
-						<input
-							type="submit" value="Transfer Money"
+				<div class="inner"
+					style="display: inline-block; text-align: center; width: 100%; height: 220px; max-height: 220px;">
+					<form method="post" action="DS">
+						<input type="hidden" name="subject" value="transfermoney" />
+
+						Select account to send from: <select name="accountToSendFrom">
+							<%
+								for (Account account : userLoggedIn.getAccounts()) {
+
+									String accountID = "" + account.getAccountNumber();
+							%>
+							<option value=<%=accountID%>
+								<%if (account.equals(userLoggedIn.getMainAccount())) {%>
+								selected="selected" <%}%>>AccountID:
+								<%=accountID%>
+
+
+
+							</option>
+							<%
+								}
+							%>
+						</select> <br> Send to: <input type="radio" name="receiverType"
+							value="account" /> Account <input type="radio" checked="checked"
+							name="receiverType" value="user" /> User <br> Receiver: <input
+							type="text" name="receiver" /> <br> <br> Message:
+						<textarea name="message" style="height: 4em; width: 90%;"
+							maxlength="140"></textarea>
+						<br> <br> Amount <br> <input type="text"
+							name="beforedecimalseperator" style="width: 10em" />. <input
+							type="text" name="afterdecimalseperator" style="width: 3em" />
+						<%=userLoggedIn.getCurrency().name()%>
+
+						<input type="submit" value="Transfer Money"
 							onclick="return confirm('Do you wish to transfer?')" /> <br>
-							
+
 					</form>
 
 				</div>
@@ -200,49 +217,54 @@ table, th, td {
 			<div id="editAccounts" class="outer">
 				<h3 align="center" style="margin-top: 0;">Edit Account</h3>
 
-				
+
 				<form method="post" action="DS">
-				Select account to edit: 
-				<select name="accountSelected">
-					<%
-						for (Account account : userLoggedIn.getAccounts()) {
-						String accountID = "" + account.getAccountNumber();
-					%>
-					 <option value= <%=accountID%> > AccountID: <%=accountID%> </option>
-					<% } %>
-				</select>
-				
-						<input type="submit" name="subject" value="Set as main account"/> 
-						<br>
-						<input type="submit" name="subject" value="Delete account"	/>					
+					Select account to edit: <select name="accountSelected">
+						<%
+							for (Account account : userLoggedIn.getAccounts()) {
+								String accountID = "" + account.getAccountNumber();
+						%>
+						<option value=<%=accountID%>>AccountID:
+							<%=accountID%>
+						</option>
+						<%
+							}
+						%>
+					</select> <input type="submit" name="subject" value="Set as main account" />
+					<br> <input type="submit" name="subject"
+						value="Delete account" />
 				</form>
-				
+
 			</div>
 
 			<div id="TH" class="outer">
 				<h3 align="center" style="margin-top: 0;">Transaction History</h3>
 
 				<div class="inner">
-					
-					<table style="width:100%">
-					  <tr>
-					    <th>Date</th>
-					    <th>From (account)</th> 
-					    <th>To (account)</th>
-					    <th>Amount</th>
-					    <th>Message</th>
-					  </tr>
-					  
-					  <% for(int i = th.size()-1; i >= 0; i--) { %>
-					  	<tr>
-					    <td><%=th.get(i)[0]%></td>
-					    <td><%=th.get(i)[1]%></td> 
-					    <td><%=th.get(i)[2]%></td>
-					    <td><%=Valuta.convert(Double.parseDouble(th.get(i)[3]), userLoggedIn)%></td>
-					    <td><%=th.get(i)[4]%></td>
-					  	</tr>
-					  <%}%>
-					  
+
+					<table style="width: 100%">
+						<tr>
+							<th>Date</th>
+							<th>From (account)</th>
+							<th>To (account)</th>
+							<th>Amount</th>
+							<th>Message</th>
+						</tr>
+
+						<%
+							for (int i = th.size() - 1; i >= 0; i--) {
+						%>
+						<tr>
+							<td><%=th.get(i)[0]%></td>
+							<td><%=th.get(i)[1]%></td>
+							<td><%=th.get(i)[2]%></td>
+							<td><%=Valuta.convert(Double.parseDouble(th.get(i)[3]), userLoggedIn)%></td>
+							<td><%=th.get(i)[4]%></td>
+						</tr>
+						<%
+							}
+						%>
+
 					</table>
 
 				</div>
@@ -251,7 +273,8 @@ table, th, td {
 			<div id="menu" class="outer">
 				<h3 align="center" style="margin-top: 0;">Menu</h3>
 
-				<div class="inner" style="display: inline-block; text-align: center; width: 100%;">
+				<div class="inner"
+					style="display: inline-block; text-align: center; width: 100%;">
 					<form method="post" action="DS">
 						<input type="hidden" name="subject" value="DeleteUser" /> <input
 							type="submit" value="Delete user"

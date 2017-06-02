@@ -270,7 +270,7 @@ public class DatabaseProtocol {
 
 			while (rs.next()) {
 				Account newAccount = new Account(customer, rs.getString("ID"), rs.getDouble("BALANCE"),
-						rs.getDouble("CREDIT"), rs.getString("TYPE"));
+						rs.getDouble("CREDIT"), rs.getString("TYPE"), rs.getDouble("INTEREST"));
 				if (rs.getString("TYPE").trim().equals("MAIN")) {
 					customer.setMainAccount(newAccount);
 				}
@@ -401,7 +401,7 @@ public class DatabaseProtocol {
 			if (rs.next()) {
 				Customer customer = getCustomer(rs.getString("USERNAME"));
 				Account account = new Account(customer, accountNumber, rs.getDouble("BALANCE"), rs.getDouble("CREDIT"),
-						rs.getString("TYPE"));
+						rs.getString("TYPE"), rs.getDouble("INTEREST"));
 				closeConnection();
 				return account;
 			} else {
@@ -418,6 +418,38 @@ public class DatabaseProtocol {
 
 	}
 
+	public List<Account> getAllAccounts() {
+		startConnection();
+		List<Account> allAccounts = new ArrayList<Account>();
+
+		try {
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS");
+
+			if (!rs.next()) {
+				return null;
+			}
+
+			while (rs.next()) {
+				Customer customer = getCustomer(rs.getString("USERNAME"));
+				Account account = new Account(customer, rs.getString("ID"), rs.getDouble("BALANCE"),
+						rs.getDouble("CREDIT"), rs.getString("TYPE"), rs.getDouble("INTEREST"));
+
+				allAccounts.add(account);
+			}
+			closeConnection();
+
+		} catch (
+
+		SQLException e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+
+		closeConnection();
+		return allAccounts;
+
+	}
+
 	public ArrayList<Account> getAccountsByUser(String username) {
 		startConnection();
 
@@ -427,8 +459,8 @@ public class DatabaseProtocol {
 			Customer customer = getCustomer(username);
 			while (rs.next()) {
 
-				Account account = new Account(customer, rs.getString("ID"), rs.getDouble("BALANCE"), rs.getDouble("CREDIT"),
-						rs.getString("TYPE"));
+				Account account = new Account(customer, rs.getString("ID"), rs.getDouble("BALANCE"),
+						rs.getDouble("CREDIT"), rs.getString("TYPE"), rs.getDouble("INTEREST"));
 				accounts.add(account);
 			}
 			closeConnection();
