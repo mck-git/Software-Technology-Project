@@ -2,6 +2,7 @@
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dtu.robboss.app.Customer"%>
 <%@ page import="dtu.robboss.app.Account"%>
+<%@ page import="dtu.robboss.app.Valuta" %>
 <%@ page import="java.util.ArrayList"%>
 
 <html>
@@ -68,6 +69,7 @@ table, th, td {
 }
 
 #menu {
+	clear: right;
 	float: right;
 }
 
@@ -83,7 +85,6 @@ table, th, td {
 <%
 	Customer userLoggedIn = (Customer) session.getAttribute("USER");
 	ArrayList<String[]> th = (ArrayList<String[]>) session.getAttribute("TRANSACTIONHISTORY");
-	final double DKK = 1, USD = 0.15, EUR = 0.13, GBP = 0.12, JPY = 16.81;
 	
 %>
 
@@ -96,7 +97,7 @@ table, th, td {
 		<div id="header">
 			<h1>
 				Welcome
-				<%=userLoggedIn.getUsername()%>
+				<%=userLoggedIn.getFullname()%>
 			</h1>
 		</div>
 
@@ -118,10 +119,10 @@ table, th, td {
 					<%=account.getAccountNumber()%>
 					
 					- balance:
-					<%=account.getBalance()%>
+					<%=Valuta.convert(account.getBalance(), userLoggedIn)%>
 					
 					- credit:
-					<%=account.getCredit()%>
+					<%=Valuta.convert(account.getCredit(), userLoggedIn)%>
 					 
 					<%
 						if (account.equals(userLoggedIn.getMainAccount()))
@@ -143,7 +144,7 @@ table, th, td {
 			<div id="currency" class="outer">
 				<h3 align="center" style="margin-top: 0;">Currency</h3>
 
-				<div class="inner">
+				<div class="inner" style="text-align: center;">
 					
 					
 					<form method="post" action="DS">
@@ -153,7 +154,7 @@ table, th, td {
 					<select name="currency">
 					
 						<option value="DKK" > DKK </option>
-						<option value="EURO" > EUR </option>
+						<option value="EUR" > EUR </option>
 						<option value="USD" > USD </option>
 						<option value="GBP" > GBP </option>
 						<option value="JPY" > JPY </option>
@@ -166,7 +167,7 @@ table, th, td {
 					
 					<br>
 
-					Current relative currency: <%=userLoggedIn.getCurrency()%>
+					Current currency: <%=userLoggedIn.getCurrency().name()%>
 				</div>
 			</div>
 
@@ -185,7 +186,7 @@ table, th, td {
 						Amount <br>
 						<input type="text" name="beforedecimalseperator"
 							style="width: 10em" />. <input type="text"
-							name="afterdecimalseperator" style="width: 3em" /> Kr. 
+							name="afterdecimalseperator" style="width: 3em" /> <%=userLoggedIn.getCurrency().name()%> 
 						
 						<input
 							type="submit" value="Transfer Money"
@@ -211,7 +212,8 @@ table, th, td {
 					<% } %>
 				</select>
 				
-						<input type="submit" name="subject" value="Set as main account"/>
+						<input type="submit" name="subject" value="Set as main account"/> 
+						<br>
 						<input type="submit" name="subject" value="Delete account"	/>					
 				</form>
 				
@@ -236,7 +238,7 @@ table, th, td {
 					    <td><%=th.get(i)[0]%></td>
 					    <td><%=th.get(i)[1]%></td> 
 					    <td><%=th.get(i)[2]%></td>
-					    <td><%=th.get(i)[3]%></td>
+					    <td><%=Valuta.convert(Double.parseDouble(th.get(i)[3]), userLoggedIn)%></td>
 					    <td><%=th.get(i)[4]%></td>
 					  	</tr>
 					  <%}%>
@@ -257,13 +259,13 @@ table, th, td {
 					</form>
 
 					<form method="post" action="DS">
-						<input type="hidden" name="subject" value="LogOutUser" "/> <input
+						<input type="hidden" name="subject" value="LogOutUser" /> <input
 							type="submit" value="Log out user"
 							onclick="return confirm('Do you wish to log out?')" />
 					</form>
 
 					<form method="post" action="DS">
-						<input type="hidden" name="subject" value="NewAccount" "/> <input
+						<input type="hidden" name="subject" value="NewAccount" /> <input
 							type="submit" value="Add new account"
 							onclick="return confirm('Do you wish to create new account?')" />
 					</form>

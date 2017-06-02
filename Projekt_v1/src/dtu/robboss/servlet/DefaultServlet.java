@@ -26,6 +26,7 @@ import dtu.robboss.app.UnknownLoginException;
 import dtu.robboss.app.User;
 import dtu.robboss.app.UserNotLoggedInException;
 import dtu.robboss.app.UserNotfoundException;
+import dtu.robboss.app.Valuta;
 
 /**
  * Servlet implementation class DefaultServlet
@@ -38,7 +39,6 @@ public class DefaultServlet extends HttpServlet {
 	// IBM: jdbc/exampleDS
 	private DataSource dataSource;
 	private BankApplication app;
-	private final double DKK = 1, USD = 0.15, EUR = 0.13, GBP = 0.12, JPY = 16.81;
 
 	@Override
 	public void init() {
@@ -72,23 +72,23 @@ public class DefaultServlet extends HttpServlet {
 				// Sets password and currency
 				String password = request.getParameter("password");
 				String currencyString = request.getParameter("currency");
-
-				double currency;
+				
+				Valuta currency;
 				switch (currencyString) {
 				case "EUR":
-					currency = EUR;
+					currency = Valuta.EUR;
 					break;
 				case "USD":
-					currency = USD;
+					currency = Valuta.USD;
 					break;
 				case "GBP":
-					currency = GBP;
+					currency = Valuta.GBP;
 					break;
 				case "JPY":
-					currency = JPY;
+					currency = Valuta.JPY;
 					break;
 				default:
-					currency = DKK;
+					currency = Valuta.DKK;
 				}
 				
 				// Creates customer object and sets subject to login
@@ -150,19 +150,39 @@ public class DefaultServlet extends HttpServlet {
 		
 		if(subject.equals("Select currency")){
 			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
-			String currency = request.getParameter("currency");
-			app.setCurrency(loggedInCustomer, currency);
+			String currencyString = request.getParameter("currency");
 			
+			Valuta currency;
+			switch (currencyString) {
+			case "EUR":
+				currency = Valuta.EUR;
+				break;
+			case "USD":
+				currency = Valuta.USD;
+				break;
+			case "GBP":
+				currency = Valuta.GBP;
+				break;
+			case "JPY":
+				currency = Valuta.JPY;
+				break;
+			default:
+				currency = Valuta.DKK;
+			}
+			
+			app.setCurrency(loggedInCustomer, currency);
+			System.out.println(loggedInCustomer.getCurrency().name());
 			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 			rd.forward(request, response);
 		}
 		
 		if (subject.equals("transfermoney")) {
-
+			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
 			String beforedecimalseperator = "0" + request.getParameter("beforedecimalseperator");
 			String afterdecimalseperator = request.getParameter("afterdecimalseperator") + "00";
 			String transferAmount = beforedecimalseperator + "." + afterdecimalseperator.substring(0, 2);
-
+			double amount = Valuta.revert(Double.parseDouble(transferAmount), loggedInCustomer);
+			
 			HttpSession session = request.getSession();
 			String recieverType = request.getParameter("receiverType");
 			String message = request.getParameter("message");
@@ -170,10 +190,10 @@ public class DefaultServlet extends HttpServlet {
 
 			try {
 				if (recieverType.equals("account")) {
-					app.transferFromAccountToAccount(sourceAccount, request.getParameter("receiver"), transferAmount,
+					app.transferFromAccountToAccount(sourceAccount, request.getParameter("receiver"), amount,
 							message);
 				} else if (recieverType.equals("user")) {
-					app.transferFromAccountToCustomer(sourceAccount, request.getParameter("receiver"), transferAmount,
+					app.transferFromAccountToCustomer(sourceAccount, request.getParameter("receiver"), amount,
 							message);
 				}
 
@@ -181,13 +201,14 @@ public class DefaultServlet extends HttpServlet {
 				List<String[]> th = app.getTransactionHistory((Customer) session.getAttribute("USER"));
 				session.setAttribute("TRANSACTIONHISTORY", th);
 
-				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
-				rd.forward(request, response);
 			} catch (UserNotLoggedInException | TransferException | AccountNotfoundException
 					| UserNotfoundException e) {
 				System.out.println("Error in DefaultServlet::doPost -> transfermoney");
 				e.printStackTrace();
 			}
+			
+			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+			rd.forward(request, response);
 
 		}
 
@@ -289,7 +310,25 @@ public class DefaultServlet extends HttpServlet {
 				String fullname = request.getParameter("fullname");
 				String username = request.getParameter("username");
 				String password = request.getParameter("password");
-				double currency = Double.parseDouble(request.getParameter("currency"));
+				String currencyString = request.getParameter("currency");
+				
+				Valuta currency;
+				switch (currencyString) {
+				case "EUR":
+					currency = Valuta.EUR;
+					break;
+				case "USD":
+					currency = Valuta.USD;
+					break;
+				case "GBP":
+					currency = Valuta.GBP;
+					break;
+				case "JPY":
+					currency = Valuta.JPY;
+					break;
+				default:
+					currency = Valuta.DKK;
+				}
 
 				try {
 					app.createCustomer(fullname, username, password, currency);

@@ -60,9 +60,11 @@ public class BankApplication {
 	// USER MANAGEMENT //
 	/////////////////////
 
-	public void setCurrency(Customer customer, String currency){
+	public void setCurrency(Customer customer, Valuta currency){
 		
-		if(currency.equals("DKK") || currency.equals("EUR") || currency.equals("USD") || currency.equals("GBP") || currency.equals("JPY"))
+		customer.setCurrency(currency);
+		
+		if(currency.name().equals("DKK") || currency.name().equals("EUR") || currency.name().equals("USD") || currency.name().equals("GBP") || currency.name().equals("JPY"))
 			database.setCurrency(customer, currency);
 		
 	}
@@ -78,7 +80,7 @@ public class BankApplication {
 		return -1;
 	}
 
-	public void createCustomer(String fullname, String username, String password, double currency) throws AlreadyExistsException {
+	public void createCustomer(String fullname, String username, String password, Valuta currency) throws AlreadyExistsException {
 		Customer newCustomer = new Customer(fullname, username, password, currency);
 		newCustomer.setCurrency(currency);
 		
@@ -184,7 +186,7 @@ public class BankApplication {
 		customer.setMainAccount(newMain);
 	}
 	
-	public void transferFromAccountToCustomer(Account sourceAccount, String targetUsername, String transferAmount, String message) throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
+	public void transferFromAccountToCustomer(Account sourceAccount, String targetUsername, double transferAmount, String message) throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
 		Customer targetCustomer = getCustomer(targetUsername);
 		transferFromAccountToAccount(sourceAccount, targetCustomer.getMainAccount().getAccountNumber(), transferAmount, message);
 	}	
@@ -197,22 +199,22 @@ public class BankApplication {
 	 * @throws TransferException
 	 * @throws AccountNotfoundException
 	 */
-	public void transferFromAccountToAccount(Account sourceAccount, String targetAccountID, String transferAmount, String message) throws UserNotLoggedInException, TransferException, AccountNotfoundException {
+	public void transferFromAccountToAccount(Account sourceAccount, String targetAccountID, double transferAmount, String message) throws UserNotLoggedInException, TransferException, AccountNotfoundException {
 		if (userLoggedIn != sourceAccount.getCustomer()) {
 			throw new UserNotLoggedInException();
 		}
 		
-		double amount = Double.parseDouble(transferAmount);
 		
-		if(sourceAccount.getBalance() + sourceAccount.getCredit() < amount || amount <= 0 || sourceAccount.getAccountNumber().equals(targetAccountID))
+		
+		if(sourceAccount.getBalance() + sourceAccount.getCredit() < transferAmount || transferAmount <= 0 || sourceAccount.getAccountNumber().equals(targetAccountID))
 			throw new TransferException();
 		
 		Account targetAccount = database.getAccount(targetAccountID);
 		if(targetAccount == null) 
 			throw new AccountNotfoundException();
 		
-		database.transferFromAccountToAccount(sourceAccount, targetAccount, amount);
-		addTransactionToTH(sourceAccount, targetAccountID, amount, message);
+		database.transferFromAccountToAccount(sourceAccount, targetAccount, transferAmount);
+		addTransactionToTH(sourceAccount, targetAccountID, transferAmount, message);
 		
 	}	
 	
