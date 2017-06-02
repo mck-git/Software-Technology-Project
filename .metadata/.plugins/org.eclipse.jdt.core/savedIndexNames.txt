@@ -1,1 +1,0 @@
-INDEX VERSION 1.129+/Users/Roar/Documents/workspaceFagprojekt/.metadata/.plugins/org.eclipse.jdt.core
