@@ -1,10 +1,7 @@
-package dtu.robboss.app;
+package dtu.robboss.exceptions;
 
 public class AlreadyExistsException extends Exception {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private String object;
 

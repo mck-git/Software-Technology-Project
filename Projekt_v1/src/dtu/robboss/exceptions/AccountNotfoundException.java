@@ -1,10 +1,6 @@
-package dtu.robboss.app;
+package dtu.robboss.exceptions;
 
 public class AccountNotfoundException extends Exception {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	@Override

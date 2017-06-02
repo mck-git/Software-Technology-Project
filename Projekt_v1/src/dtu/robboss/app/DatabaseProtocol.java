@@ -11,6 +11,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import dtu.robboss.exceptions.AlreadyExistsException;
+
 public class DatabaseProtocol {
 	private DataSource dataSource;
 	private Connection con = null;
@@ -366,7 +368,7 @@ public class DatabaseProtocol {
 	public Customer getCustomer(String username) {
 		startConnection();
 		try {
-			// TODO: OLD: USERS -> CUSTOMER
+			// TODO: OLD: USERS -> CUSTOMERS
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.CUSTOMERS WHERE USERNAME = '" + username + "'");
 			if (rs.next()) {
 
@@ -397,7 +399,6 @@ public class DatabaseProtocol {
 				return null;
 			}
 		} catch (SQLException e) {
-			closeConnection();
 			e.printStackTrace();
 		}
 
@@ -425,7 +426,6 @@ public class DatabaseProtocol {
 				return null;
 			}
 		} catch (SQLException e) {
-			closeConnection();
 			e.printStackTrace();
 		}
 

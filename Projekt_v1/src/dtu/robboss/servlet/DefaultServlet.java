@@ -16,17 +16,18 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import dtu.robboss.app.Account;
-import dtu.robboss.app.AccountNotfoundException;
 import dtu.robboss.app.Admin;
-import dtu.robboss.app.AlreadyExistsException;
 import dtu.robboss.app.BankApplication;
 import dtu.robboss.app.Customer;
-import dtu.robboss.app.TransferException;
-import dtu.robboss.app.UnknownLoginException;
 import dtu.robboss.app.User;
-import dtu.robboss.app.UserNotLoggedInException;
-import dtu.robboss.app.UserNotfoundException;
 import dtu.robboss.app.Valuta;
+import dtu.robboss.exceptions.AccountNotfoundException;
+import dtu.robboss.exceptions.AlreadyExistsException;
+import dtu.robboss.exceptions.InvalidUsernameException;
+import dtu.robboss.exceptions.TransferException;
+import dtu.robboss.exceptions.UnknownLoginException;
+import dtu.robboss.exceptions.UserNotLoggedInException;
+import dtu.robboss.exceptions.UserNotfoundException;
 
 /**
  * Servlet implementation class DefaultServlet
@@ -97,6 +98,7 @@ public class DefaultServlet extends HttpServlet {
 
 			} catch (InvalidUsernameException e) {
 				System.out.println(e.getMessage());
+				response.sendRedirect("login.html");
 			} catch (AlreadyExistsException e) {
 				System.out.println("User already exist");
 				response.sendRedirect("login.html");
@@ -115,7 +117,7 @@ public class DefaultServlet extends HttpServlet {
 				HttpSession session = request.getSession();
 
 				User userLoggedIn = app.login(username, password);
-
+				
 				// Checks if user logged in is a customer
 				if (userLoggedIn instanceof Customer) {
 					Customer customerLoggedIn = (Customer) userLoggedIn;
@@ -126,11 +128,11 @@ public class DefaultServlet extends HttpServlet {
 					List<String[]> th = app.getTransactionHistory(customerLoggedIn);
 					session.setAttribute("TRANSACTIONHISTORY", th);
 					
-					System.out.println(session.getAttribute("TRANSACTIONHISTORY"));
+//					System.out.println(session.getAttribute("TRANSACTIONHISTORY"));
 					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 					rd.forward(request, response);
 				}
-
+				
 				// Checks if user logged in is an admin
 				if (userLoggedIn instanceof Admin) {
 					Admin adminLoggedIn = (Admin) userLoggedIn;
@@ -171,7 +173,7 @@ public class DefaultServlet extends HttpServlet {
 			}
 			
 			app.setCurrency(loggedInCustomer, currency);
-			System.out.println(loggedInCustomer.getCurrency().name());
+//			System.out.println(loggedInCustomer.getCurrency().name());
 			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 			rd.forward(request, response);
 		}
@@ -180,7 +182,7 @@ public class DefaultServlet extends HttpServlet {
 			
 			
 			String accountIDFrom = request.getParameter("accountToSendFrom");
-			System.out.println("AccountIDFrom = " + accountIDFrom);
+//			System.out.println("AccountIDFrom = " + accountIDFrom);
 			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
 			String beforedecimalseperator = "0" + request.getParameter("beforedecimalseperator");
 			String afterdecimalseperator = request.getParameter("afterdecimalseperator") + "00";
@@ -193,7 +195,7 @@ public class DefaultServlet extends HttpServlet {
 //			Account sourceAccount = ((Customer) session.getAttribute("USER")).getMainAccount();
 			Account sourceAccount = app.getAccount(accountIDFrom);
 			
-			System.out.println("sourceAccount Customer = " + sourceAccount.getCustomer().getUsername());
+//			System.out.println("sourceAccount Customer = " + sourceAccount.getCustomer().getUsername());
 			
 			try {
 				if (recieverType.equals("account")) {
@@ -260,7 +262,7 @@ public class DefaultServlet extends HttpServlet {
 			Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
 			
 			String accountID = request.getParameter("accountSelected");
-			System.out.println("Setting " + accountID + " as MAIN"); 
+//			System.out.println("Setting " + accountID + " as MAIN"); 
 			Account newMain = loggedInCustomer.getAccountByID(accountID);
 			
 			app.setNewMainAccount(loggedInCustomer, newMain);
