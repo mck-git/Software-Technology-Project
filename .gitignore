@@ -1,4 +1,7 @@
-/bin/
-/.classpath/
+.metadata
 /.apt_generated/
-/build/
+
+*/bin
+*/build
+*/.classpath
+*/.settings 
