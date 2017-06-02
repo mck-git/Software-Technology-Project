@@ -69,6 +69,7 @@ table, th, td {
 }
 
 #menu {
+	clear: right;
 	float: right;
 }
 
@@ -258,13 +259,13 @@ table, th, td {
 					</form>
 
 					<form method="post" action="DS">
-						<input type="hidden" name="subject" value="LogOutUser" "/> <input
+						<input type="hidden" name="subject" value="LogOutUser" /> <input
 							type="submit" value="Log out user"
 							onclick="return confirm('Do you wish to log out?')" />
 					</form>
 
 					<form method="post" action="DS">
-						<input type="hidden" name="subject" value="NewAccount" "/> <input
+						<input type="hidden" name="subject" value="NewAccount" /> <input
 							type="submit" value="Add new account"
 							onclick="return confirm('Do you wish to create new account?')" />
 					</form>
