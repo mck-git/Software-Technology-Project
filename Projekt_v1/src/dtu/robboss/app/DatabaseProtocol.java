@@ -671,7 +671,7 @@ public class DatabaseProtocol {
 
 	private void startConnection() {
 		try {
-			con = dataSource.getConnection();
+			con = dataSource.getConnection("DTU02", "FAGP2017");
 			stmt = con.createStatement();
 		} catch (SQLException e) {
 			e.printStackTrace();

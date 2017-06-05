@@ -35,7 +35,7 @@ import dtu.robboss.exceptions.UserNotfoundException;
 @WebServlet(description = "default servlet", urlPatterns = { "/DS" })
 public class DefaultServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	@Resource(name = "jdbc/DB2") 
+	@Resource(name = "jdbc/exampleDS") 
 	// local: jdbc/DB2
 	// IBM: jdbc/exampleDS
 	private DataSource dataSource;
