@@ -424,6 +424,8 @@ public class DefaultServlet extends HttpServlet {
 			try {
 				double interest = Double.parseDouble(request.getParameter("interest"));
 				
+				
+				
 				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 				rd.forward(request, response);
 				
