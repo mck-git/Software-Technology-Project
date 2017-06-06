@@ -104,8 +104,8 @@ public class Account {
 		String balance = Valuta.convert(this.balance, this.customer);
 		String credit = Valuta.convert(this.credit, this.customer);
 
-		String s = "ID: " + this.accountNumber + ", balance: " + balance + ", credit: " + credit
-				+ ", interest: " + this.interest + ", type: " + this.type;
+		String s = "ID: " + this.accountNumber + "\t\t balance: " + balance + "\t\t credit: " + credit
+				+ "\n interest: " + this.interest + "\t\t type: " + this.type + "\n";
 
 		return s;
 	}

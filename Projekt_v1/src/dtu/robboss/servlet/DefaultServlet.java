@@ -381,11 +381,48 @@ public class DefaultServlet extends HttpServlet {
 			}
 		}
 		
-		if (subject.equals("PerformBatch")) {
+		if (subject.equals("Perform Batch")) {
 			
 			try {
 				app.applyInterestToAllAccounts();
 				app.storeOldTransactionsInArchive();
+				
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (subject.equals("Apply Interest")) {
+			
+			try {
+				app.applyInterestToAllAccounts();
+				
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if (subject.equals("Archive Old Transactions")) {
+			
+			try {
+				app.storeOldTransactionsInArchive();
+				
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if (subject.equals("Set Interest")) {
+			
+			try {
+				double interest = Double.parseDouble(request.getParameter("interest"));
 				
 				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 				rd.forward(request, response);

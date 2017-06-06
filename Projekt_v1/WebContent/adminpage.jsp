@@ -1,5 +1,6 @@
 <!DOCTYPE HTML><%@page language="java"
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="dtu.robboss.app.Valuta"%>
 <%@ page import="dtu.robboss.app.Account"%>
 <%@ page import="dtu.robboss.app.Admin"%>
 <%@ page import="java.util.ArrayList"%>
@@ -27,6 +28,8 @@
 	width: 100%;
 	background: rgba(240, 230, 255, 0.9);
 	border-radius: 2px;
+	max-height: 160px;
+	overflow: scroll;
 }
 
 .outer {
@@ -39,11 +42,15 @@
 	overflow: hidden;
 }
 
+table, th, td {
+	border: 1px solid black;
+}
+
 #news {
 	float: left;
 }
 
-#messages {
+#batch {
 	float: right;
 }
 
@@ -60,7 +67,9 @@
 }
 
 #accounts {
-	float: right;
+	clear: both;
+	float: center;
+	overflow: scroll;
 }
 
 #modifyUser {
@@ -108,7 +117,7 @@
 				</div>
 			</div>
 
-			<div id="news" class="outer">
+			<div id="batch" class="outer">
 				<h3 align="center" style="margin-top: 0;">Batch jobs</h3>
 
 				<div class="inner">
@@ -117,8 +126,15 @@
 					2 - Move old transactions to archive table <br>
 
 					<form method="post" action = "DS" align ="center">
-							<input type="hidden" name="subject" value="PerformBatch">
-							<input type="submit" value ="Perform Batch" />
+							<input type="submit" name="subject" value ="Apply Interest" />
+					</form>
+					
+					<form method="post" action = "DS" align ="center">
+							<input type="submit" name="subject" value ="Archive Old Transactions" />
+					</form>
+
+					<form method="post" action = "DS" align ="center">
+							<input type="submit" name="subject" value ="Perform Batch" />
 					</form>
 
 				</div>
@@ -137,7 +153,7 @@
 
 					<form method="post" action="DS" align="center">
 						<input type="hidden" name="subject" value="LogOutUser" "/> <input
-							type="submit" value="Log out user"
+							type="submit" value="Log out admin"
 							onclick="return confirm('Do you wish to log out?')" />
 					</form>
 
@@ -179,41 +195,38 @@
 			</div>
 
 
-			<div id="accounts" class="outer">
+			<div id="accounts" class="outer", style="width: 80%;">
 				<h3 align="center" style="margin-top: 0;">Accounts</h3>
 
 				<div class="inner">
-					<%
-						String type;
-					%>
-					<%
+					
+					<table style="width: 100%">
+						<tr>
+							<th>Customer</th>
+							<th>ID</th>
+							<th>Balance</th>
+							<th>Credit</th>
+							<th>Type</th>
+							<th>Interest</th>
+						</tr>
+
+						<%
 						for (Account account : accountsFound) {
-					%>
-
-					AccountID:
-					<%=account.getAccountNumber()%>
-
-					- balance:
-					<%=account.getBalance()%>
-
-					- credit:
-					<%=account.getCredit()%>
-
-					<%
-						if (account.getType().equals("MAIN"))
-								type = "MAIN";
-							else
-								type = "NORMAL";
-					%>
-					- type:
-					<%=type%>
-					<br>
-
-					<%
-						}
-					%>
-
-					<%=(accountsFound.size() == 0 ? "No accounts" : "")%>
+						%>
+						<tr>
+							<td><%=account.getCustomer().getUsername()%></td>
+							<td><%=account.getAccountNumber()%></td>
+							<td><%=Valuta.convert(account.getBalance(), account.getCustomer())%></td>
+							<td><%=Valuta.convert(account.getCredit(), account.getCustomer())%></td>
+							<td><%=account.getType()%></td>
+							<td><%=account.getInterest()%></td>
+						</tr>
+						<%
+							}
+						%>
+						<%=(accountsFound.size() == 0 ? "No accounts" : "")%>
+					</table>
+					
 
 				</div>
 			</div>
@@ -226,6 +239,31 @@
 						<input type="hidden" name="subject" value="modifyUserAdmin" />
 						User name: <input type="text" name="username" /> <br> <input
 							type="submit" value="Modify User">
+					</form>
+				</div>
+
+			</div>
+			
+			<div id="modifyAccount" class="outer">
+				<h3 align="center" style="margin-top: 0;">Modify Account</h3>
+				<div class="inner">
+					<form method="post" action="DS" align="center">
+						Select Account: <select name="accountSelected"/>
+						<%
+							for (Account account : accountsFound) {
+								String accountID = "" + account.getAccountNumber();
+						%>
+						<option value=<%=accountID%>>AccountID: <%=accountID%> </option>
+						<%
+							}
+						%>
+					</select> 
+					<br/>
+						Modify Interest: <input type="text" name="interest"/>
+										<input type="submit" name="subject" value="Set Interest" />
+										<br/>
+						Modify Credit: <input type="text" name="credit"/>
+										<input type="submit" name="subject" value="Set Credit" />
 					</form>
 				</div>
 
