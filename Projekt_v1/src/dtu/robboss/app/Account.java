@@ -95,4 +95,15 @@ public class Account {
 		// TODO: If not?
 	}
 
+	public String toString() {
+		
+		String balance = Valuta.convert(this.balance, this.customer);
+		String credit = Valuta.convert(this.credit, this.customer);
+
+		String s = "ID: " + this.accountNumber + ", balance: " + balance + ", credit: " + credit
+				+ ", interest: " + this.interest + ", type: " + this.type;
+
+		return s;
+	}
+
 }
