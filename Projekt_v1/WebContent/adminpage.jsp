@@ -39,29 +39,33 @@
 	overflow: hidden;
 }
 
-#accounts {
+#news {
 	float: left;
-}
-
-#currency {
-	float: right;
 }
 
 #messages {
-	float: left;
-}
-
-#payment {
 	float: right;
-}
-
-#news {
-	clear: left;
-	float: left;
 }
 
 #menu {
+	float: left;
+}
+
+#accountLookUp {
 	float: right;
+}
+
+#createUser {
+	float: left;
+}
+
+#accounts {
+	float: right;
+}
+
+#modifyUser {
+	clear: both;
+	float: left;
 }
 
 #footer {
@@ -93,11 +97,13 @@
 
 		<!-- CONTENT AREA -->
 		<div id="content_area">
-			<div id="messages" class="outer">
-				<h3 align="center" style="margin-top: 0;">Messages</h3>
+
+
+			<div id="news" class="outer">
+				<h3 align="center" style="margin-top: 0;">News</h3>
 
 				<div class="inner">
-					message <br>
+					news <br>
 
 				</div>
 			</div>
@@ -138,7 +144,6 @@
 				</div>
 			</div>
 
-
 			<div id="accountLookUp" class="outer">
 				<h3 align="center" style="margin-top: 0;">Account look-up</h3>
 
@@ -155,6 +160,24 @@
 
 				</div>
 			</div>
+
+			<div id="createUser" class="outer">
+				<h3 align="center" style="margin-top: 0;">Create user</h3>
+				<div class="inner">
+					<form method="post" action="DS" align="center">
+						<input type="hidden" name="subject" value="CreateNewUserAdmin" />
+						User type: <input type="radio" name="userType" value="customer" />
+						Customer <input type="radio" checked="checked" name="userType"
+							value="admin" /> Admin <br> Full name: <input type="text"
+							name="fullname" /> <br> User name: <input type="text"
+							name="username" /> <br> Password: <input type="text"
+							name="password" /> <br> CPR: <input type="text" name="cpr" />
+						<br> <input type="submit" value="Create User">
+					</form>
+				</div>
+
+			</div>
+
 
 			<div id="accounts" class="outer">
 				<h3 align="center" style="margin-top: 0;">Accounts</h3>
@@ -195,25 +218,22 @@
 				</div>
 			</div>
 
-			<div id="createUser" class="outer">
-			<h3 align="center" style="margin-top: 0;">Create user</h3>
+
+			<div id="modifyUser" class="outer">
+				<h3 align="center" style="margin-top: 0;">Modify user</h3>
 				<div class="inner">
 					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="CreateNewUserAdmin" />
-						User type: <input type="radio" name="userType" value="customer" />
-						Customer <input type="radio" checked="checked" name="userType"
-							value="admin" /> Admin <br> Full name: <input type="text"
-							name="fullname" /> <br> User name: <input type="text"
-							name="username" /> <br> Password: <input type="text"
-							name="password" /> <br> CPR: <input type="text" name="cpr" />
-						<br> <input type="submit" value="Create User">
+						<input type="hidden" name="subject" value="modifyUserAdmin" />
+						User name: <input type="text" name="username" /> <br> <input
+							type="submit" value="Modify User">
 					</form>
 				</div>
 
 			</div>
 
+			<!--  
 			<div id="deleteUser" class="outer">
-			<h3 align="center" style="margin-top: 0;">Delete user</h3>
+				<h3 align="center" style="margin-top: 0;">Delete user</h3>
 				<div class="inner">
 					<form method="post" action="DS" align="center">
 						<input type="hidden" name="subject" value="DeleteUserAdmin" />
@@ -223,7 +243,7 @@
 				</div>
 
 			</div>
-
+-->
 
 
 		</div>
@@ -238,4 +258,4 @@
 	</div>
 
 </body>
-</html>
+</html>
