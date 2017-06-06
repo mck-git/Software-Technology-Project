@@ -3,6 +3,7 @@
 <%@ page import="dtu.robboss.app.Customer"%>
 <%@ page import="dtu.robboss.app.Account"%>
 <%@ page import="dtu.robboss.app.Valuta"%>
+<%@ page import="dtu.robboss.app.TransactionHistoryElement"%>
 <%@ page import="java.util.ArrayList"%>
 
 <html>
@@ -83,8 +84,18 @@ table, th, td {
 
 <!-- Get current logged in user -->
 <%
+	//Delete cache from browser
+	response.setHeader("Cache-Control","no-cache");
+	response.setHeader("Cache-Control","no-store");
+	response.setHeader("Pragma","no-cache");
+	response.setDateHeader ("Expires", 0);
+
+	//If USER is null, redirect to login page.
+	if(session.getAttribute("USER") == null)
+		response.sendRedirect("login.html");
+
 	Customer userLoggedIn = (Customer) session.getAttribute("USER");
-	ArrayList<String[]> th = (ArrayList<String[]>) session.getAttribute("TRANSACTIONHISTORY");
+	ArrayList<TransactionHistoryElement> th = (ArrayList<TransactionHistoryElement>) session.getAttribute("TRANSACTIONHISTORY");
 %>
 
 </head>
@@ -198,7 +209,7 @@ table, th, td {
 						</select> <br> Send to: <input type="radio" name="receiverType"
 							value="account" /> Account <input type="radio" checked="checked"
 							name="receiverType" value="user" /> User <br> Receiver: <input
-							type="text" name="receiver" /> <br> <br> Message:
+							type="text" name="receiver" maxlength="20" /> <br> <br> Message:
 						<textarea name="message" style="height: 3em; width: 90%;"
 							maxlength="140"></textarea>
 						<br> <br> Amount <br> <input type="text"
@@ -257,17 +268,17 @@ table, th, td {
 							for (int i = th.size() - 1; i >= 0; i--) {
 						%>
 						<tr>
-							<td><%=th.get(i)[0]%></td>
-							<td><%=th.get(i)[3]%>/<%=th.get(i)[1]%></td>
-							<td><%=th.get(i)[4]%>/<%=th.get(i)[2]%></td>
-							<td><%=Valuta.convert(Double.parseDouble(th.get(i)[7]), userLoggedIn)%></td>
+							<td><%=th.get(i).getDate()%></td>
+							<td><%=th.get(i).getFromUserName()%>/<%=th.get(i).getFromAccountID()%></td>
+							<td><%=th.get(i).getToUserName()%>/<%=th.get(i).getToAccountID()%></td>
+							<td><%=Valuta.convert(th.get(i).getAmount(), userLoggedIn)%></td>
 							
-							<% if(userLoggedIn.getUsername().equals(th.get(i)[3])){ %> 
-							<td> <%=Valuta.convert(Double.parseDouble(th.get(i)[5]), userLoggedIn)%> </td> 
+							<% if(userLoggedIn.getUsername().equals(th.get(i).getFromUserName())){ %> 
+							<td> <%=Valuta.convert(th.get(i).getFromBalance(), userLoggedIn)%> </td> 
 							<% }else{ %> 
-							<td> <%=Valuta.convert(Double.parseDouble(th.get(i)[6]), userLoggedIn)%> </td> <%}; %>
+							<td> <%=Valuta.convert(th.get(i).getToBalance(), userLoggedIn)%> </td> <%}; %>
 							
-							<td><%=th.get(i)[8]%></td>
+							<td><%=th.get(i).getMessage()%></td>
 						</tr>
 						<%
 							}

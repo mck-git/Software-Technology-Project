@@ -120,12 +120,17 @@ public void storeOldTransactionsInArchive() {
 				
 				if ( cal.before(limit) ) {
 					String dateString = rs.getString("DATE");
-					int from = rs.getInt("FROM");
-					int to = rs.getInt("TO");
+					int fromAccountID = rs.getInt("FROM");
+					int toAccountID = rs.getInt("TO");
+					String fromUser = rs.getString("FROMUSER");
+					String toUser = rs.getString("TOUSER");
+					double fromBalance = rs.getDouble("FROMBALANCE");
+					double toBalance = rs.getDouble("TOBALANCE");
 					double amount = rs.getDouble("AMOUNT");
+					
 					String msg = rs.getString("MESSAGE");
 					
-					transactions.add(new TransactionHistoryElement(dateString, from, to, amount, msg));
+					transactions.add(new TransactionHistoryElement(dateString, fromAccountID, toAccountID, fromUser, toUser, fromBalance, toBalance, amount, msg));
 				}
 					
 			}
@@ -134,9 +139,18 @@ public void storeOldTransactionsInArchive() {
 			startConnection();
 			
 			for (TransactionHistoryElement the : transactions) {
-				stmt.executeUpdate("INSERT INTO DTUGRP04.TRANSACTIONARCHIVE (DATE, FROM, TO, AMOUNT, MESSAGE) "
+				//DATABASE FORMAT: DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
+				stmt.executeUpdate("INSERT INTO DTUGRP04.TRANSACTIONARCHIVE (DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) "
 						+ "VALUES"
-						+ "('" + the.getDate()+ "', '" + the.getFrom() + "', '" + the.getTo() + "', '" + the.getAmount() + "', '" + the.getMessage() + "')");			
+						+ "('" + the.getDate()+ "', '" 
+						+ the.getFromAccountID() + "', '" 
+						+ the.getToAccountID() + "', '" 
+						+ the.getFromUserName() + "', '" 
+						+ the.getToUserName() + "', '" 
+						+ the.getFromBalance() + "', '" 
+						+ the.getToBalance() + "', '" 
+						+ the.getAmount() + "', '" 
+						+ the.getMessage() + "')");			
 			}
 			
 			closeConnection();
@@ -551,12 +565,11 @@ public void storeOldTransactionsInArchive() {
 
 	}
 
-	public List<String[]> getTransactionHistory(Customer customer) {
+	public List<TransactionHistoryElement> getTransactionHistory(Customer customer) {
 		startConnection();
 
-		List<String[]> table = new ArrayList<>();
+		List<TransactionHistoryElement> table = new ArrayList<>();
 
-		System.out.println(customer.getUsername());
 		try {
 //			String query = "SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE ";
 //			ArrayList<Account> accounts = customer.getAccounts();
@@ -570,10 +583,14 @@ public void storeOldTransactionsInArchive() {
 			ResultSet th = stmt.executeQuery("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE FROMUSER = '" + customer.getUsername() 
 											+ "' OR TOUSER = '" + customer.getUsername() + "'");
 			while (th.next()) {
-				String[] row = { th.getString("DATE"), th.getString("FROMACCOUNT"), th.getString("TOACCOUNT"), 
-						th.getString("FROMUSER"), th.getString("TOUSER"), th.getString("FROMBALANCE"), th.getString("TOBALANCE"), 
-						th.getString("AMOUNT"), th.getString("MESSAGE") };
-				table.add(row);
+//				String[] row = { th.getString("DATE"), th.getString("FROMACCOUNT"), th.getString("TOACCOUNT"), 
+//						th.getString("FROMUSER"), th.getString("TOUSER"), th.getString("FROMBALANCE"), th.getString("TOBALANCE"), 
+//						th.getString("AMOUNT"), th.getString("MESSAGE") };
+				TransactionHistoryElement element = new TransactionHistoryElement(th.getString("DATE"), th.getInt("FROMACCOUNT"), 
+						th.getInt("TOACCOUNT"), th.getString("FROMUSER"), th.getString("TOUSER"), 
+						th.getDouble("FROMBALANCE"), th.getDouble("TOBALANCE"),
+						th.getDouble("AMOUNT"), th.getString("MESSAGE"));
+				table.add(element);
 			}
 
 			return table;
@@ -641,7 +658,6 @@ public void storeOldTransactionsInArchive() {
 			target.changeBalance(-amount);
 
 			System.out.println("Error in DatabaseProtocol::transferFromAccountToAccount");
-			e.printStackTrace();
 		}
 		closeConnection();
 	}
@@ -649,9 +665,9 @@ public void storeOldTransactionsInArchive() {
 	public void setAccountBalance(Account account, double newBalance) {
 
 		startConnection();
-
+		account.setBalance(0);
+		account.changeBalance(newBalance);
 		try {
-			account.setBalance(newBalance);
 			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + account.getBalance() + "' WHERE ID = '"
 					+ account.getAccountNumber() + "'");
 

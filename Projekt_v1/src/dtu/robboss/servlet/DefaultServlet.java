@@ -19,6 +19,7 @@ import dtu.robboss.app.Account;
 import dtu.robboss.app.Admin;
 import dtu.robboss.app.BankApplication;
 import dtu.robboss.app.Customer;
+import dtu.robboss.app.TransactionHistoryElement;
 import dtu.robboss.app.User;
 import dtu.robboss.app.Valuta;
 import dtu.robboss.exceptions.AccountNotfoundException;
@@ -100,7 +101,7 @@ public class DefaultServlet extends HttpServlet {
 				System.out.println(e.getMessage());
 				response.sendRedirect("login.html");
 			} catch (AlreadyExistsException e) {
-				System.out.println("User already exist");
+				System.out.println(e.getMessage());
 				response.sendRedirect("login.html");
 				// e.printStackTrace();
 			}
@@ -125,7 +126,7 @@ public class DefaultServlet extends HttpServlet {
 					session.setAttribute("USER", customerLoggedIn);
 					
 					// Get transaction history for customer
-					List<String[]> th = app.getTransactionHistory(customerLoggedIn);
+					List<TransactionHistoryElement> th = app.getTransactionHistory(customerLoggedIn);
 					session.setAttribute("TRANSACTIONHISTORY", th);
 					
 //					System.out.println(session.getAttribute("TRANSACTIONHISTORY"));
@@ -144,7 +145,7 @@ public class DefaultServlet extends HttpServlet {
 				}
 
 			} catch (UnknownLoginException e) {
-				System.out.println("Failed to login in defaultservlet ");
+				System.out.println("DefaultServlet::doPost -> Login\nError message: " + e.getMessage());
 				response.sendRedirect("login.html");
 				// e.printStackTrace();
 			} 
@@ -187,7 +188,6 @@ public class DefaultServlet extends HttpServlet {
 			String beforedecimalseperator = "0" + request.getParameter("beforedecimalseperator");
 			String afterdecimalseperator = request.getParameter("afterdecimalseperator") + "00";
 			String transferAmount = beforedecimalseperator + "." + afterdecimalseperator.substring(0, 2);
-			double amount = Valuta.revert(Double.parseDouble(transferAmount), loggedInCustomer);
 			
 			HttpSession session = request.getSession();
 			String recieverType = request.getParameter("receiverType");
@@ -199,6 +199,10 @@ public class DefaultServlet extends HttpServlet {
 //			System.out.println("sourceAccount Customer = " + sourceAccount.getCustomer().getUsername());
 			
 			try {
+				if(loggedInCustomer == null)
+					throw new UserNotfoundException();
+				
+				double amount = Valuta.revert(Double.parseDouble(transferAmount), loggedInCustomer);
 				if (recieverType.equals("account")) {
 					Account targetAccount = app.getAccount(request.getParameter("receiver"));
 					app.transferFromAccountToAccount(sourceAccount, targetAccount, amount,
@@ -209,24 +213,24 @@ public class DefaultServlet extends HttpServlet {
 				}
 
 				// Get transaction history for customer
-				List<String[]> th = app.getTransactionHistory((Customer) session.getAttribute("USER"));
+				List<TransactionHistoryElement> th = app.getTransactionHistory((Customer) session.getAttribute("USER"));
 				session.setAttribute("TRANSACTIONHISTORY", th);
 
 			} catch (UserNotLoggedInException | TransferException | AccountNotfoundException
-					| UserNotfoundException e) {
-				System.out.println("Error in DefaultServlet::doPost -> transfermoney");
-				e.printStackTrace();
+					| UserNotfoundException | NumberFormatException e) {
+				System.out.println("Error in DefaultServlet::doPost -> transfermoney\nError message: " + e.getMessage());
+//				e.printStackTrace();
 			}
 			
-			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 			app.refreshAccountsForCustomer((Customer) session.getAttribute("USER")); 
+			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 			rd.forward(request, response);
 
 		}
 
-		if (subject.equals("paybill")) {
-
-		}
+//		if (subject.equals("paybill")) {
+//
+//		}
 
 		if (subject.equals("DeleteUser")) {
 			User userToDelete = (User) request.getSession().getAttribute("USER");
@@ -239,14 +243,14 @@ public class DefaultServlet extends HttpServlet {
 
 			} catch (NullPointerException e) {
 				// e.printStackTrace();
-				System.out.println("Could not remove user.");
+				System.out.println("DefaultServlet::doPost -> DeleteUser. \nError message: Could not remove user.");
 			}
 		}
 
 		if (subject.equals("LogOutUser")) {
 
 			request.getSession().removeAttribute("USER");
-
+			app.logOut();
 			RequestDispatcher rd = request.getRequestDispatcher("login.html");
 			rd.forward(request, response);
 
@@ -345,7 +349,7 @@ public class DefaultServlet extends HttpServlet {
 				try {
 					app.createCustomer(fullname, username, password, currency);
 				} catch (AlreadyExistsException e) {
-					System.out.println("User already exist");
+					System.out.println("DefaultServlet::doPost -> CreateNewCustomer\nError message: " + e.getMessage());
 				}
 			}
 			else
@@ -358,7 +362,7 @@ public class DefaultServlet extends HttpServlet {
 				try {
 					app.createAdmin(fullname, username, password);
 				} catch (AlreadyExistsException e) {
-					System.out.println("User already exists");
+					System.out.println("DefaultServlet::doPost -> CreateNewAdmin\nError message: " + e.getMessage());
 				}
 			}
 
@@ -377,7 +381,7 @@ public class DefaultServlet extends HttpServlet {
 
 			} catch (NullPointerException e) {
 				// e.printStackTrace();
-				System.out.println("Could not remove user.");
+				System.out.println("DefaultServlet::doPost -> DeleteUserAdmin\nErorr message: Could not remove user.");
 			}
 		}
 		

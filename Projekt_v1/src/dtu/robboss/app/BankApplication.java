@@ -203,6 +203,7 @@ public class BankApplication {
 	 * @param sourceAccount
 	 * @param targetAccountID
 	 * @param transferAmount
+	 * @param out 
 	 * @throws UserNotLoggedInException
 	 * @throws TransferException
 	 * @throws AccountNotfoundException
@@ -226,7 +227,7 @@ public class BankApplication {
 
 	}
 
-	public List<String[]> getTransactionHistory(Customer customer) {
+	public List<TransactionHistoryElement> getTransactionHistory(Customer customer) {
 		return database.getTransactionHistory(customer);
 	}
 
@@ -275,9 +276,9 @@ public class BankApplication {
 		// and update in database
 
 		for (Account account : allAccounts) {
-			database.setAccountBalance(account, account.getBalance() * account.getInterest());
+			double newBalance = account.getBalance()*account.getInterest();
+			database.setAccountBalance(account, newBalance);
 		}
-
 	}
 	
 	public void storeOldTransactionsInArchive() {
