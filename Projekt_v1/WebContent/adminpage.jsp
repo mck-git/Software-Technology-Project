@@ -103,17 +103,11 @@
 			</div>
 
 			<div id="news" class="outer">
-				<h3 align="center" style="margin-top: 0;">Batch jobs</h3>
+				<h3 align="center" style="margin-top: 0;">News</h3>
 
 				<div class="inner">
-					Batch Jobs:<br>
-					1 - Apply interest to all accounts <br>
-					2 - Move old transactions to archive table <br>
+					news <br>
 
-					<form method="post" action = "DS" align ="center">
-							<input type="hidden" name="subject" value="PerformBatch">
-							<input type="submit" value ="Perform Batch" />
-					</form>
 				</div>
 			</div>
 
@@ -122,8 +116,8 @@
 
 				<div class="inner">
 					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="DeleteUser" /> 
-						<input type="submit" value="Delete user" 
+						<input type="hidden" name="subject" value="DeleteUser" /> <input
+							type="submit" value="Delete user"
 							onclick="return confirm('Do you wish to delete user?')" />
 					</form>
 
