@@ -295,4 +295,14 @@ public class BankApplication {
 		database.storeOldTransactionsInArchive();
 	}
 
+	public void setInterest(String accountID, double interest) {
+		if (interest >= 0)
+			database.setInterest(accountID, interest);
+	}
+
+	public void setCredit(String accountID, double credit) {
+		if (credit >= 0) 
+			database.setCredit(accountID, credit);
+	}
+
 }

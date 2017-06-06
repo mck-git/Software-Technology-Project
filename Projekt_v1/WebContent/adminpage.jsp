@@ -1,5 +1,7 @@
 <!DOCTYPE HTML><%@page language="java"
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="dtu.robboss.app.Valuta"%>
+<%@ page import="dtu.robboss.app.Customer"%>
 <%@ page import="dtu.robboss.app.Account"%>
 <%@ page import="dtu.robboss.app.Admin"%>
 <%@ page import="java.util.ArrayList"%>
@@ -27,6 +29,7 @@
 	width: 100%;
 	background: rgba(240, 230, 255, 0.9);
 	border-radius: 2px;
+	max-height: 160px;
 }
 
 .outer {
@@ -39,33 +42,44 @@
 	overflow: hidden;
 }
 
-#news {
+table, th, td {
+	border: 1px solid black;
+}
+
+#search {
 	float: left;
 }
 
-#messages {
+#batch {
 	float: right;
-}
-
-#menu {
-	float: left;
-}
-
-#accountLookUp {
-	float: right;
-}
-
-#createUser {
-	float: left;
 }
 
 #accounts {
+	clear: both;
+	float: left;
+	overflow: scroll;
+}
+
+#customer {
 	float: right;
 }
 
 #modifyUser {
 	clear: both;
 	float: left;
+}
+
+#modifyAccount {
+	float: right;
+}
+
+#createUser {
+	clear: both;
+	float: left;
+}
+
+#menu {
+	float: right;
 }
 
 #footer {
@@ -79,7 +93,8 @@
 <!-- Get current logged in user -->
 <%
 	Admin userLoggedIn = (Admin) session.getAttribute("USER");
-	ArrayList<Account> accountsFound = (ArrayList<Account>) session.getAttribute("ACCOUNTSFOUND");
+	//ArrayList<Account> accountsFound = (ArrayList<Account>) session.getAttribute("ACCOUNTSFOUND"); 
+	Customer customerFound = (Customer) session.getAttribute("CUSTOMERFOUND");
 %>
 
 </head>
@@ -98,68 +113,146 @@
 		<!-- CONTENT AREA -->
 		<div id="content_area">
 
-
-			<div id="news" class="outer">
-				<h3 align="center" style="margin-top: 0;">News</h3>
-
-				<div class="inner">
-					news <br>
-
-				</div>
-			</div>
-
-			<div id="news" class="outer">
-				<h3 align="center" style="margin-top: 0;">Batch jobs</h3>
-
-				<div class="inner">
-					Batch Jobs:<br>
-					1 - Apply interest to all accounts <br>
-					2 - Move old transactions to archive table <br>
-
-					<form method="post" action = "DS" align ="center">
-							<input type="hidden" name="subject" value="PerformBatch">
-							<input type="submit" value ="Perform Batch" />
-					</form>
-
-				</div>
-			</div>
-
-			<div id="menu" class="outer">
-				<h3 align="center" style="margin-top: 0;">Menu</h3>
-
-				<div class="inner">
-					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="DeleteUser" /> <input
-							type="submit" value="Delete user"
-							onclick="return confirm('Do you wish to delete user?')" />
-					</form>
-
-
-					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="LogOutUser" "/> <input
-							type="submit" value="Log out user"
-							onclick="return confirm('Do you wish to log out?')" />
-					</form>
-
-				</div>
-			</div>
-
-			<div id="accountLookUp" class="outer">
-				<h3 align="center" style="margin-top: 0;">Account look-up</h3>
+			<div id="search" class="outer">
+				<h3 align="center" style="margin-top: 0;">Search</h3>
 
 				<div class="inner"
 					style="display: inline-block; text-align: center; width: 100%;">
 					<form method="post" action="DS">
-						<input type="hidden" name="subject" value="AccountLookUp" />
 						Search by: <input type="radio" name="searchBy" value="account" />
 						Account <input type="radio" checked="checked" name="searchBy"
 							value="user" /> User <br> Search for: <input type="text"
 							name="searchToken" /> <br> <input type="submit"
-							value="Search" />
+							name="subject" value="Search" />
 					</form>
 
 				</div>
 			</div>
+
+			<div id="batch" class="outer">
+				<h3 align="center" style="margin-top: 0;">Batch jobs</h3>
+
+				<div class="inner">
+					Batch Jobs:<br> 1 - Apply interest to all accounts <br> 2
+					- Move old transactions to archive table <br>
+
+					<form method="post" action="DS" align="center">
+						<input type="submit" name="subject" value="Apply Interest" />
+					</form>
+
+					<form method="post" action="DS" align="center">
+						<input type="submit" name="subject"
+							value="Archive Old Transactions" />
+					</form>
+
+					<form method="post" action="DS" align="center">
+						<input type="submit" name="subject" value="Perform Batch" />
+					</form>
+
+				</div>
+			</div>
+
+
+			<div id="accounts" class="outer" , style="width: 60%;">
+				<h3 align="center" style="margin-top: 0;">Accounts</h3>
+
+				<div class="inner">
+
+					<table style="width: 100%">
+						<tr>
+							<th>Customer</th>
+							<th>ID</th>
+							<th>Balance</th>
+							<th>Credit</th>
+							<th>Type</th>
+							<th>Interest</th>
+						</tr>
+
+						<%
+							if (customerFound != null)
+								for (Account account : customerFound.getAccounts()) {
+						%>
+						<tr>
+							<td><%=customerFound.getUsername()%></td>
+							<td><%=account.getAccountNumber()%></td>
+							<td><%=Valuta.convert(account.getBalance(), customerFound)%></td>
+							<td><%=Valuta.convert(account.getCredit(), customerFound)%></td>
+							<td><%=account.getType()%></td>
+							<td><%=account.getInterest()%></td>
+						</tr>
+						<%
+							}
+						%>
+						<!-- (customerFound.getAccounts().size() == 0 ? "No accounts" : "")%>   -->
+					</table>
+
+
+				</div>
+			</div>
+
+
+			<div id="customer" class="outer" , style="width: 23%">
+				<h3 align="center" style="margin-top: 0;">Customer</h3>
+				<div class="inner">
+					<%
+						if (customerFound != null) {
+					%>
+					Username:
+					<%=customerFound.getUsername()%>
+					<br /> Full Name:
+					<%=customerFound.getFullName()%>
+					<br /> Password:
+					<%=customerFound.getPassword()%>
+					<br /> Preferred Currency:
+					<%=customerFound.getCurrency()%>
+					<%
+						}
+					%>
+
+				</div>
+
+			</div>
+
+
+
+			<div id="modifyUser" class="outer">
+				<h3 align="center" style="margin-top: 0;">Modify user</h3>
+				<div class="inner">
+					<form method="post" action="DS" align="center">
+						User name: <input type="text" name="username" /> <br> <input
+							type="submit" name="subject" value="Delete User">
+					</form>
+				</div>
+
+			</div>
+
+
+			<div id="modifyAccount" class="outer">
+				<h3 align="center" style="margin-top: 0;">Modify Account</h3>
+				<div class="inner">
+					<form method="post" action="DS" align="center">
+						Select Account: <select name="accountSelected" />
+						<%
+							if (customerFound != null)
+								for (Account account : customerFound.getAccounts()) {
+									String accountID = "" + account.getAccountNumber();
+						%>
+						<option value=<%=accountID%>>AccountID:
+							<%=accountID%>
+						</option>
+						<%
+							}
+						%>
+						</select> <br /> Modify Interest: <input type="text" name="interest"
+							placeholder="etc 5% -> 1.05" /> <input type="submit"
+							name="subject" value="Set Interest" /> <br /> Modify Credit: <input
+							type="text" name="credit" /> DKK <input type="submit"
+							name="subject" value="Set Credit" />
+					</form>
+				</div>
+
+			</div>
+
 
 			<div id="createUser" class="outer">
 				<h3 align="center" style="margin-top: 0;">Create user</h3>
@@ -171,65 +264,35 @@
 							value="admin" /> Admin <br> Full name: <input type="text"
 							name="fullname" /> <br> User name: <input type="text"
 							name="username" /> <br> Password: <input type="text"
-							name="password" /> <br> CPR: <input type="text" name="cpr" />
-						<br> <input type="submit" value="Create User">
+							name="password" /> <br> <input type="submit"
+							value="Create User">
 					</form>
 				</div>
 
 			</div>
 
 
-			<div id="accounts" class="outer">
-				<h3 align="center" style="margin-top: 0;">Accounts</h3>
+			<div id="menu" class="outer">
+				<h3 align="center" style="margin-top: 0;">Menu</h3>
 
-				<div class="inner">
-					<%
-						String type;
-					%>
-					<%
-						for (Account account : accountsFound) {
-					%>
-
-					AccountID:
-					<%=account.getAccountNumber()%>
-
-					- balance:
-					<%=account.getBalance()%>
-
-					- credit:
-					<%=account.getCredit()%>
-
-					<%
-						if (account.getType().equals("MAIN"))
-								type = "MAIN";
-							else
-								type = "NORMAL";
-					%>
-					- type:
-					<%=type%>
-					<br>
-
-					<%
-						}
-					%>
-
-					<%=(accountsFound.size() == 0 ? "No accounts" : "")%>
-
-				</div>
-			</div>
-
-
-			<div id="modifyUser" class="outer">
-				<h3 align="center" style="margin-top: 0;">Modify user</h3>
 				<div class="inner">
 					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="modifyUserAdmin" />
-						User name: <input type="text" name="username" /> <br> <input
-							type="submit" value="Modify User">
+						<input type="submit" name="subject" value="Delete Admin"
+							onclick="return confirm('Do you wish to delete admin?')" />
 					</form>
-				</div>
 
+
+					<form method="post" action="DS" align="center">
+						<input type="hidden" name="subject" value="LogOutUser" "/> <input
+							type="submit" value="Log out admin"
+							onclick="return confirm('Do you wish to log out?')" />
+					</form>
+
+				</div>
 			</div>
+
+
+
 
 			<!--  
 			<div id="deleteUser" class="outer">
@@ -250,12 +313,25 @@
 
 		<!-- FOOTER -->
 		<div id="footer">
-			Footer <br>
-			<p>Contact informations here
+			<div style="height: 100%; width: 24%; float: left">
+				Username:
+				<%=userLoggedIn.getUsername()%><br> Full name:
+				<%=userLoggedIn.getFullName()%>
+			</div>
+			<div style="height: 100%; width: 24%; float: left">
+				
+			</div>
+			<div style="height: 100%; width: 24%; float: right">
+				<br> s154666@student.dtu.dk <br> s151952@student.dtu.dk
+			</div>
+			<div style="height: 100%; width: 24%; float: right">
+				Contact information: <br> s144107@student.dtu.dk <br>
+				s144063@student.dtu.dk
+			</div>
 		</div>
 
 		<!-- END OF CONTAINER -->
 	</div>
 
 </body>
-</html>
+</html>
