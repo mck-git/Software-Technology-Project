@@ -218,7 +218,7 @@ public void storeOldTransactionsInArchive() {
 		try {
 			startConnection();
 			stmt.executeUpdate("INSERT INTO DTUGRP04.ADMINS (USERNAME, FULLNAME, PASSWORD) VALUES('"
-					+ admin.getUsername() + "', '" + admin.getFullname() + "', '" + admin.getPassword() + "')");
+					+ admin.getUsername() + "', '" + admin.getFullName() + "', '" + admin.getPassword() + "')");
 		} catch (SQLException e) {
 			closeConnection();
 			e.printStackTrace();
@@ -246,7 +246,7 @@ public void storeOldTransactionsInArchive() {
 
 			// TODO: OLD: USERS -> CUSTOMERS
 			stmt.executeUpdate("INSERT INTO DTUGRP04.CUSTOMERS (USERNAME, FULLNAME, PASSWORD, CURRENCY) VALUES('"
-					+ customer.getUsername() + "', '" + customer.getFullname() + "', '" + customer.getPassword()
+					+ customer.getUsername() + "', '" + customer.getFullName() + "', '" + customer.getPassword()
 					+ "', '" + customer.getCurrency() + "')");
 
 		} catch (SQLException e) {
@@ -686,6 +686,35 @@ public void storeOldTransactionsInArchive() {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void setInterest(String accountID, double interest) {
+		startConnection();
+
+		try {
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET INTEREST = '" + interest + "' WHERE ID = '"
+					+ accountID + "'");
+
+		} catch (SQLException e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+		closeConnection();
+	}
+
+	public void setCredit(String accountID, double credit) {
+		startConnection();
+
+		try {
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET CREDIT = '" + credit + "' WHERE ID = '"
+					+ accountID + "'");
+
+		} catch (SQLException e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+		closeConnection();
+		
 	}
 
 }

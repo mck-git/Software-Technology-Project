@@ -96,7 +96,7 @@ table, th, td {
 		<div id="header">
 			<h1>
 				Welcome
-				<%=userLoggedIn.getFullname()%>
+				<%=userLoggedIn.getFullName()%>
 			</h1>
 		</div>
 
@@ -310,7 +310,7 @@ table, th, td {
 		<div id="footer">
 			<div style="height: 100%; width: 24%; float: left">
 				Username: <%=userLoggedIn.getUsername()%><br>
-				Full name: <%=userLoggedIn.getFullname()%>
+				Full name: <%=userLoggedIn.getFullName()%>
 			</div>
 			<div style="height: 100%; width: 24%; float: left">
 				Amount of accounts: <%=userLoggedIn.getAccounts().size()%>

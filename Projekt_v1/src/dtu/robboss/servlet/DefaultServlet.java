@@ -228,7 +228,7 @@ public class DefaultServlet extends HttpServlet {
 
 		}
 
-		if (subject.equals("DeleteUser")) {
+		if (subject.equals("Delete Admin")) {
 			User userToDelete = (User) request.getSession().getAttribute("USER");
 			try {
 				System.out.println("Removing " + userToDelete.getUsername() + ".");
@@ -288,26 +288,31 @@ public class DefaultServlet extends HttpServlet {
 		}
 
 		// ADMIN ONLY
-		if (subject.equals("AccountLookUp")) {
+		if (subject.equals("Search")) {
 
 			HttpSession session = request.getSession();
 
 			String searchBy = request.getParameter("searchBy");
 			String searchToken = request.getParameter("searchToken");
-			ArrayList<Account> accounts = new ArrayList<Account>();
+			//ArrayList<Account> accounts = new ArrayList<Account>(); TODO OLD CODE
 
 			try {
 				if (searchBy.equals("account")) {
-
-					accounts.add(app.getAccount(searchToken));
-					session.setAttribute("ACCOUNTSFOUND", accounts);
+					// Searching for a specific account 
+					// This utilizes the fact that getAccount creates a customer with only
+					// that 1 account in it.
+					//accounts.add(app.getAccount(searchToken)); TODO OLD CODE
+					Customer customerFound = app.getAccount(searchToken).getCustomer();
+					session.setAttribute("CUSTOMERFOUND", customerFound);
 
 				} else if (searchBy.equals("user")) {
-					accounts.addAll(app.getAccountsByUser(searchToken));
-					session.setAttribute("ACCOUNTSFOUND", accounts);
+					// Searcing for a specific user
+					//accounts.addAll(app.getAccountsByUser(searchToken));
+					Customer customerFound = app.getCustomer(searchToken);
+					session.setAttribute("CUSTOMERFOUND", customerFound);
 
 				}
-			} catch (NullPointerException e) {
+			} catch (Exception e) {
 
 			}
 
@@ -367,12 +372,13 @@ public class DefaultServlet extends HttpServlet {
 
 		}
 
-		if (subject.equals("DeleteUserAdmin")) {
+		if (subject.equals("Delete User")) {
 			User userToDelete = app.getUser(request.getParameter("username"));
 			try {
 				System.out.println("Removing " + userToDelete.getUsername() + ".");
 				app.deleteUser(userToDelete);
 				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				// TODO: if admin deletes itself, redirect to login page instead
 				rd.forward(request, response);
 
 			} catch (NullPointerException e) {
@@ -381,12 +387,70 @@ public class DefaultServlet extends HttpServlet {
 			}
 		}
 		
-		if (subject.equals("PerformBatch")) {
+		if (subject.equals("Perform Batch")) {
 			
 			try {
 				app.applyInterestToAllAccounts();
 				app.storeOldTransactionsInArchive();
 				
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (subject.equals("Apply Interest")) {
+			
+			try {
+				app.applyInterestToAllAccounts();
+				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if (subject.equals("Archive Old Transactions")) {
+			
+			try {
+				app.storeOldTransactionsInArchive();
+				
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if (subject.equals("Set Interest")) {
+			
+			try {
+				double interest = Double.parseDouble(request.getParameter("interest"));
+				String accountID = request.getParameter("accountSelected");
+				
+				// Sets interest in database
+				app.setInterest(accountID, interest);
+				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (subject.equals("Set Credit")) {
+			
+			try {
+				double credit = Double.parseDouble(request.getParameter("credit"));
+				String accountID = request.getParameter("accountSelected");
+				
+				// Sets credit in database
+				app.setCredit(accountID, credit);
+				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 				rd.forward(request, response);
 				
