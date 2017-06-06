@@ -8,6 +8,13 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import dtu.robboss.exceptions.AccountNotfoundException;
+import dtu.robboss.exceptions.AlreadyExistsException;
+import dtu.robboss.exceptions.TransferException;
+import dtu.robboss.exceptions.UnknownLoginException;
+import dtu.robboss.exceptions.UserNotLoggedInException;
+import dtu.robboss.exceptions.UserNotfoundException;
+
 public class BankApplication {
 
 	public DatabaseProtocol database;
@@ -24,8 +31,8 @@ public class BankApplication {
 	public User login(String username, String pass) throws UnknownLoginException {
 
 		userLoggedIn = getUser(username);
-
-		// checks if user login is customer
+		
+		// checks if correct login information
 		if (userLoggedIn != null && pass.equals(userLoggedIn.getPassword().trim()))
 			return userLoggedIn;
 
@@ -124,14 +131,14 @@ public class BankApplication {
 
 	}
 
-	private Admin getAdmin(String username) throws UserNotfoundException {
-		Admin adminFromDatabase = database.getAdmin(username);
-
-		if (adminFromDatabase == null)
-			throw new UserNotfoundException();
-
-		return adminFromDatabase;
-	}
+//	private Admin getAdmin(String username) throws UserNotfoundException {
+//		Admin adminFromDatabase = database.getAdmin(username);
+//
+//		if (adminFromDatabase == null)
+//			throw new UserNotfoundException();
+//
+//		return adminFromDatabase;
+//	}
 
 	////////////////////////
 	// ACCOUNT MANAGEMENT //

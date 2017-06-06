@@ -75,8 +75,8 @@ table, th, td {
 
 #footer {
 	clear: both;
-	background: yellow;
-	height: 60px;
+	background: #dfa;
+	height: 65px;
 	text-align: center;
 }
 </style>
@@ -114,7 +114,7 @@ table, th, td {
 						for (Account account : userLoggedIn.getAccounts()) {
 					%>
 
-					AccountID:
+					ID:
 					<%=account.getAccountNumber()%>
 
 					- balance:
@@ -122,7 +122,7 @@ table, th, td {
 
 					- credit:
 					<%=Valuta.convert(account.getCredit(), userLoggedIn)%>
-					
+
 					- interest:
 					<%=account.getInterest()%>
 
@@ -199,7 +199,7 @@ table, th, td {
 							value="account" /> Account <input type="radio" checked="checked"
 							name="receiverType" value="user" /> User <br> Receiver: <input
 							type="text" name="receiver" /> <br> <br> Message:
-						<textarea name="message" style="height: 4em; width: 90%;"
+						<textarea name="message" style="height: 3em; width: 90%;"
 							maxlength="140"></textarea>
 						<br> <br> Amount <br> <input type="text"
 							name="beforedecimalseperator" style="width: 10em" />. <input
@@ -214,7 +214,7 @@ table, th, td {
 				</div>
 			</div>
 
-			<div id="editAccounts" class="outer">
+			<div id="editAccounts" class="outer"  style="text-align: center;">
 				<h3 align="center" style="margin-top: 0;">Edit Account</h3>
 
 
@@ -224,15 +224,16 @@ table, th, td {
 							for (Account account : userLoggedIn.getAccounts()) {
 								String accountID = "" + account.getAccountNumber();
 						%>
-						<option value=<%=accountID%>>AccountID:
-							<%=accountID%>
+						<option value=<%=accountID%>>AccountID: <%=accountID%>
 						</option>
 						<%
 							}
 						%>
-					</select> <input type="submit" name="subject" value="Set as main account" />
-					<br> <input type="submit" name="subject"
-						value="Delete account" />
+					</select> 
+					<br><br>
+					<input type="submit" name="subject" value="Set as main account" />
+					<br><br> 
+					<input type="submit" name="subject" value="Delete account" />
 				</form>
 
 			</div>
@@ -300,8 +301,26 @@ table, th, td {
 
 		<!-- FOOTER -->
 		<div id="footer">
-			Footer <br>
-			<p>Contact informations here
+			<div style="height: 100%; width: 24%; float: left">
+				Username: <%=userLoggedIn.getUsername()%><br>
+				Full name: <%=userLoggedIn.getFullname()%>
+			</div>
+			<div style="height: 100%; width: 24%; float: left">
+				Amount of accounts: <%=userLoggedIn.getAccounts().size()%>
+			</div>
+			<div style="height: 100%; width: 24%; float: right">
+				<br>
+				s154666@student.dtu.dk
+				<br>
+				s151952@student.dtu.dk
+			</div>
+			<div style="height: 100%; width: 24%; float: right">
+				Contact information:
+				<br>
+				s144107@student.dtu.dk
+				<br>
+				s144063@student.dtu.dk
+			</div>
 		</div>
 
 		<!-- END OF CONTAINER -->

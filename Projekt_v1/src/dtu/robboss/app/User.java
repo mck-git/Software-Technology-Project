@@ -1,11 +1,11 @@
 package dtu.robboss.app;
 
-import java.util.HashSet;
+//import java.util.HashSet;
 
 public class User {
 
 	private String username, fullName, password;
-	private HashSet<UserMessage> userMessages; // TODO maybe think more about this name? "user" is redundant?
+//	private HashSet<UserMessage> userMessages; // TODO maybe think more about this name? "user" is redundant?
 
 	// TODO new constructor? taking a ResultSet as argument?
 	// or just think about which arguments User should have
@@ -13,7 +13,7 @@ public class User {
 		this.fullName = name;
 		this.username = username;
 		this.password = password;
-		this.userMessages = new HashSet<>();
+//		this.userMessages = new HashSet<>();
 	}
 
 	public String toString(){
