@@ -33,7 +33,7 @@ public class User {
 	}
 	
 
-	public String getFullname() {
+	public String getFullName() {
 		return fullName;
 	}
 

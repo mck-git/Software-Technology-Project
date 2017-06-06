@@ -288,26 +288,31 @@ public class DefaultServlet extends HttpServlet {
 		}
 
 		// ADMIN ONLY
-		if (subject.equals("AccountLookUp")) {
+		if (subject.equals("Search")) {
 
 			HttpSession session = request.getSession();
 
 			String searchBy = request.getParameter("searchBy");
 			String searchToken = request.getParameter("searchToken");
-			ArrayList<Account> accounts = new ArrayList<Account>();
+			//ArrayList<Account> accounts = new ArrayList<Account>(); TODO OLD CODE
 
 			try {
 				if (searchBy.equals("account")) {
-
-					accounts.add(app.getAccount(searchToken));
-					session.setAttribute("ACCOUNTSFOUND", accounts);
+					// Searching for a specific account 
+					// This utilizes the fact that getAccount creates a customer with only
+					// that 1 account in it.
+					//accounts.add(app.getAccount(searchToken)); TODO OLD CODE
+					Customer customerFound = app.getAccount(searchToken).getCustomer();
+					session.setAttribute("CUSTOMERFOUND", customerFound);
 
 				} else if (searchBy.equals("user")) {
-					accounts.addAll(app.getAccountsByUser(searchToken));
-					session.setAttribute("ACCOUNTSFOUND", accounts);
+					// Searcing for a specific user
+					//accounts.addAll(app.getAccountsByUser(searchToken));
+					Customer customerFound = app.getCustomer(searchToken);
+					session.setAttribute("CUSTOMERFOUND", customerFound);
 
 				}
-			} catch (NullPointerException e) {
+			} catch (Exception e) {
 
 			}
 

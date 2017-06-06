@@ -1,6 +1,7 @@
 <!DOCTYPE HTML><%@page language="java"
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dtu.robboss.app.Valuta"%>
+<%@ page import="dtu.robboss.app.Customer"%>
 <%@ page import="dtu.robboss.app.Account"%>
 <%@ page import="dtu.robboss.app.Admin"%>
 <%@ page import="java.util.ArrayList"%>
@@ -46,9 +47,6 @@ table, th, td {
 	border: 1px solid black;
 }
 
-#news {
-	float: left;
-}
 
 #batch {
 	float: right;
@@ -88,7 +86,9 @@ table, th, td {
 <!-- Get current logged in user -->
 <%
 	Admin userLoggedIn = (Admin) session.getAttribute("USER");
-	ArrayList<Account> accountsFound = (ArrayList<Account>) session.getAttribute("ACCOUNTSFOUND");
+	//ArrayList<Account> accountsFound = (ArrayList<Account>) session.getAttribute("ACCOUNTSFOUND"); 
+	Customer customerFound = (Customer) session.getAttribute("CUSTOMERFOUND");
+	
 %>
 
 </head>
@@ -106,16 +106,6 @@ table, th, td {
 
 		<!-- CONTENT AREA -->
 		<div id="content_area">
-
-
-			<div id="news" class="outer">
-				<h3 align="center" style="margin-top: 0;">News</h3>
-
-				<div class="inner">
-					news <br>
-
-				</div>
-			</div>
 
 			<div id="batch" class="outer">
 				<h3 align="center" style="margin-top: 0;">Batch jobs</h3>
@@ -160,18 +150,18 @@ table, th, td {
 				</div>
 			</div>
 
-			<div id="accountLookUp" class="outer">
-				<h3 align="center" style="margin-top: 0;">Account look-up</h3>
+			<div id="search" class="outer">
+				<h3 align="center" style="margin-top: 0;">Search</h3>
 
 				<div class="inner"
 					style="display: inline-block; text-align: center; width: 100%;">
 					<form method="post" action="DS">
-						<input type="hidden" name="subject" value="AccountLookUp" />
 						Search by: <input type="radio" name="searchBy" value="account" />
-						Account <input type="radio" checked="checked" name="searchBy"
-							value="user" /> User <br> Search for: <input type="text"
-							name="searchToken" /> <br> <input type="submit"
-							value="Search" />
+						Account <input type="radio" checked="checked" name="searchBy" value="user" /> User 
+							<br> 
+							Search for: <input type="text" name="searchToken" /> 
+							<br> 
+							<input type="submit" name="subject" value="Search" />
 					</form>
 
 				</div>
@@ -194,6 +184,25 @@ table, th, td {
 
 			</div>
 
+			<div id="customer" class="outer">
+				<h3 align="center" style="margin-top: 0;">Customer</h3>
+				<div class="inner">
+					<%if (customerFound != null) { %>
+						Username: <%=customerFound.getUsername()%>
+						<br/>
+						Full Name: <%=customerFound.getFullName()%>
+						<br/>
+						Password: <%=customerFound.getPassword()%>
+						<br/>
+						Preferred Currency: <%=customerFound.getCurrency()%>
+					<% 
+					}
+					%>						
+					
+				</div>
+
+			</div>
+
 
 			<div id="accounts" class="outer", style="width: 80%;">
 				<h3 align="center" style="margin-top: 0;">Accounts</h3>
@@ -211,20 +220,21 @@ table, th, td {
 						</tr>
 
 						<%
-						for (Account account : accountsFound) {
+						if (customerFound != null)
+						for (Account account : customerFound.getAccounts()) {
 						%>
 						<tr>
-							<td><%=account.getCustomer().getUsername()%></td>
+							<td><%=customerFound.getUsername()%></td>
 							<td><%=account.getAccountNumber()%></td>
-							<td><%=Valuta.convert(account.getBalance(), account.getCustomer())%></td>
-							<td><%=Valuta.convert(account.getCredit(), account.getCustomer())%></td>
+							<td><%=Valuta.convert(account.getBalance(), customerFound)%></td>
+							<td><%=Valuta.convert(account.getCredit(), customerFound)%></td>
 							<td><%=account.getType()%></td>
 							<td><%=account.getInterest()%></td>
 						</tr>
 						<%
 							}
 						%>
-						<%=(accountsFound.size() == 0 ? "No accounts" : "")%>
+						<!-- (customerFound.getAccounts().size() == 0 ? "No accounts" : "")%>   -->
 					</table>
 					
 
@@ -250,7 +260,8 @@ table, th, td {
 					<form method="post" action="DS" align="center">
 						Select Account: <select name="accountSelected"/>
 						<%
-							for (Account account : accountsFound) {
+							if(customerFound != null)
+							for (Account account : customerFound.getAccounts()) {
 								String accountID = "" + account.getAccountNumber();
 						%>
 						<option value=<%=accountID%>>AccountID: <%=accountID%> </option>
