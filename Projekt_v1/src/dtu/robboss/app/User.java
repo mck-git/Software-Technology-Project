@@ -2,7 +2,7 @@ package dtu.robboss.app;
 
 //import java.util.HashSet;
 
-public class User {
+public abstract class User {
 
 	private String username, fullName, password;
 //	private HashSet<UserMessage> userMessages; // TODO maybe think more about this name? "user" is redundant?

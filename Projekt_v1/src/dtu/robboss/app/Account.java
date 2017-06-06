@@ -7,15 +7,15 @@ package dtu.robboss.app;
 public class Account {
 
 	private Customer customer;
-	private String accountNumber;
+	private String id;
 	private double balance;
 	private double credit;
 	private String type;
 	private double interest;
 
-	public Account(Customer customer, String accountNumber) {
+	public Account(Customer customer, String id) {
 		this.customer = customer;
-		this.accountNumber = accountNumber;
+		this.id = id;
 		this.balance = 0;
 		this.credit = 0;
 		this.interest = 1.05;
@@ -35,11 +35,11 @@ public class Account {
 	// customer.addAccount(this);
 	// }
 
-	public Account(Customer customer, String accountNumber, double balance, double credit, String type,
+	public Account(Customer customer, String id, double balance, double credit, String type,
 			double interest) {
 		this.customer = customer;
-		this.accountNumber = accountNumber;
-		this.balance = balance;
+		this.id = id;
+		this.balance = Math.round(balance*100.0)/100.0;
 		this.credit = credit;
 		this.type = type;
 		this.interest = interest;
@@ -60,7 +60,7 @@ public class Account {
 	}
 
 	public String getAccountNumber() {
-		return this.accountNumber;
+		return this.id;
 	}
 
 	public double getBalance() {
@@ -104,8 +104,8 @@ public class Account {
 		String balance = Valuta.convert(this.balance, this.customer);
 		String credit = Valuta.convert(this.credit, this.customer);
 
-		String s = "ID: " + this.accountNumber + "\t\t balance: " + balance + "\t\t credit: " + credit
-				+ "\n interest: " + this.interest + "\t\t type: " + this.type + "\n";
+		String s = "ID: " + this.id + ", balance: " + balance + ", credit: " + credit
+				+ ", interest: " + this.interest + ", type: " + this.type;
 
 		return s;
 	}
