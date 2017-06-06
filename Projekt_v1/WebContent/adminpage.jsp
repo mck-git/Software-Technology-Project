@@ -30,7 +30,6 @@
 	background: rgba(240, 230, 255, 0.9);
 	border-radius: 2px;
 	max-height: 160px;
-	overflow: scroll;
 }
 
 .outer {
@@ -47,32 +46,40 @@ table, th, td {
 	border: 1px solid black;
 }
 
+#search {
+	float: left;
+}
 
 #batch {
 	float: right;
 }
 
-#menu {
-	float: left;
-}
-
-#accountLookUp {
-	float: right;
-}
-
-#createUser {
-	float: left;
-}
-
 #accounts {
 	clear: both;
-	float: center;
+	float: left;
 	overflow: scroll;
+}
+
+#customer {
+	float: right;
 }
 
 #modifyUser {
 	clear: both;
 	float: left;
+}
+
+#modifyAccount {
+	float: right;
+}
+
+#createUser {
+	clear: both;
+	float: left;
+}
+
+#menu {
+	float: right;
 }
 
 #footer {
@@ -88,7 +95,6 @@ table, th, td {
 	Admin userLoggedIn = (Admin) session.getAttribute("USER");
 	//ArrayList<Account> accountsFound = (ArrayList<Account>) session.getAttribute("ACCOUNTSFOUND"); 
 	Customer customerFound = (Customer) session.getAttribute("CUSTOMERFOUND");
-	
 %>
 
 </head>
@@ -107,49 +113,6 @@ table, th, td {
 		<!-- CONTENT AREA -->
 		<div id="content_area">
 
-			<div id="batch" class="outer">
-				<h3 align="center" style="margin-top: 0;">Batch jobs</h3>
-
-				<div class="inner">
-					Batch Jobs:<br>
-					1 - Apply interest to all accounts <br>
-					2 - Move old transactions to archive table <br>
-
-					<form method="post" action = "DS" align ="center">
-							<input type="submit" name="subject" value ="Apply Interest" />
-					</form>
-					
-					<form method="post" action = "DS" align ="center">
-							<input type="submit" name="subject" value ="Archive Old Transactions" />
-					</form>
-
-					<form method="post" action = "DS" align ="center">
-							<input type="submit" name="subject" value ="Perform Batch" />
-					</form>
-
-				</div>
-			</div>
-
-			<div id="menu" class="outer">
-				<h3 align="center" style="margin-top: 0;">Menu</h3>
-
-				<div class="inner">
-					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="DeleteUser" /> <input
-							type="submit" value="Delete user"
-							onclick="return confirm('Do you wish to delete user?')" />
-					</form>
-
-
-					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="LogOutUser" "/> <input
-							type="submit" value="Log out admin"
-							onclick="return confirm('Do you wish to log out?')" />
-					</form>
-
-				</div>
-			</div>
-
 			<div id="search" class="outer">
 				<h3 align="center" style="margin-top: 0;">Search</h3>
 
@@ -157,58 +120,44 @@ table, th, td {
 					style="display: inline-block; text-align: center; width: 100%;">
 					<form method="post" action="DS">
 						Search by: <input type="radio" name="searchBy" value="account" />
-						Account <input type="radio" checked="checked" name="searchBy" value="user" /> User 
-							<br> 
-							Search for: <input type="text" name="searchToken" /> 
-							<br> 
-							<input type="submit" name="subject" value="Search" />
+						Account <input type="radio" checked="checked" name="searchBy"
+							value="user" /> User <br> Search for: <input type="text"
+							name="searchToken" /> <br> <input type="submit"
+							name="subject" value="Search" />
 					</form>
 
 				</div>
 			</div>
 
-			<div id="createUser" class="outer">
-				<h3 align="center" style="margin-top: 0;">Create user</h3>
+			<div id="batch" class="outer">
+				<h3 align="center" style="margin-top: 0;">Batch jobs</h3>
+
 				<div class="inner">
+					Batch Jobs:<br> 1 - Apply interest to all accounts <br> 2
+					- Move old transactions to archive table <br>
+
 					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="CreateNewUserAdmin" />
-						User type: <input type="radio" name="userType" value="customer" />
-						Customer <input type="radio" checked="checked" name="userType"
-							value="admin" /> Admin <br> Full name: <input type="text"
-							name="fullname" /> <br> User name: <input type="text"
-							name="username" /> <br> Password: <input type="text"
-							name="password" /> <br> CPR: <input type="text" name="cpr" />
-						<br> <input type="submit" value="Create User">
+						<input type="submit" name="subject" value="Apply Interest" />
 					</form>
+
+					<form method="post" action="DS" align="center">
+						<input type="submit" name="subject"
+							value="Archive Old Transactions" />
+					</form>
+
+					<form method="post" action="DS" align="center">
+						<input type="submit" name="subject" value="Perform Batch" />
+					</form>
+
 				</div>
-
-			</div>
-
-			<div id="customer" class="outer">
-				<h3 align="center" style="margin-top: 0;">Customer</h3>
-				<div class="inner">
-					<%if (customerFound != null) { %>
-						Username: <%=customerFound.getUsername()%>
-						<br/>
-						Full Name: <%=customerFound.getFullName()%>
-						<br/>
-						Password: <%=customerFound.getPassword()%>
-						<br/>
-						Preferred Currency: <%=customerFound.getCurrency()%>
-					<% 
-					}
-					%>						
-					
-				</div>
-
 			</div>
 
 
-			<div id="accounts" class="outer", style="width: 80%;">
+			<div id="accounts" class="outer" , style="width: 60%;">
 				<h3 align="center" style="margin-top: 0;">Accounts</h3>
 
 				<div class="inner">
-					
+
 					<table style="width: 100%">
 						<tr>
 							<th>Customer</th>
@@ -220,8 +169,8 @@ table, th, td {
 						</tr>
 
 						<%
-						if (customerFound != null)
-						for (Account account : customerFound.getAccounts()) {
+							if (customerFound != null)
+								for (Account account : customerFound.getAccounts()) {
 						%>
 						<tr>
 							<td><%=customerFound.getUsername()%></td>
@@ -236,49 +185,114 @@ table, th, td {
 						%>
 						<!-- (customerFound.getAccounts().size() == 0 ? "No accounts" : "")%>   -->
 					</table>
-					
+
 
 				</div>
 			</div>
+
+
+			<div id="customer" class="outer" , style="width: 23%">
+				<h3 align="center" style="margin-top: 0;">Customer</h3>
+				<div class="inner">
+					<%
+						if (customerFound != null) {
+					%>
+					Username:
+					<%=customerFound.getUsername()%>
+					<br /> Full Name:
+					<%=customerFound.getFullName()%>
+					<br /> Password:
+					<%=customerFound.getPassword()%>
+					<br /> Preferred Currency:
+					<%=customerFound.getCurrency()%>
+					<%
+						}
+					%>
+
+				</div>
+
+			</div>
+
 
 
 			<div id="modifyUser" class="outer">
 				<h3 align="center" style="margin-top: 0;">Modify user</h3>
 				<div class="inner">
 					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="modifyUserAdmin" />
 						User name: <input type="text" name="username" /> <br> <input
-							type="submit" value="Modify User">
+							type="submit" name="subject" value="Delete User">
 					</form>
 				</div>
 
 			</div>
-			
+
+
 			<div id="modifyAccount" class="outer">
 				<h3 align="center" style="margin-top: 0;">Modify Account</h3>
 				<div class="inner">
 					<form method="post" action="DS" align="center">
-						Select Account: <select name="accountSelected"/>
+						Select Account: <select name="accountSelected" />
 						<%
-							if(customerFound != null)
-							for (Account account : customerFound.getAccounts()) {
-								String accountID = "" + account.getAccountNumber();
+							if (customerFound != null)
+								for (Account account : customerFound.getAccounts()) {
+									String accountID = "" + account.getAccountNumber();
 						%>
-						<option value=<%=accountID%>>AccountID: <%=accountID%> </option>
+						<option value=<%=accountID%>>AccountID:
+							<%=accountID%>
+						</option>
 						<%
 							}
 						%>
-					</select> 
-					<br/>
-						Modify Interest: <input type="text" name="interest" placeholder="etc 5% -> 1.05"/>
-										<input type="submit" name="subject" value="Set Interest" />
-										<br/>
-						Modify Credit: <input type="text" name="credit"/> DKK
-										<input type="submit" name="subject" value="Set Credit" />
+						</select> <br /> Modify Interest: <input type="text" name="interest"
+							placeholder="etc 5% -> 1.05" /> <input type="submit"
+							name="subject" value="Set Interest" /> <br /> Modify Credit: <input
+							type="text" name="credit" /> DKK <input type="submit"
+							name="subject" value="Set Credit" />
 					</form>
 				</div>
 
 			</div>
+
+
+			<div id="createUser" class="outer">
+				<h3 align="center" style="margin-top: 0;">Create user</h3>
+				<div class="inner">
+					<form method="post" action="DS" align="center">
+						<input type="hidden" name="subject" value="CreateNewUserAdmin" />
+						User type: <input type="radio" name="userType" value="customer" />
+						Customer <input type="radio" checked="checked" name="userType"
+							value="admin" /> Admin <br> Full name: <input type="text"
+							name="fullname" /> <br> User name: <input type="text"
+							name="username" /> <br> Password: <input type="text"
+							name="password" /> <br> <input type="submit"
+							value="Create User">
+					</form>
+				</div>
+
+			</div>
+
+
+			<div id="menu" class="outer">
+				<h3 align="center" style="margin-top: 0;">Menu</h3>
+
+				<div class="inner">
+					<form method="post" action="DS" align="center">
+						<input type="submit" name="subject" value="Delete Admin"
+							onclick="return confirm('Do you wish to delete admin?')" />
+					</form>
+
+
+					<form method="post" action="DS" align="center">
+						<input type="hidden" name="subject" value="LogOutUser" "/> <input
+							type="submit" value="Log out admin"
+							onclick="return confirm('Do you wish to log out?')" />
+					</form>
+
+				</div>
+			</div>
+
+
+
 
 			<!--  
 			<div id="deleteUser" class="outer">
@@ -299,12 +313,25 @@ table, th, td {
 
 		<!-- FOOTER -->
 		<div id="footer">
-			Footer <br>
-			<p>Contact informations here
+			<div style="height: 100%; width: 24%; float: left">
+				Username:
+				<%=userLoggedIn.getUsername()%><br> Full name:
+				<%=userLoggedIn.getFullName()%>
+			</div>
+			<div style="height: 100%; width: 24%; float: left">
+				
+			</div>
+			<div style="height: 100%; width: 24%; float: right">
+				<br> s154666@student.dtu.dk <br> s151952@student.dtu.dk
+			</div>
+			<div style="height: 100%; width: 24%; float: right">
+				Contact information: <br> s144107@student.dtu.dk <br>
+				s144063@student.dtu.dk
+			</div>
 		</div>
 
 		<!-- END OF CONTAINER -->
 	</div>
 
 </body>
-</html>
+</html>

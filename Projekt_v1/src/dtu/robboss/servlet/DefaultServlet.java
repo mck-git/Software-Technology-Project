@@ -228,7 +228,7 @@ public class DefaultServlet extends HttpServlet {
 
 		}
 
-		if (subject.equals("DeleteUser")) {
+		if (subject.equals("Delete Admin")) {
 			User userToDelete = (User) request.getSession().getAttribute("USER");
 			try {
 				System.out.println("Removing " + userToDelete.getUsername() + ".");
@@ -372,12 +372,13 @@ public class DefaultServlet extends HttpServlet {
 
 		}
 
-		if (subject.equals("DeleteUserAdmin")) {
+		if (subject.equals("Delete User")) {
 			User userToDelete = app.getUser(request.getParameter("username"));
 			try {
 				System.out.println("Removing " + userToDelete.getUsername() + ".");
 				app.deleteUser(userToDelete);
 				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				// TODO: if admin deletes itself, redirect to login page instead
 				rd.forward(request, response);
 
 			} catch (NullPointerException e) {
