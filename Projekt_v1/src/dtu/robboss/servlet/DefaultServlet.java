@@ -195,11 +195,13 @@ public class DefaultServlet extends HttpServlet {
 //			Account sourceAccount = ((Customer) session.getAttribute("USER")).getMainAccount();
 			Account sourceAccount = app.getAccount(accountIDFrom);
 			
+			
 //			System.out.println("sourceAccount Customer = " + sourceAccount.getCustomer().getUsername());
 			
 			try {
 				if (recieverType.equals("account")) {
-					app.transferFromAccountToAccount(sourceAccount, request.getParameter("receiver"), amount,
+					Account targetAccount = app.getAccount(request.getParameter("receiver"));
+					app.transferFromAccountToAccount(sourceAccount, targetAccount, amount,
 							message);
 				} else if (recieverType.equals("user")) {
 					app.transferFromAccountToCustomer(sourceAccount, request.getParameter("receiver"), amount,
@@ -376,6 +378,20 @@ public class DefaultServlet extends HttpServlet {
 			} catch (NullPointerException e) {
 				// e.printStackTrace();
 				System.out.println("Could not remove user.");
+			}
+		}
+		
+		if (subject.equals("PerformBatch")) {
+			
+			try {
+				app.applyInterestToAllAccounts();
+				app.storeOldTransactionsInArchive();
+				
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 

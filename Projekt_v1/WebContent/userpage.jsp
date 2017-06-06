@@ -240,15 +240,16 @@ table, th, td {
 
 			<div id="TH" class="outer">
 				<h3 align="center" style="margin-top: 0;">Transaction History</h3>
-
+					<!--FORMAT: DATE[0], FROMACCOUNT[1], TOACCOUNT[2], FROMUSER[3], TOUSER[4], FROMBALANCE[5], TOBALANCE[6], AMOUNT[7], MESSAGE[8]-->
 				<div class="inner">
 
 					<table style="width: 100%">
 						<tr>
 							<th>Date</th>
-							<th>From (account)</th>
-							<th>To (account)</th>
+							<th>From (user/account)</th>
+							<th>To (user/account)</th>
 							<th>Amount</th>
+							<th>Balance</th>
 							<th>Message</th>
 						</tr>
 
@@ -257,10 +258,16 @@ table, th, td {
 						%>
 						<tr>
 							<td><%=th.get(i)[0]%></td>
-							<td><%=th.get(i)[1]%></td>
-							<td><%=th.get(i)[2]%></td>
-							<td><%=Valuta.convert(Double.parseDouble(th.get(i)[3]), userLoggedIn)%></td>
-							<td><%=th.get(i)[4]%></td>
+							<td><%=th.get(i)[3]%>/<%=th.get(i)[1]%></td>
+							<td><%=th.get(i)[4]%>/<%=th.get(i)[2]%></td>
+							<td><%=Valuta.convert(Double.parseDouble(th.get(i)[7]), userLoggedIn)%></td>
+							
+							<% if(userLoggedIn.getUsername().equals(th.get(i)[3])){ %> 
+							<td> <%=Valuta.convert(Double.parseDouble(th.get(i)[5]), userLoggedIn)%> </td> 
+							<% }else{ %> 
+							<td> <%=Valuta.convert(Double.parseDouble(th.get(i)[6]), userLoggedIn)%> </td> <%}; %>
+							
+							<td><%=th.get(i)[8]%></td>
 						</tr>
 						<%
 							}
