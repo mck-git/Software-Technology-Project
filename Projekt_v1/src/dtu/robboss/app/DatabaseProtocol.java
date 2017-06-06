@@ -688,4 +688,33 @@ public void storeOldTransactionsInArchive() {
 		}
 	}
 
+	public void setInterest(String accountID, double interest) {
+		startConnection();
+
+		try {
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET INTEREST = '" + interest + "' WHERE ID = '"
+					+ accountID + "'");
+
+		} catch (SQLException e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+		closeConnection();
+	}
+
+	public void setCredit(String accountID, double credit) {
+		startConnection();
+
+		try {
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET CREDIT = '" + credit + "' WHERE ID = '"
+					+ accountID + "'");
+
+		} catch (SQLException e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+		closeConnection();
+		
+	}
+
 }

@@ -270,10 +270,10 @@ table, th, td {
 						%>
 					</select> 
 					<br/>
-						Modify Interest: <input type="text" name="interest"/>
+						Modify Interest: <input type="text" name="interest" placeholder="etc 5% -> 1.05"/>
 										<input type="submit" name="subject" value="Set Interest" />
 										<br/>
-						Modify Credit: <input type="text" name="credit"/>
+						Modify Credit: <input type="text" name="credit"/> DKK
 										<input type="submit" name="subject" value="Set Credit" />
 					</form>
 				</div>

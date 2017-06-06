@@ -404,7 +404,7 @@ public class DefaultServlet extends HttpServlet {
 			
 			try {
 				app.applyInterestToAllAccounts();
-				
+				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 				rd.forward(request, response);
 				
@@ -428,9 +428,28 @@ public class DefaultServlet extends HttpServlet {
 			
 			try {
 				double interest = Double.parseDouble(request.getParameter("interest"));
+				String accountID = request.getParameter("accountSelected");
 				
+				// Sets interest in database
+				app.setInterest(accountID, interest);
+				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
 				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (subject.equals("Set Credit")) {
+			
+			try {
+				double credit = Double.parseDouble(request.getParameter("credit"));
+				String accountID = request.getParameter("accountSelected");
 				
+				// Sets credit in database
+				app.setCredit(accountID, credit);
+				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 				rd.forward(request, response);
 				
