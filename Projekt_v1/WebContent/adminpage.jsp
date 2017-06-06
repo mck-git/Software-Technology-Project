@@ -108,12 +108,18 @@
 				</div>
 			</div>
 
-
-			<div id="messages" class="outer">
-				<h3 align="center" style="margin-top: 0;">Messages</h3>
+			<div id="news" class="outer">
+				<h3 align="center" style="margin-top: 0;">Batch jobs</h3>
 
 				<div class="inner">
-					message <br>
+					Batch Jobs:<br>
+					1 - Apply interest to all accounts <br>
+					2 - Move old transactions to archive table <br>
+
+					<form method="post" action = "DS" align ="center">
+							<input type="hidden" name="subject" value="PerformBatch">
+							<input type="submit" value ="Perform Batch" />
+					</form>
 
 				</div>
 			</div>
@@ -252,4 +258,4 @@
 	</div>
 
 </body>
-</html>
+</html>

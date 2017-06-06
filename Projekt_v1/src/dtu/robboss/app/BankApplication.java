@@ -193,7 +193,8 @@ public class BankApplication {
 			String message)
 			throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
 		Customer targetCustomer = getCustomer(targetUsername);
-		transferFromAccountToAccount(sourceAccount, targetCustomer.getMainAccount().getAccountNumber(), transferAmount,
+		
+		transferFromAccountToAccount(sourceAccount, targetCustomer.getMainAccount(), transferAmount,
 				message);
 	}
 
@@ -206,22 +207,22 @@ public class BankApplication {
 	 * @throws TransferException
 	 * @throws AccountNotfoundException
 	 */
-	public void transferFromAccountToAccount(Account sourceAccount, String targetAccountID, double transferAmount,
+	public void transferFromAccountToAccount(Account sourceAccount, Account targetAccount, double transferAmount,
 			String message) throws UserNotLoggedInException, TransferException, AccountNotfoundException {
 		if (!userLoggedIn.getUsername().equals(sourceAccount.getCustomer().getUsername())) {
 			throw new UserNotLoggedInException();
 		}
 
-		if (sourceAccount.getBalance() + sourceAccount.getCredit() < transferAmount || transferAmount <= 0
-				|| sourceAccount.getAccountNumber().equals(targetAccountID))
-			throw new TransferException();
-
-		Account targetAccount = database.getAccount(targetAccountID);
 		if (targetAccount == null)
 			throw new AccountNotfoundException();
+		
+		if (sourceAccount.getBalance() + sourceAccount.getCredit() < transferAmount || transferAmount <= 0
+				|| sourceAccount.getAccountNumber().equals(targetAccount.getAccountNumber()))
+			throw new TransferException();
+
 
 		database.transferFromAccountToAccount(sourceAccount, targetAccount, transferAmount);
-		addTransactionToTH(sourceAccount, targetAccountID, transferAmount, message);
+		addTransactionToTH(sourceAccount, targetAccount, transferAmount, message);
 
 	}
 
@@ -229,7 +230,7 @@ public class BankApplication {
 		return database.getTransactionHistory(customer);
 	}
 
-	private void addTransactionToTH(Account from, String to, Double amount, String message) {
+	private void addTransactionToTH(Account from, Account to, Double amount, String message) {
 
 		Calendar date = new GregorianCalendar();
 
@@ -265,15 +266,32 @@ public class BankApplication {
 		
 	}
 
-	public void applyInterest() {
-		
+	public void applyInterestToAllAccounts() {
+
 		// 1: get all accounts
+		List<Account> allAccounts = database.getAllAccounts();
+
+		// 2update balances locally according to interest
+		// and update in database
+
+		for (Account account : allAccounts) {
+			database.setAccountBalance(account, account.getBalance() * account.getInterest());
+		}
+
+	}
+	
+	public void storeOldTransactionsInArchive() {
 		
-		// 2: update balances locally according to interest
+		// 1! Get all transactions in Transaction History
 		
-		// 3: update in database
+		// 2! Find ID interval for old transactions
+		
+		// 3.1! Delete old transactions from Transaction History
+		
+		// 3.a! Insert old transactions into Archive table
 		
 		
+		database.storeOldTransactionsInArchive();
 	}
 
 }

@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -64,14 +66,22 @@ public class DatabaseProtocol {
 	// ADD AND REMOVE //
 	////////////////////
 
-	public void addTransactionToTH(String date, Account from, String toID, Double amount, String message) {
-		// TABLECOLUMNS: DATE, FROM, TO, AMOUNT, MESSAGE
+	public void addTransactionToTH(String date, Account from, Account to, Double amount, String message) {
+		// TABLECOLUMNS: DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
 
 		try {
 			startConnection();
 			stmt.executeUpdate(
-					"INSERT INTO DTUGRP04.TRANSACTIONHISTORY (DATE, FROM, TO, AMOUNT, MESSAGE) VALUES('" + date + "', '"
-							+ from.getAccountNumber() + "', '" + toID + "', '" + amount + "', '" + message + "')");
+					"INSERT INTO DTUGRP04.TRANSACTIONHISTORY (DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) VALUES('" 
+			+ date + "', '"
+			+ from.getAccountNumber() + "', '" 
+			+ to.getAccountNumber() + "', '" 
+			+ from.getCustomer().getUsername() + "', '" 
+			+ to.getCustomer().getUsername() + "', '" 
+			+ from.getBalance() + "', '" 
+			+ to.getBalance() + "', '" 			
+			+ amount + "', '" 
+			+ message + "')");
 
 		} catch (SQLException e) {
 			closeConnection();
@@ -79,6 +89,72 @@ public class DatabaseProtocol {
 		}
 		closeConnection();
 
+	}
+	
+public void storeOldTransactionsInArchive() {
+		
+		try {
+			startConnection();
+			
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY");
+			Calendar cal = new GregorianCalendar();
+			Calendar limit = new GregorianCalendar();
+			
+			limit.set(Calendar.DAY_OF_YEAR, limit.get(Calendar.DAY_OF_YEAR)-7);
+			
+			List<TransactionHistoryElement> transactions = new ArrayList<TransactionHistoryElement>();
+			
+			while(rs.next()) {
+				String date = rs.getString("DATE");
+				// 							 0123456789
+				// date format for database: YYYY/MM/DD/hh/mm
+				
+				int year = Integer.parseInt(date.substring(0, 4));
+				cal.set(Calendar.YEAR, year);
+
+				int month = Integer.parseInt(date.substring(5,7));
+				cal.set(Calendar.MONTH, month);
+				
+				int day = Integer.parseInt(date.substring(8, 10));
+				cal.set(Calendar.DAY_OF_MONTH, day);
+				
+				if ( cal.before(limit) ) {
+					String dateString = rs.getString("DATE");
+					int from = rs.getInt("FROM");
+					int to = rs.getInt("TO");
+					double amount = rs.getDouble("AMOUNT");
+					String msg = rs.getString("MESSAGE");
+					
+					transactions.add(new TransactionHistoryElement(dateString, from, to, amount, msg));
+				}
+					
+			}
+			closeConnection();
+			
+			startConnection();
+			
+			for (TransactionHistoryElement the : transactions) {
+				stmt.executeUpdate("INSERT INTO DTUGRP04.TRANSACTIONARCHIVE (DATE, FROM, TO, AMOUNT, MESSAGE) "
+						+ "VALUES"
+						+ "('" + the.getDate()+ "', '" + the.getFrom() + "', '" + the.getTo() + "', '" + the.getAmount() + "', '" + the.getMessage() + "')");			
+			}
+			
+			closeConnection();
+			
+			startConnection();
+			
+			for (TransactionHistoryElement the : transactions) {
+				stmt.executeUpdate("DELETE FROM DTUGRP04.TRANSACTIONHISTORY WHERE DATE = '" + the.getDate() + "'");			
+			}
+			
+			
+			closeConnection();
+			
+		} catch (Exception e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+		
 	}
 
 	// TODO: OLD
@@ -195,7 +271,7 @@ public class DatabaseProtocol {
 		startConnection();
 		try {
 			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + "(USERNAME, TYPE, BALANCE, CREDIT, INTEREST)"
-					+ "VALUES ('" + customer.getUsername() + "', '" + (main ? "MAIN" : "NORMAL") + "', 0, 0 , 1.0)");
+					+ "VALUES ('" + customer.getUsername() + "', '" + (main ? "MAIN" : "NORMAL") + "', 0, 0 , 1.05)");
 		} catch (SQLException e) {
 			closeConnection();
 			System.out.println("Could not create account");
@@ -482,19 +558,21 @@ public class DatabaseProtocol {
 
 		System.out.println(customer.getUsername());
 		try {
-			String query = "SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE ";
-			ArrayList<Account> accounts = customer.getAccounts();
-			for (int i = 0; i < accounts.size(); i++) {
-				query += " FROM = " + accounts.get(i).getAccountNumber() + " OR TO = "
-						+ accounts.get(i).getAccountNumber() + " ";
-				if (i < accounts.size() - 1)
-					query += " OR ";
-			}
+//			String query = "SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE ";
+//			ArrayList<Account> accounts = customer.getAccounts();
+//			for (int i = 0; i < accounts.size(); i++) {
+//				query += " FROMACCOUNT = " + accounts.get(i).getAccountNumber() + " OR TOACCOUNT = "
+//						+ accounts.get(i).getAccountNumber() + " ";
+//				if (i < accounts.size() - 1)
+//					query += " OR ";
+//			}
 
-			ResultSet th = stmt.executeQuery(query);
+			ResultSet th = stmt.executeQuery("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE FROMUSER = '" + customer.getUsername() 
+											+ "' OR TOUSER = '" + customer.getUsername() + "'");
 			while (th.next()) {
-				String[] row = { th.getString("DATE"), th.getString("FROM"), th.getString("TO"), th.getString("AMOUNT"),
-						th.getString("MESSAGE") };
+				String[] row = { th.getString("DATE"), th.getString("FROMACCOUNT"), th.getString("TOACCOUNT"), 
+						th.getString("FROMUSER"), th.getString("TOUSER"), th.getString("FROMBALANCE"), th.getString("TOBALANCE"), 
+						th.getString("AMOUNT"), th.getString("MESSAGE") };
 				table.add(row);
 			}
 
@@ -567,6 +645,24 @@ public class DatabaseProtocol {
 		}
 		closeConnection();
 	}
+	
+	public void setAccountBalance(Account account, double newBalance) {
+
+		startConnection();
+
+		try {
+			account.setBalance(newBalance);
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + account.getBalance() + "' WHERE ID = '"
+					+ account.getAccountNumber() + "'");
+
+		} catch (SQLException e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+		closeConnection();
+
+	}
+
 
 	////////////////////
 	// Connection //

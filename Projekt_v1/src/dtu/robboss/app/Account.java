@@ -18,7 +18,7 @@ public class Account {
 		this.accountNumber = accountNumber;
 		this.balance = 0;
 		this.credit = 0;
-		this.interest = 1.0;
+		this.interest = 1.05;
 
 		customer.addAccount(this);
 	}
@@ -45,6 +45,10 @@ public class Account {
 		this.interest = interest;
 
 		customer.addAccount(this);
+	}
+	
+	public void setBalance(double newBalance) {
+		this.balance = newBalance;
 	}
 
 	public boolean isMainAccount() {
