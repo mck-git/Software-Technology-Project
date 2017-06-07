@@ -54,69 +54,7 @@ public class DefaultServlet extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		String subject = request.getParameter("subject");
 		
-		////////////////
-		// LOGIN.HTML //
-		////////////////
-		
-		if (subject.equals("Login")) {
-			/*
-			 * Logs in as user with given credentials assuming one exists. 
-			 * After this is done, relevant session attributes are set. 
-			 */
-			// Get request username and password
-			String username = request.getParameter("username");
-			String password = request.getParameter("password");
-			
-			try {
-				HttpSession session = request.getSession();
-				
-				// Gets the user object logged in
-				User userLoggedIn = app.login(username, password);
-				
-				// Checks if user logged in is a customer
-				if (userLoggedIn instanceof Customer) {
-					// Casts from user to customer and refreshes customers account information.
-					Customer customerLoggedIn = (Customer) userLoggedIn;
-					app.refreshAccountsForCustomer(customerLoggedIn);
-					
-					// Sets customer as the session attribute 
-					session.setAttribute("USER", customerLoggedIn);
-					
-					// Get transaction history for customer
-					List<TransactionHistoryElement> th = app.getTransactionHistory(customerLoggedIn);
-					session.setAttribute("TRANSACTIONHISTORY", th);
-					
-					RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
-					rd.forward(request, response);
-				}
-				
-				// Checks if user logged in is an admin
-				if (userLoggedIn instanceof Admin) {
-					// Cast sfrom user to admin and sets admin as the session attribute
-					Admin adminLoggedIn = (Admin) userLoggedIn;
-					session.setAttribute("USER", adminLoggedIn);
-					
-					// Creates a list to store future admin search results
-					session.setAttribute("ACCOUNTSFOUND", new ArrayList<Account>());
-					
-					RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
-					rd.forward(request, response);
-				}
-				
-			} catch (UnknownLoginException | UserNotfoundException e) {
-				System.out.println("DefaultServlet::doPost -> Login\nError message: " + e.getMessage());
-				response.sendRedirect("login.html");
-			}
-		}
-		
-		if (subject.equals("UserCount")) {
-			/*
-			 * Prints the number of users currently in the database.
-			 */
-			out.println("Number of users: " + app.customerCount());
-		}
-		
-		/////////////////
+				/////////////////
 		// NEWUSER.JSP //
 		/////////////////
 		
@@ -272,6 +210,70 @@ public class DefaultServlet extends HttpServlet {
 			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 			rd.forward(request, response);
 		}
+		
+	////////////////
+	// LOGIN.HTML //
+	////////////////
+	
+	if (subject.equals("Login")) {
+		/*
+		 * Logs in as user with given credentials assuming one exists. 
+		 * After this is done, relevant session attributes are set. 
+		 */
+		// Get request username and password
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
+		
+		try {
+			HttpSession session = request.getSession();
+			
+			// Gets the user object logged in
+			User userLoggedIn = app.login(username, password);
+			
+			// Checks if user logged in is a customer
+			if (userLoggedIn instanceof Customer) {
+				// Casts from user to customer and refreshes customers account information.
+				Customer customerLoggedIn = (Customer) userLoggedIn;
+				app.refreshAccountsForCustomer(customerLoggedIn);
+				
+				// Sets customer as the session attribute 
+				session.setAttribute("USER", customerLoggedIn);
+				
+				// Get transaction history for customer
+				List<TransactionHistoryElement> th = app.getTransactionHistory(customerLoggedIn);
+				session.setAttribute("TRANSACTIONHISTORY", th);
+				
+				RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
+				rd.forward(request, response);
+			}
+			
+			// Checks if user logged in is an admin
+			if (userLoggedIn instanceof Admin) {
+				// Cast sfrom user to admin and sets admin as the session attribute
+				Admin adminLoggedIn = (Admin) userLoggedIn;
+				session.setAttribute("USER", adminLoggedIn);
+				
+				// Creates a list to store future admin search results
+				session.setAttribute("ACCOUNTSFOUND", new ArrayList<Account>());
+				
+				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				rd.forward(request, response);
+			}
+			
+		} catch (UnknownLoginException | UserNotfoundException e) {
+			System.out.println("DefaultServlet::doPost -> Login\nError message: " + e.getMessage());
+			response.sendRedirect("login.html");
+		}
+	}
+	
+	if (subject.equals("UserCount")) {
+		/*
+		 * Prints the number of users currently in the database.
+		 */
+		out.println("Number of users: " + app.customerCount());
+	}
+	
+
 
 		///////////////////
 		// ADMINPAGE.JSP //
