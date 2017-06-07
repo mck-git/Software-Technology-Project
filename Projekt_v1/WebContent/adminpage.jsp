@@ -32,6 +32,14 @@
 	max-height: 160px;
 }
 
+.innerScrollable {
+	width: 100%;
+	background: rgba(240, 230, 255, 0.9);
+	border-radius: 2px;
+	max-height: 160px;
+	overflow: scroll;
+}
+
 .outer {
 	background: rgba(150, 204, 250, 0.8);
 	width: 40%;
@@ -57,7 +65,6 @@ table, th, td {
 #accounts {
 	clear: both;
 	float: left;
-	overflow: scroll;
 }
 
 #customer {
@@ -156,7 +163,7 @@ table, th, td {
 			<div id="accounts" class="outer" , style="width: 60%;">
 				<h3 align="center" style="margin-top: 0;">Accounts</h3>
 
-				<div class="inner">
+				<div class="innerScrollable">
 
 					<table style="width: 100%">
 						<tr>
@@ -219,8 +226,9 @@ table, th, td {
 				<h3 align="center" style="margin-top: 0;">Modify user</h3>
 				<div class="inner">
 					<form method="post" action="DS" align="center">
-						User name: <input type="text" name="username" /> <br> <input
-							type="submit" name="subject" value="Delete User">
+					<input type="hidden" name="subject" value="DeleteUserByAdmin">
+						User name: <input type="text" name="username" /> <br> 
+						<input type="submit" value="Delete User">
 					</form>
 				</div>
 
@@ -277,14 +285,15 @@ table, th, td {
 
 				<div class="inner">
 					<form method="post" action="DS" align="center">
-						<input type="submit" name="subject" value="Delete Admin"
+					<input type="hidden" name="subject" value="DeleteLoggedInUser"/>
+						<input type="submit"  value="Delete Admin"
 							onclick="return confirm('Do you wish to delete admin?')" />
 					</form>
 
 
 					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="LogOutUser" "/> <input
-							type="submit" value="Log out admin"
+						<input type="hidden" name="subject" value="LogOutUser"/> 
+						<input type="submit" value="Log out admin"
 							onclick="return confirm('Do you wish to log out?')" />
 					</form>
 
