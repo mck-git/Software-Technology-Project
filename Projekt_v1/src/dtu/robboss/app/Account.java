@@ -1,9 +1,5 @@
 package dtu.robboss.app;
 
-//HEJ MAGNUS!
-
-//,,,,,,,,,,
-
 public class Account {
 
 	private Customer customer;
@@ -13,40 +9,30 @@ public class Account {
 	private String type;
 	private double interest;
 
-	public Account(Customer customer, String id) {
+	/**
+	 * Constructor for the Account class. Takes the following parameters:
+	 * 
+	 * @param customer: every account belongs to a customer (user that is not admin).
+	 * @param id: unique ID, auto generated in database
+	 * @param balance: how many DKK are in the account (can be shown in other currencies, but stored as DKK)
+	 * @param credit: how far below 0 the account balance is allowed to go
+	 * @param type: either "normal" or "main". Every customer has at most 1 main account
+	 * @param interest: 1.05 corresponds to 5 % interest, applied during batch job
+	 */
+	public Account(Customer customer, String id, double balance, double credit, String type, double interest) {
 		this.customer = customer;
 		this.id = id;
-		this.balance = 0;
-		this.credit = 0;
-		this.interest = 1.05;
-
-		customer.addAccount(this);
-	}
-
-	// public Account(Customer customer, String accountNumber, double balance,
-	// double credit, String type) {
-	// this.customer = customer;
-	// this.accountNumber = accountNumber;
-	// this.balance = balance;
-	// this.credit = credit;
-	// this.type = type;
-	// this.interest = 1.0;
-	//
-	// customer.addAccount(this);
-	// }
-
-	public Account(Customer customer, String id, double balance, double credit, String type,
-			double interest) {
-		this.customer = customer;
-		this.id = id;
-		this.balance = Math.round(balance*100.0)/100.0;
+		
+		// round to 2 decimal places
+		this.balance = Math.round(balance * 100.0) / 100.0;
+		
 		this.credit = credit;
 		this.type = type;
 		this.interest = interest;
 
 		customer.addAccount(this);
 	}
-	
+
 	public void setBalance(double newBalance) {
 		this.balance = newBalance;
 	}
@@ -100,12 +86,12 @@ public class Account {
 	}
 
 	public String toString() {
-		
+
 		String balance = Valuta.convert(this.balance, this.customer);
 		String credit = Valuta.convert(this.credit, this.customer);
 
-		String s = "ID: " + this.id + ", balance: " + balance + ", credit: " + credit
-				+ ", interest: " + this.interest + ", type: " + this.type;
+		String s = "ID: " + this.id + ", balance: " + balance + ", credit: " + credit + ", interest: " + this.interest
+				+ ", type: " + this.type;
 
 		return s;
 	}
