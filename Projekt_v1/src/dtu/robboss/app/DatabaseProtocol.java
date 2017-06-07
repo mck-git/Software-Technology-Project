@@ -18,231 +18,146 @@ public class DatabaseProtocol {
 	private Connection con = null;
 	private Statement stmt = null;
 
-	////////////
-	// AMOUNT //
-	////////////
-
+	/**
+	 * database protocol is constructed (in BankApplication) with a dataSource,
+	 * used to communicate with the database. For details on dataSource object,
+	 * see DefaultServlet.
+	 * 
+	 * @param dataSource
+	 */
 	public DatabaseProtocol(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
+	////////////////
+	// Connection //
+	////////////////
+
+	/**
+	 * Used to initiate contact with database.
+	 */
+	private void startConnection() {
+		try {
+			con = dataSource.getConnection("DTU02", "FAGP2017");
+			stmt = con.createStatement();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Used to terminate contact with database. When the connection to the
+	 * database is closed, the SQL statement is committed.
+	 */
+	private void closeConnection() {
+		try {
+			if (!con.isClosed())
+				con.close();
+			if (!stmt.isClosed())
+				stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	////////////////////
+	// CUSTOMER COUNT //
+	////////////////////
+
+	/**
+	 * Counts how many customers there are in the database.
+	 * 
+	 * @return integer corresponding to number of customers. Returns -1 if the
+	 *         count fails.
+	 * 
+	 * @throws SQLException
+	 */
 	public int customerCount() throws SQLException {
 		startConnection();
-		// TODO: OLD: USERS -> CUSTOMERS
-		ResultSet rs = stmt.executeQuery("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.CUSTOMERS");
+		ResultSet rs = stmt.executeQuery("SELECT COUNT(*) AS CUSTOMERCOUNT FROM DTUGRP04.CUSTOMERS");
 
 		if (rs.next()) {
-			int userCount = Integer.parseInt(rs.getString("USERCOUNT"));
+			int customerCount = Integer.parseInt(rs.getString("CUSTOMERCOUNT"));
 			closeConnection();
-			return userCount;
+			return customerCount;
 		}
 		closeConnection();
 		return -1;
 	}
 
-	///////////////
-	// SEARCHING //
-	///////////////
+	///////////
+	// USERS //
+	///////////
 
 	/**
-	 * Checks if database contains a user with given users username. Checks both
-	 * CUSTOMERS and ADMINS tables.
+	 * Checks if the database contains the given user.
 	 * 
 	 * @param user
-	 *            - user to search for.
-	 * @return - true if user is found otherwise false.
+	 *            : user to search for.
+	 * @return : true if user is found otherwise false.
 	 */
 	public boolean containsUser(User user) {
 		User userCheck = getUserByUsername(user.getUsername());
 		return !(userCheck == null);
 	}
 
-	public boolean containsAccount(Account account) {
-		Account accountCheck = getAccount(account.getAccountID());
-		return !(accountCheck == null);
-	}
-
-	////////////////////
-	// ADD AND REMOVE //
-	////////////////////
-
-	public void addTransactionToTH(String date, Account from, Account to, Double amount, String message) {
-		// TABLECOLUMNS: DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
-
-		try {
-			startConnection();
-			stmt.executeUpdate(
-					"INSERT INTO DTUGRP04.TRANSACTIONHISTORY (DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) VALUES('" 
-			+ date + "', '"
-			+ from.getAccountID() + "', '" 
-			+ to.getAccountID() + "', '" 
-			+ from.getCustomer().getUsername() + "', '" 
-			+ to.getCustomer().getUsername() + "', '" 
-			+ from.getBalance() + "', '" 
-			+ to.getBalance() + "', '" 			
-			+ amount + "', '" 
-			+ message + "')");
-
-		} catch (SQLException e) {
-			closeConnection();
-			e.printStackTrace();
-		}
-		closeConnection();
-
-	}
-	
-public void storeOldTransactionsInArchive() {
-		
-		try {
-			startConnection();
-			
-			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY");
-			Calendar cal = new GregorianCalendar();
-			Calendar limit = new GregorianCalendar();
-			
-			limit.set(Calendar.DAY_OF_YEAR, limit.get(Calendar.DAY_OF_YEAR)-7);
-			
-			List<TransactionHistoryElement> transactions = new ArrayList<TransactionHistoryElement>();
-			
-			while(rs.next()) {
-				String date = rs.getString("DATE");
-				// 							 0123456789
-				// date format for database: YYYY/MM/DD/hh/mm
-				
-				int year = Integer.parseInt(date.substring(0, 4));
-				cal.set(Calendar.YEAR, year);
-
-				int month = Integer.parseInt(date.substring(5,7));
-				cal.set(Calendar.MONTH, month);
-				
-				int day = Integer.parseInt(date.substring(8, 10));
-				cal.set(Calendar.DAY_OF_MONTH, day);
-				
-				if ( cal.before(limit) ) {
-					String dateString = rs.getString("DATE");
-					int fromAccountID = rs.getInt("FROM");
-					int toAccountID = rs.getInt("TO");
-					String fromUser = rs.getString("FROMUSER");
-					String toUser = rs.getString("TOUSER");
-					double fromBalance = rs.getDouble("FROMBALANCE");
-					double toBalance = rs.getDouble("TOBALANCE");
-					double amount = rs.getDouble("AMOUNT");
-					
-					String msg = rs.getString("MESSAGE");
-					
-					transactions.add(new TransactionHistoryElement(dateString, fromAccountID, toAccountID, fromUser, toUser, fromBalance, toBalance, amount, msg));
-				}
-					
-			}
-			closeConnection();
-			
-			startConnection();
-			
-			for (TransactionHistoryElement the : transactions) {
-				//DATABASE FORMAT: DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
-				stmt.executeUpdate("INSERT INTO DTUGRP04.TRANSACTIONARCHIVE (DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) "
-						+ "VALUES"
-						+ "('" + the.getDate()+ "', '" 
-						+ the.getFromAccountID() + "', '" 
-						+ the.getToAccountID() + "', '" 
-						+ the.getFromUserName() + "', '" 
-						+ the.getToUserName() + "', '" 
-						+ the.getFromBalance() + "', '" 
-						+ the.getToBalance() + "', '" 
-						+ the.getAmount() + "', '" 
-						+ the.getMessage() + "')");			
-			}
-			
-			closeConnection();
-			
-			startConnection();
-			
-			for (TransactionHistoryElement the : transactions) {
-				stmt.executeUpdate("DELETE FROM DTUGRP04.TRANSACTIONHISTORY WHERE DATE = '" + the.getDate() + "'");			
-			}
-			
-			
-			closeConnection();
-			
-		} catch (Exception e) {
-			closeConnection();
-			e.printStackTrace();
-		}
-		
-	}
-
-	// TODO: OLD
-	// public void removeTransactionHistoryTable(Customer cos) {
-	// String tableSQL = "DROP TABLE DTUGRP04." + cos.getUsername() + "TH ";
-	// startConnection();
-	// try {
-	// stmt.executeUpdate(tableSQL);
-	// } catch (SQLException e) {
-	// e.printStackTrace();
-	// closeConnection();
-	// }
-	// closeConnection();
-	// }
-
-	// TODO: OLD
-	// /**
-	// * @throws SQLException
-	// *
-	// */
-	// public void addTransactionHistoryTable(Customer cos) {
-	// // Transaction history = TH
-	// String tableSQL = "CREATE TABLE DTUGRP04." + cos.getUsername() + "TH " +
-	// "( DATE CHAR(16) NOT NULL, " +
-	// " FROM INTEGER NOT NULL, " +
-	// " TO INTEGER NOT NULL, " +
-	// " AMOUNT DOUBLE NOT NULL, " +
-	// " MESSAGE VARCHAR(140))" +
-	// " IN DTUGRP04.DTUGRP04" +
-	// " AUDIT NONE " +
-	// " DATA CAPTURE NONE " +
-	// " CCSID EBCDIC;";
-	//
-	// // Starts connection with database and adds table
-	// startConnection();
-	// try {
-	// stmt.executeUpdate(tableSQL);
-	// } catch (SQLException e) {
-	// closeConnection();
-	// e.printStackTrace();
-	// System.out.println("ERROR: Could not add TH table with username " +
-	// cos.getUsername());
-	// }
-	// closeConnection();
-	// }
-
 	/**
-	 * Adds given admin to database in ADMINS table. username, full name and
-	 * password is stored.
+	 * Removes given user from database and all accounts associated with the
+	 * user. Uses given user's username to search through database in tables
+	 * CUSTOMERS, ADMINS and ACCOUNTS.
 	 * 
-	 * @param admin
-	 *            - admin to be added.
-	 * @throws AlreadyExistsException
-	 *             - if a user with given username already exists in database.
+	 * Transaction history and transaction archive are unchanged.
+	 * 
+	 * @param user
+	 *            - user to be removed from database.
 	 */
-	public void addAdmin(Admin admin) throws AlreadyExistsException {
-		// ADMINS columns: USERNAME, FULLNAME, PASSWORD
+	public void removeUser(User user) {
 
-		if (containsUser(admin))
-			throw new AlreadyExistsException("User");
+		startConnection();
 		try {
-			startConnection();
-			stmt.executeUpdate("INSERT INTO DTUGRP04.ADMINS (USERNAME, FULLNAME, PASSWORD) VALUES('"
-					+ admin.getUsername() + "', '" + admin.getFullName() + "', '" + admin.getPassword() + "')");
+
+			if (user instanceof Customer) {
+				stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + user.getUsername() + "'");
+				stmt.executeUpdate("DELETE FROM DTUGRP04.CUSTOMERS WHERE USERNAME = '" + user.getUsername() + "'");
+
+			} else
+				stmt.executeUpdate("DELETE FROM DTUGRP04.ADMINS WHERE USERNAME = '" + user.getUsername() + "'");
+
 		} catch (SQLException e) {
 			closeConnection();
+			System.out.println("Could not remove user.");
 			e.printStackTrace();
 		}
 		closeConnection();
+
 	}
 
 	/**
-	 * Adds given customer to database in CUSTOMERS table. username, full name
-	 * and password is stored.
+	 * Finds user in the database with the given username. Searches through both
+	 * USERS and ADMINS tables. Searches through customers first. If no customer
+	 * is found, searches through admins. If no admin is found, returns null.
+	 * 
+	 * @param username
+	 *            - Username of user we want to find
+	 */
+	public User getUserByUsername(String username) {
+
+		Customer customer = getCustomer(username);
+		if (!(customer == null)) {
+			return customer;
+		}
+
+		return getAdmin(username);
+
+	}
+
+	// ################
+	// CUSTOMERS
+	// ################
+
+	/**
+	 * Adds given customer object to database in CUSTOMERS table. 
+	 * Parameters stored (columns in table): USERNAME, FULLNAME, PASSWORD, CURRENCY
 	 * 
 	 * @param customer
 	 *            - customer to be added.
@@ -269,116 +184,6 @@ public void storeOldTransactionsInArchive() {
 		}
 		closeConnection();
 	}
-
-	/**
-	 * Adds account to database in ACCOUNTS table. This does not take an Account
-	 * as parameter as the AccountID is unknown until the account is generated
-	 * in the database. Accounts are generated with values as 0.0, and added to
-	 * the costumer given.
-	 * 
-	 * @param customer
-	 * @param main
-	 */
-	public void addAccount(Customer customer, boolean main) {
-		// ACCOUNTS columns: ID, USERNAME, TYPE, BALANCE, CREDIT, INTEREST
-
-		startConnection();
-		try {
-			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + "(USERNAME, TYPE, BALANCE, CREDIT, INTEREST)"
-					+ "VALUES ('" + customer.getUsername() + "', '" + (main ? "MAIN" : "NORMAL") + "', 0, 0 , 1.05)");
-		} catch (SQLException e) {
-			closeConnection();
-			System.out.println("Could not create account");
-			// e.printStackTrace();
-		}
-		closeConnection();
-	}
-
-	/**
-	 * Removes given user from database and all accounts associated with the
-	 * user. Uses given users username to search through database in tables
-	 * CUSTOMERS, ADMINS and ACCOUNTS.
-	 * 
-	 * @param user
-	 *            - user to be removed from database.
-	 */
-	public void removeUser(User user) {
-
-		startConnection();
-		try {
-			// Removes TH table
-			if (user instanceof Customer) {
-				stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + user.getUsername() + "'");
-				// TODO: OLD: USERS -> CUSTOMERS
-				stmt.executeUpdate("DELETE FROM DTUGRP04.CUSTOMERS WHERE USERNAME = '" + user.getUsername() + "'");
-				// TODO: OLD: NO LONGER REMOVES TABLE DYNAMICALLY
-				// removeTransactionHistoryTable((Customer) user);
-			} else
-				stmt.executeUpdate("DELETE FROM DTUGRP04.ADMINS WHERE USERNAME = '" + user.getUsername() + "'");
-
-		} catch (SQLException e) {
-			closeConnection();
-			System.out.println("Could not remove user.");
-			e.printStackTrace();
-		}
-		closeConnection();
-
-	}
-
-	/**
-	 * Removes given account from database. Uses given account's ID to search
-	 * through the database.
-	 * 
-	 * @param account
-	 *            - account to be removed.
-	 */
-	public void removeAccount(Account account) {
-
-		startConnection();
-		try {
-			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = '" + account.getAccountID() + "'");
-		} catch (SQLException e) {
-			closeConnection();
-			System.out.println("Could not remove account.");
-			// e.printStackTrace();
-		}
-
-		closeConnection();
-
-	}
-
-	/**
-	 * Fetches all accounts from the database associated with given customer.
-	 * Also adds these accounts to local customer instance.
-	 * 
-	 * @param customer
-	 *            - customer whose accounts to fetch.
-	 */
-	public void addAccountsToLocalCustomer(Customer customer) {
-		startConnection();
-		try {
-			ResultSet rs = stmt
-					.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + customer.getUsername() + "'");
-
-			while (rs.next()) {
-				Account newAccount = new Account(customer, rs.getString("ID"), rs.getDouble("BALANCE"),
-						rs.getDouble("CREDIT"), rs.getString("TYPE"), rs.getDouble("INTEREST"));
-				if (rs.getString("TYPE").trim().equals("MAIN")) {
-					customer.setMainAccount(newAccount);
-				}
-			}
-		} catch (SQLException e) {
-			closeConnection();
-			System.out.println("Error: DatabaseProtocol::addAccountsToLocalCostumer");
-			// e.printStackTrace();
-		}
-
-		closeConnection();
-	}
-
-	////////////////////
-	// Get //
-	////////////////////
 
 	/**
 	 * Fetches customer from database
@@ -428,6 +233,47 @@ public void storeOldTransactionsInArchive() {
 		return null;
 	}
 
+	public void setCurrency(Customer customer, Valuta currency) {
+		startConnection();
+		try {
+			stmt.executeUpdate("UPDATE DTUGRP04.CUSTOMERS SET CURRENCY = '" + currency.name() + "' WHERE USERNAME = '"
+					+ customer.getUsername() + "'");
+		} catch (SQLException e) {
+
+			e.printStackTrace();
+		}
+		closeConnection();
+	}
+
+	// ################
+	// ADMIN
+	// ################
+
+	/**
+	 * Adds given admin to database in ADMINS table. username, full name and
+	 * password is stored.
+	 * 
+	 * @param admin
+	 *            - admin to be added.
+	 * @throws AlreadyExistsException
+	 *             - if a user with given username already exists in database.
+	 */
+	public void addAdmin(Admin admin) throws AlreadyExistsException {
+		// ADMINS columns: USERNAME, FULLNAME, PASSWORD
+
+		if (containsUser(admin))
+			throw new AlreadyExistsException("User");
+		try {
+			startConnection();
+			stmt.executeUpdate("INSERT INTO DTUGRP04.ADMINS (USERNAME, FULLNAME, PASSWORD) VALUES('"
+					+ admin.getUsername() + "', '" + admin.getFullName() + "', '" + admin.getPassword() + "')");
+		} catch (SQLException e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+		closeConnection();
+	}
+
 	/**
 	 * Fetches admin from database
 	 * 
@@ -455,27 +301,70 @@ public void storeOldTransactionsInArchive() {
 		return null;
 	}
 
-	/**
-	 * Finds user in the database with the given username. Searches through both
-	 * USERS and ADMINS tables.
-	 * 
-	 * @param username
-	 *            - Username of user we want to find
-	 */
-	public User getUserByUsername(String username) {
+	//////////////
+	// ACCOUNTS //
+	//////////////
 
-		// Checks if a customer exists with the given username
-		Customer c = getCustomer(username);
-		if (!(c == null)) {
-			return c;
+	/**
+	 * Checks if the database contains the given account.
+	 * 
+	 * @param account
+	 * @return : returns true if account is found.
+	 */
+	public boolean containsAccount(Account account) {
+		Account accountCheck = getAccount(account.getAccountID());
+		return !(accountCheck == null);
+	}
+
+	/**
+	 * Adds account to database in ACCOUNTS table. This does not take an Account
+	 * as parameter as the AccountID is unknown until the account is generated
+	 * in the database. Accounts are generated with values as 0.0, and added to
+	 * the costumer given.
+	 * 
+	 * @param customer
+	 * @param main
+	 */
+	public void addAccount(Customer customer, boolean main) {
+		// ACCOUNTS columns: ID, USERNAME, TYPE, BALANCE, CREDIT, INTEREST
+
+		startConnection();
+		try {
+			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + "(USERNAME, TYPE, BALANCE, CREDIT, INTEREST)"
+					+ "VALUES ('" + customer.getUsername() + "', '" + (main ? "MAIN" : "NORMAL") + "', 0, 0 , 1.05)");
+		} catch (SQLException e) {
+			closeConnection();
+			System.out.println("Could not create account");
+			// e.printStackTrace();
+		}
+		closeConnection();
+	}
+
+	/**
+	 * Removes given account from database. Uses given account's ID to search
+	 * through the database.
+	 * 
+	 * @param account
+	 *            - account to be removed.
+	 */
+	public void removeAccount(Account account) {
+
+		startConnection();
+		try {
+			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = '" + account.getAccountID() + "'");
+		} catch (SQLException e) {
+			closeConnection();
+			System.out.println("Could not remove account.");
+			// e.printStackTrace();
 		}
 
-		// If customer does not exist, returns the admin with the given
-		// username.
-		// If no admin with given username exists, returns null
-		return getAdmin(username);
+		closeConnection();
 
 	}
+
+	// ####################
+	// GETTERS
+	// ####################
 
 	/**
 	 * Fetches account from table ACCOUNTS in the database with the given
@@ -515,9 +404,9 @@ public void storeOldTransactionsInArchive() {
 		try {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS");
 
-//			if (!rs.next()) {
-//				return null;
-//			}
+			// if (!rs.next()) {
+			// return null;
+			// }
 
 			while (rs.next()) {
 				Customer customer = getCustomer(rs.getString("USERNAME"));
@@ -565,58 +454,9 @@ public void storeOldTransactionsInArchive() {
 
 	}
 
-	public List<TransactionHistoryElement> getTransactionHistory(Customer customer) {
-		startConnection();
-
-		List<TransactionHistoryElement> table = new ArrayList<>();
-
-		try {
-//			String query = "SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE ";
-//			ArrayList<Account> accounts = customer.getAccounts();
-//			for (int i = 0; i < accounts.size(); i++) {
-//				query += " FROMACCOUNT = " + accounts.get(i).getAccountNumber() + " OR TOACCOUNT = "
-//						+ accounts.get(i).getAccountNumber() + " ";
-//				if (i < accounts.size() - 1)
-//					query += " OR ";
-//			}
-
-			ResultSet th = stmt.executeQuery("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE FROMUSER = '" + customer.getUsername() 
-											+ "' OR TOUSER = '" + customer.getUsername() + "'");
-			while (th.next()) {
-//				String[] row = { th.getString("DATE"), th.getString("FROMACCOUNT"), th.getString("TOACCOUNT"), 
-//						th.getString("FROMUSER"), th.getString("TOUSER"), th.getString("FROMBALANCE"), th.getString("TOBALANCE"), 
-//						th.getString("AMOUNT"), th.getString("MESSAGE") };
-				TransactionHistoryElement element = new TransactionHistoryElement(th.getString("DATE"), th.getInt("FROMACCOUNT"), 
-						th.getInt("TOACCOUNT"), th.getString("FROMUSER"), th.getString("TOUSER"), 
-						th.getDouble("FROMBALANCE"), th.getDouble("TOBALANCE"),
-						th.getDouble("AMOUNT"), th.getString("MESSAGE"));
-				table.add(element);
-			}
-
-			return table;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		closeConnection();
-		return null;
-	}
-
-	////////////
-	// Update //
-	////////////
-
-	public void setCurrency(Customer customer, Valuta currency) {
-		startConnection();
-		try {
-			stmt.executeUpdate("UPDATE DTUGRP04.CUSTOMERS SET CURRENCY = '" + currency.name() + "' WHERE USERNAME = '"
-					+ customer.getUsername() + "'");
-		} catch (SQLException e) {
-
-			e.printStackTrace();
-		}
-		closeConnection();
-	}
+	// ####################
+	// SETTERS
+	// ####################
 
 	public void setNewMainAccount(Account oldMain, Account newMain) {
 
@@ -637,6 +477,38 @@ public void storeOldTransactionsInArchive() {
 		closeConnection();
 
 	}
+
+	public void setInterest(String accountID, double interest) {
+		startConnection();
+
+		try {
+			stmt.executeUpdate(
+					"UPDATE DTUGRP04.ACCOUNTS SET INTEREST = '" + interest + "' WHERE ID = '" + accountID + "'");
+
+		} catch (SQLException e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+		closeConnection();
+	}
+
+	public void setCredit(String accountID, double credit) {
+		startConnection();
+
+		try {
+			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET CREDIT = '" + credit + "' WHERE ID = '" + accountID + "'");
+
+		} catch (SQLException e) {
+			closeConnection();
+			e.printStackTrace();
+		}
+		closeConnection();
+
+	}
+
+	// ####################
+	// TRANSACTIONS
+	// ####################
 
 	public void transferFromAccountToAccount(Account source, Account target, double amount) {
 
@@ -661,7 +533,7 @@ public void storeOldTransactionsInArchive() {
 		}
 		closeConnection();
 	}
-	
+
 	public void setAccountBalance(Account account, double newBalance) {
 
 		startConnection();
@@ -679,58 +551,182 @@ public void storeOldTransactionsInArchive() {
 
 	}
 
+	// #########################
+	// ADDING TO LOCAL FIELDS
+	// #########################
 
-	////////////////////
-	// Connection //
-	////////////////////
-
-	private void closeConnection() {
-		try {
-			if (!con.isClosed())
-				con.close();
-			if (!stmt.isClosed())
-				stmt.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void startConnection() {
-		try {
-			con = dataSource.getConnection("DTU02", "FAGP2017");
-			stmt = con.createStatement();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void setInterest(String accountID, double interest) {
+	/**
+	 * Fetches all accounts from the database associated with given customer.
+	 * Also adds these accounts to local customer instance.
+	 * 
+	 * @param customer
+	 *            - customer whose accounts to fetch.
+	 */
+	public void addAccountsToLocalCustomer(Customer customer) {
 		startConnection();
+		try {
+			ResultSet rs = stmt
+					.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + customer.getUsername() + "'");
+
+			while (rs.next()) {
+				Account newAccount = new Account(customer, rs.getString("ID"), rs.getDouble("BALANCE"),
+						rs.getDouble("CREDIT"), rs.getString("TYPE"), rs.getDouble("INTEREST"));
+				if (rs.getString("TYPE").trim().equals("MAIN")) {
+					customer.setMainAccount(newAccount);
+				}
+			}
+		} catch (SQLException e) {
+			closeConnection();
+			System.out.println("Error: DatabaseProtocol::addAccountsToLocalCostumer");
+			// e.printStackTrace();
+		}
+
+		closeConnection();
+	}
+
+	/////////////////////////
+	// TRANSACTION HISTORY //
+	/////////////////////////
+
+	public void addTransactionToHistory(String date, Account from, Account to, Double amount, String message) {
+		// TABLECOLUMNS: DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER,
+		// FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
 
 		try {
-			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET INTEREST = '" + interest + "' WHERE ID = '"
-					+ accountID + "'");
+			startConnection();
+			stmt.executeUpdate(
+					"INSERT INTO DTUGRP04.TRANSACTIONHISTORY (DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) VALUES('"
+							+ date + "', '" + from.getAccountID() + "', '" + to.getAccountID() + "', '"
+							+ from.getCustomer().getUsername() + "', '" + to.getCustomer().getUsername() + "', '"
+							+ from.getBalance() + "', '" + to.getBalance() + "', '" + amount + "', '" + message + "')");
 
 		} catch (SQLException e) {
 			closeConnection();
 			e.printStackTrace();
 		}
 		closeConnection();
+
 	}
 
-	public void setCredit(String accountID, double credit) {
+	public List<TransactionHistoryElement> getTransactionHistory(Customer customer) {
 		startConnection();
 
-		try {
-			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET CREDIT = '" + credit + "' WHERE ID = '"
-					+ accountID + "'");
+		List<TransactionHistoryElement> table = new ArrayList<>();
 
+		try {
+			// String query = "SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE
+			// ";
+			// ArrayList<Account> accounts = customer.getAccounts();
+			// for (int i = 0; i < accounts.size(); i++) {
+			// query += " FROMACCOUNT = " + accounts.get(i).getAccountNumber() +
+			// " OR TOACCOUNT = "
+			// + accounts.get(i).getAccountNumber() + " ";
+			// if (i < accounts.size() - 1)
+			// query += " OR ";
+			// }
+
+			ResultSet th = stmt.executeQuery("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE FROMUSER = '"
+					+ customer.getUsername() + "' OR TOUSER = '" + customer.getUsername() + "'");
+			while (th.next()) {
+				// String[] row = { th.getString("DATE"),
+				// th.getString("FROMACCOUNT"), th.getString("TOACCOUNT"),
+				// th.getString("FROMUSER"), th.getString("TOUSER"),
+				// th.getString("FROMBALANCE"), th.getString("TOBALANCE"),
+				// th.getString("AMOUNT"), th.getString("MESSAGE") };
+				TransactionHistoryElement element = new TransactionHistoryElement(th.getString("DATE"),
+						th.getInt("FROMACCOUNT"), th.getInt("TOACCOUNT"), th.getString("FROMUSER"),
+						th.getString("TOUSER"), th.getDouble("FROMBALANCE"), th.getDouble("TOBALANCE"),
+						th.getDouble("AMOUNT"), th.getString("MESSAGE"));
+				table.add(element);
+			}
+
+			return table;
 		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+		return null;
+	}
+
+	// ########################
+	// TRANSACTION ARCHIVE
+	// ########################
+
+	public void storeOldTransactionsInArchive() {
+
+		try {
+			startConnection();
+
+			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY");
+			Calendar cal = new GregorianCalendar();
+			Calendar limit = new GregorianCalendar();
+
+			limit.set(Calendar.DAY_OF_YEAR, limit.get(Calendar.DAY_OF_YEAR) - 7);
+
+			List<TransactionHistoryElement> transactions = new ArrayList<TransactionHistoryElement>();
+
+			while (rs.next()) {
+				String date = rs.getString("DATE");
+				// 0123456789
+				// date format for database: YYYY/MM/DD/hh/mm
+
+				int year = Integer.parseInt(date.substring(0, 4));
+				cal.set(Calendar.YEAR, year);
+
+				int month = Integer.parseInt(date.substring(5, 7));
+				cal.set(Calendar.MONTH, month);
+
+				int day = Integer.parseInt(date.substring(8, 10));
+				cal.set(Calendar.DAY_OF_MONTH, day);
+
+				if (cal.before(limit)) {
+					String dateString = rs.getString("DATE");
+					int fromAccountID = rs.getInt("FROM");
+					int toAccountID = rs.getInt("TO");
+					String fromUser = rs.getString("FROMUSER");
+					String toUser = rs.getString("TOUSER");
+					double fromBalance = rs.getDouble("FROMBALANCE");
+					double toBalance = rs.getDouble("TOBALANCE");
+					double amount = rs.getDouble("AMOUNT");
+
+					String msg = rs.getString("MESSAGE");
+
+					transactions.add(new TransactionHistoryElement(dateString, fromAccountID, toAccountID, fromUser,
+							toUser, fromBalance, toBalance, amount, msg));
+				}
+
+			}
+			closeConnection();
+
+			startConnection();
+
+			for (TransactionHistoryElement the : transactions) {
+				// DATABASE FORMAT: DATE, FROMACCOUNT, TOACCOUNT, FROMUSER,
+				// TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
+				stmt.executeUpdate(
+						"INSERT INTO DTUGRP04.TRANSACTIONARCHIVE (DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) "
+								+ "VALUES" + "('" + the.getDate() + "', '" + the.getFromAccountID() + "', '"
+								+ the.getToAccountID() + "', '" + the.getFromUserName() + "', '" + the.getToUserName()
+								+ "', '" + the.getFromBalance() + "', '" + the.getToBalance() + "', '" + the.getAmount()
+								+ "', '" + the.getMessage() + "')");
+			}
+
+			closeConnection();
+
+			startConnection();
+
+			for (TransactionHistoryElement the : transactions) {
+				stmt.executeUpdate("DELETE FROM DTUGRP04.TRANSACTIONHISTORY WHERE DATE = '" + the.getDate() + "'");
+			}
+
+			closeConnection();
+
+		} catch (Exception e) {
 			closeConnection();
 			e.printStackTrace();
 		}
-		closeConnection();
-		
+
 	}
 
 }

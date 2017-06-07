@@ -619,7 +619,7 @@ public class BankApplication {
 		String dateFormated = year + "/" + month + "/" + day + "-" + hour + ":" + minute;
 
 		// Send information to database protocol
-		database.addTransactionToTH(dateFormated, sourceAccount, targetAccount, transferAmount, message);
+		database.addTransactionToHistory(dateFormated, sourceAccount, targetAccount, transferAmount, message);
 
 	}
 
