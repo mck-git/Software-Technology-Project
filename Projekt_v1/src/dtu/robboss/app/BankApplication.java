@@ -218,7 +218,7 @@ public class BankApplication {
 			throw new AccountNotfoundException();
 		
 		if (sourceAccount.getBalance() + sourceAccount.getCredit() < transferAmount || transferAmount <= 0
-				|| sourceAccount.getAccountNumber().equals(targetAccount.getAccountNumber()))
+				|| sourceAccount.getAccountID().equals(targetAccount.getAccountID()))
 			throw new TransferException();
 
 

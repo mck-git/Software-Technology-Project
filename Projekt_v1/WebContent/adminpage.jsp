@@ -174,7 +174,7 @@ table, th, td {
 						%>
 						<tr>
 							<td><%=customerFound.getUsername()%></td>
-							<td><%=account.getAccountNumber()%></td>
+							<td><%=account.getAccountID()%></td>
 							<td><%=Valuta.convert(account.getBalance(), customerFound)%></td>
 							<td><%=Valuta.convert(account.getCredit(), customerFound)%></td>
 							<td><%=account.getType()%></td>
@@ -235,7 +235,7 @@ table, th, td {
 						<%
 							if (customerFound != null)
 								for (Account account : customerFound.getAccounts()) {
-									String accountID = "" + account.getAccountNumber();
+									String accountID = "" + account.getAccountID();
 						%>
 						<option value=<%=accountID%>>AccountID:
 							<%=accountID%>

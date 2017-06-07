@@ -62,7 +62,7 @@ public class Customer extends User {
 	public Account getAccountByID(String accountID){
 		
 		for(Account acc: this.accounts){
-			if(acc.getAccountNumber().equals(accountID))
+			if(acc.getAccountID().equals(accountID))
 				return acc;
 		}
 		

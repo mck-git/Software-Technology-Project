@@ -126,7 +126,7 @@ table, th, td {
 					%>
 
 					ID:
-					<%=account.getAccountNumber()%>
+					<%=account.getAccountID()%>
 
 					- balance:
 					<%=Valuta.convert(account.getBalance(), userLoggedIn)%>
@@ -193,7 +193,7 @@ table, th, td {
 							<%
 								for (Account account : userLoggedIn.getAccounts()) {
 
-									String accountID = "" + account.getAccountNumber();
+									String accountID = "" + account.getAccountID();
 							%>
 							<option value=<%=accountID%>
 								<%if (account.equals(userLoggedIn.getMainAccount())) {%>
@@ -233,7 +233,7 @@ table, th, td {
 					Select account to edit: <select name="accountSelected">
 						<%
 							for (Account account : userLoggedIn.getAccounts()) {
-								String accountID = "" + account.getAccountNumber();
+								String accountID = "" + account.getAccountID();
 						%>
 						<option value=<%=accountID%>>AccountID: <%=accountID%>
 						</option>

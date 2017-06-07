@@ -58,7 +58,7 @@ public class DatabaseProtocol {
 	}
 
 	public boolean containsAccount(Account account) {
-		Account accountCheck = getAccount(account.getAccountNumber());
+		Account accountCheck = getAccount(account.getAccountID());
 		return !(accountCheck == null);
 	}
 
@@ -74,8 +74,8 @@ public class DatabaseProtocol {
 			stmt.executeUpdate(
 					"INSERT INTO DTUGRP04.TRANSACTIONHISTORY (DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) VALUES('" 
 			+ date + "', '"
-			+ from.getAccountNumber() + "', '" 
-			+ to.getAccountNumber() + "', '" 
+			+ from.getAccountID() + "', '" 
+			+ to.getAccountID() + "', '" 
 			+ from.getCustomer().getUsername() + "', '" 
 			+ to.getCustomer().getUsername() + "', '" 
 			+ from.getBalance() + "', '" 
@@ -336,7 +336,7 @@ public void storeOldTransactionsInArchive() {
 
 		startConnection();
 		try {
-			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = '" + account.getAccountNumber() + "'");
+			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = '" + account.getAccountID() + "'");
 		} catch (SQLException e) {
 			closeConnection();
 			System.out.println("Could not remove account.");
@@ -627,9 +627,9 @@ public void storeOldTransactionsInArchive() {
 
 		try {
 			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET TYPE = '" + oldMain.getType() + "' WHERE ID = '"
-					+ oldMain.getAccountNumber() + "'");
+					+ oldMain.getAccountID() + "'");
 			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET TYPE = '" + newMain.getType() + "' WHERE ID = '"
-					+ newMain.getAccountNumber() + "'");
+					+ newMain.getAccountID() + "'");
 		} catch (SQLException e) {
 			closeConnection();
 			System.out.println("Error in DatabaseProtocol::selectNewMainAccount");
@@ -647,9 +647,9 @@ public void storeOldTransactionsInArchive() {
 
 		try {
 			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + source.getBalance() + "' WHERE ID = '"
-					+ source.getAccountNumber() + "'");
+					+ source.getAccountID() + "'");
 			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + target.getBalance() + "' WHERE ID = '"
-					+ target.getAccountNumber() + "'");
+					+ target.getAccountID() + "'");
 
 		} catch (SQLException e) {
 			closeConnection();
@@ -669,7 +669,7 @@ public void storeOldTransactionsInArchive() {
 		account.changeBalance(newBalance);
 		try {
 			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + account.getBalance() + "' WHERE ID = '"
-					+ account.getAccountNumber() + "'");
+					+ account.getAccountID() + "'");
 
 		} catch (SQLException e) {
 			closeConnection();
