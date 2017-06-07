@@ -56,7 +56,7 @@ public class DefaultServlet extends HttpServlet {
 		String subject = request.getParameter("subject");
 
 		if (subject.equals("UserCount")) {
-			out.println("Amount of users: " + app.userCount());
+			out.println("Amount of users: " + app.customerCount());
 		}
 
 		if (subject.equals("CreateNewUser")) {
@@ -144,7 +144,7 @@ public class DefaultServlet extends HttpServlet {
 					rd.forward(request, response);
 				}
 
-			} catch (UnknownLoginException e) {
+			} catch (UnknownLoginException | UserNotfoundException e) {
 				System.out.println("DefaultServlet::doPost -> Login\nError message: " + e.getMessage());
 				response.sendRedirect("login.html");
 				// e.printStackTrace();
@@ -193,7 +193,7 @@ public class DefaultServlet extends HttpServlet {
 			String recieverType = request.getParameter("receiverType");
 			String message = request.getParameter("message");
 //			Account sourceAccount = ((Customer) session.getAttribute("USER")).getMainAccount();
-			Account sourceAccount = app.getAccount(accountIDFrom);
+			Account sourceAccount = app.getAccountByID(accountIDFrom);
 			
 			
 //			System.out.println("sourceAccount Customer = " + sourceAccount.getCustomer().getUsername());
@@ -204,7 +204,7 @@ public class DefaultServlet extends HttpServlet {
 				
 				double amount = Valuta.revert(Double.parseDouble(transferAmount), loggedInCustomer);
 				if (recieverType.equals("account")) {
-					Account targetAccount = app.getAccount(request.getParameter("receiver"));
+					Account targetAccount = app.getAccountByID(request.getParameter("receiver"));
 					app.transferFromAccountToAccount(sourceAccount, targetAccount, amount,
 							message);
 				} else if (recieverType.equals("user")) {
@@ -236,7 +236,7 @@ public class DefaultServlet extends HttpServlet {
 			User userToDelete = (User) request.getSession().getAttribute("USER");
 			try {
 				System.out.println("Removing " + userToDelete.getUsername() + ".");
-				app.deleteUser(userToDelete);
+				app.removeUser(userToDelete);
 				request.getSession().removeAttribute("USER");
 				RequestDispatcher rd = request.getRequestDispatcher("login.html");
 				rd.forward(request, response);
@@ -285,7 +285,7 @@ public class DefaultServlet extends HttpServlet {
 			String accountID = request.getParameter("accountSelected");
 			
 			Account delete = loggedInCustomer.getAccountByID(accountID);
-			app.deleteAccount(delete);
+			app.removeAccount(delete);
 			
 			RequestDispatcher rd = request.getRequestDispatcher("userpage.jsp");
 			rd.forward(request, response);
@@ -306,13 +306,13 @@ public class DefaultServlet extends HttpServlet {
 					// This utilizes the fact that getAccount creates a customer with only
 					// that 1 account in it.
 					//accounts.add(app.getAccount(searchToken)); TODO OLD CODE
-					Customer customerFound = app.getAccount(searchToken).getCustomer();
+					Customer customerFound = app.getAccountByID(searchToken).getCustomer();
 					session.setAttribute("CUSTOMERFOUND", customerFound);
 
 				} else if (searchBy.equals("user")) {
 					// Searcing for a specific user
 					//accounts.addAll(app.getAccountsByUser(searchToken));
-					Customer customerFound = app.getCustomer(searchToken);
+					Customer customerFound = (Customer) app.getUserByUsername(searchToken);
 					session.setAttribute("CUSTOMERFOUND", customerFound);
 
 				}
@@ -377,15 +377,15 @@ public class DefaultServlet extends HttpServlet {
 		}
 
 		if (subject.equals("Delete User")) {
-			User userToDelete = app.getUser(request.getParameter("username"));
 			try {
+				User userToDelete = app.getUserByUsername(request.getParameter("username"));
 				System.out.println("Removing " + userToDelete.getUsername() + ".");
-				app.deleteUser(userToDelete);
+				app.removeUser(userToDelete);
 				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 				// TODO: if admin deletes itself, redirect to login page instead
 				rd.forward(request, response);
 
-			} catch (NullPointerException e) {
+			} catch (NullPointerException | UserNotfoundException e) {
 				// e.printStackTrace();
 				System.out.println("DefaultServlet::doPost -> DeleteUserAdmin\nErorr message: Could not remove user.");
 			}

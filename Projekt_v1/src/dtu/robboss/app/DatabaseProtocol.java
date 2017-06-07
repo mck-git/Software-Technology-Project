@@ -26,7 +26,7 @@ public class DatabaseProtocol {
 		this.dataSource = dataSource;
 	}
 
-	public int userCount() throws SQLException {
+	public int customerCount() throws SQLException {
 		startConnection();
 		// TODO: OLD: USERS -> CUSTOMERS
 		ResultSet rs = stmt.executeQuery("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.CUSTOMERS");
@@ -53,7 +53,7 @@ public class DatabaseProtocol {
 	 * @return - true if user is found otherwise false.
 	 */
 	public boolean containsUser(User user) {
-		User userCheck = getUser(user.getUsername());
+		User userCheck = getUserByUsername(user.getUsername());
 		return !(userCheck == null);
 	}
 
@@ -462,7 +462,7 @@ public void storeOldTransactionsInArchive() {
 	 * @param username
 	 *            - Username of user we want to find
 	 */
-	public User getUser(String username) {
+	public User getUserByUsername(String username) {
 
 		// Checks if a customer exists with the given username
 		Customer c = getCustomer(username);

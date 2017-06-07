@@ -48,6 +48,7 @@ public class Account {
 
 	public boolean isMainAccount() {
 		return this.getCustomer().getMainAccount().equals(this);
+
 	}
 
 	public Customer getCustomer() {

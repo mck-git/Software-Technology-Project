@@ -28,34 +28,53 @@ public class BankApplication {
 	// LOGIN LOGOUT //
 	//////////////////
 
-	public User login(String username, String pass) throws UnknownLoginException {
+	/**
+	 * Logs in user with the given username, if username and password match in
+	 * the database. User can be Customer or Admin.
+	 * 
+	 * @param username
+	 * @param pass
+	 * @return User corresponding to the login information
+	 * @throws UnknownLoginException
+	 *             : If login fails.
+	 */
+	public User login(String username, String pass) throws UnknownLoginException, UserNotfoundException {
 
-		userLoggedIn = getUser(username);
-		
+		if (username.equals(""))
+			throw new UnknownLoginException();
+
+		// Gets user with the given username from the Database
+		userLoggedIn = getUserByUsername(username);
+
 		// checks if correct login information
-		if (userLoggedIn != null && pass.equals(userLoggedIn.getPassword().trim()))
-			return userLoggedIn;
-
 		// If login failed, throw exception
-		throw new UnknownLoginException();
+		if (userLoggedIn == null || !pass.equals(userLoggedIn.getPassword().trim()))
+			throw new UnknownLoginException();
+
+		return userLoggedIn;
 	}
 
-	//////////////////
-	// LOGIN CHECKS //
-	//////////////////
-
-	public boolean userLoggedIn() {
-		return userLoggedIn != null;
-	}
-
+	/**
+	 * Returns true if userLoggedIn is an Admin
+	 * 
+	 * @return
+	 */
 	public boolean adminLoggedIn() {
 		return userLoggedIn instanceof Admin;
 	}
 
+	/**
+	 * Returns true if userLoggedIn is a Customer
+	 * 
+	 * @return
+	 */
 	public boolean customerLoggedIn() {
 		return userLoggedIn instanceof Customer;
 	}
 
+	/**
+	 * Sets userLoggedIn to be null
+	 */
 	public void logOut() {
 		userLoggedIn = null;
 	}
@@ -64,20 +83,43 @@ public class BankApplication {
 	// USER MANAGEMENT //
 	/////////////////////
 
+	/**
+	 * If currency is valid - set currency for customer both locally and
+	 * externally (database)
+	 * 
+	 * @param customer
+	 *            : Customer object to set currency for
+	 * @param currency
+	 *            : Currency enum to set for customer. Valid currencies are:
+	 *            DKK, EUR, USD, GBP, JPY.
+	 */
 	public void setCurrency(Customer customer, Valuta currency) {
 
+		if (customer == null) {
+			System.out.println("setCurrency -> customer is null");
+			return;
+		}
+
+		if (!isValidCurrency(currency)) {
+			System.out.println("setCurrency -> currency is invalid");
+			return;
+		}
+
+		// If currency is valid - set currency for customer both locally and
+		// externally (database)
+		database.setCurrency(customer, currency);
 		customer.setCurrency(currency);
-
-		if (currency.name().equals("DKK") || currency.name().equals("EUR") || currency.name().equals("USD")
-				|| currency.name().equals("GBP") || currency.name().equals("JPY"))
-			database.setCurrency(customer, currency);
-
 	}
 
-	public int userCount() {
+	/**
+	 * 
+	 * @return The number of customers in the database. If unsuccessful -
+	 *         returns -1.
+	 */
+	public int customerCount() {
 
 		try {
-			return database.userCount();
+			return database.customerCount();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -85,106 +127,323 @@ public class BankApplication {
 		return -1;
 	}
 
+	/**
+	 * Creates customer with given information both locally and externally (in
+	 * the database).
+	 * 
+	 * @param fullname
+	 * @param username
+	 * @param password
+	 * @param currency
+	 * @throws AlreadyExistsException
+	 */
 	public void createCustomer(String fullname, String username, String password, Valuta currency)
 			throws AlreadyExistsException {
+
+		if(!newUserHasValidParameters(fullname, username, password)){
+			System.out.println("createCustomer");
+			return;
+		}
+		
+		if (!isValidCurrency(currency)) {
+			System.out.println("createCustomer -> invalid currency");
+			return;
+		}
+
+		// Create account locally and in database
 		Customer newCustomer = new Customer(fullname, username, password, currency);
-		newCustomer.setCurrency(currency);
-
 		database.addCustomer(newCustomer);
+		
+		// Create a new account for the created customer. New account is set to Main.
 		createAccount(newCustomer, true);
-
-		// Creates TH table TODO: OLD
-		// database.addTransactionHistoryTable(newCustomer);
 	}
 
+	/**
+	 * Checks if parameters are valid when creating a new customer.
+	 * @param fullname
+	 * @param username
+	 * @param password
+	 * @param currency
+	 * @return True if parameters are valid
+	 */
+	private boolean newUserHasValidParameters(String fullname, String username, String password) {
+		if (fullname == null || fullname.equals("")) {
+			System.out.println("creating user -> invalid full name");
+			return false;
+		}
+
+		if (username == null || username.equals("")) {
+			System.out.println("creating user -> invalid username");
+			return false;
+		}
+
+		if (password == null || password.equals("")) {
+			System.out.println("creating user -> invalid password");
+			return false;
+		}
+
+		if (fullname == null || fullname.equals("")) {
+			System.out.println("creating user -> invalid name");
+			return false;
+		}
+		
+		
+		return true;
+	}
+
+	/**
+	 * Checks if the given enum Valuta is a valid currency
+	 * 
+	 * @param currency
+	 *            : Valid currencies are: DKK, EUR, USD, GBP, JPY.
+	 * @return True if currency is valid.
+	 */
+	private boolean isValidCurrency(Valuta currency) {
+		if (currency == null)
+			return false;
+
+		return (currency.name().equals("DKK") || currency.name().equals("EUR") || currency.name().equals("USD")
+				|| currency.name().equals("GBP") || currency.name().equals("JPY"));
+	}
+	
+	
+	
 	public void createAdmin(String fullname, String username, String password) throws AlreadyExistsException {
+		
+		if(!newUserHasValidParameters(fullname , username, password)){
+			System.out.println("createAdmin");
+			return;
+		}
+		
 		Admin newAdmin = new Admin(fullname, username, password);
 
 		database.addAdmin(newAdmin);
 	}
 
-	public void deleteUser(User user) {
-		// TODO: Administer admin.
-		// if (!adminLoggedIn)
-		// throw new AdminNotLoggedInException();
-
-		// TODO: Sanitation - brugeren må kun slettes hvis alle balance på
-		// konti er 0.
-
+	/**
+	 * Removes given user in Database. Only removes customer, if all accounts belonging to the customer have balance 0.
+	 * @param user
+	 */
+	public void removeUser(User user) {
+		if(user == null){
+			System.out.println("removeUser -> user is null");
+			return;
+		}
+		
+		if(user instanceof Customer){
+			// If user is a customer, refresh all accounts belonging to the customer.
+			refreshAccountsForCustomer((Customer) user);
+			
+			// Go through all accounts for given customer, and check if balance is 0
+			for(Account account : ((Customer) user).getAccounts()) {
+				if(account.getBalance() != 0){
+					System.out.println("removeUser -> Customer has account balance different from 0");
+					return;
+				}
+			}
+		}
+		
+		// Remove the user.
 		database.removeUser(user);
 
 	}
 
-	public User getUser(String username) {
-		return database.getUser(username);
-	}
-
-	public Customer getCustomer(String username) throws UserNotfoundException {
-		Customer customerFromDatabase = database.getCustomer(username);
-
-		if (customerFromDatabase == null)
+	/** 
+	 * Gets user with the given username from the database.
+	 * @param username
+	 * @return
+	 */
+	public User getUserByUsername(String username) throws UserNotfoundException {
+		if(username == null || username.equals("")){
+			System.out.println("getUserByUsername -> username is null or empty string");
 			throw new UserNotfoundException();
-
-		refreshAccountsForCustomer(customerFromDatabase);
-
-		return customerFromDatabase;
-
+		}
+		
+		User foundUser = database.getUserByUsername(username);
+		
+		if(foundUser instanceof Customer){
+			refreshAccountsForCustomer((Customer) foundUser);
+			
+			return (Customer) foundUser;
+		}
+		
+		return (Admin) foundUser;
 	}
-
-//	private Admin getAdmin(String username) throws UserNotfoundException {
-//		Admin adminFromDatabase = database.getAdmin(username);
-//
-//		if (adminFromDatabase == null)
-//			throw new UserNotfoundException();
-//
-//		return adminFromDatabase;
-//	}
 
 	////////////////////////
 	// ACCOUNT MANAGEMENT //
 	////////////////////////
 
+	// ##############################
+	// account: create and delete
+	// ##############################
+
+	/**
+	 * Creates an account in the database, given a customer.
+	 * 
+	 * @param customer
+	 *            : object of type Customer. All accounts must belong to a
+	 *            customer.
+	 * @param main
+	 *            : whether the account is of type main.
+	 */
+
+	// TODO: change boolean main to String
+	// TODO: sanitize for customer, must exist
+
 	public void createAccount(Customer customer, boolean main) {
-		database.addAccount(customer, main);
+
+		if (customer == null)
+			System.out.println("createAccount -> Customer is null");
+
+		else if (customer.getMainAccount() != null && main)
+			System.out.println("createAccount -> new account is Main and customer already has a main account");
+
+		// TODO: check database if customer has main account
+		else
+			database.addAccount(customer, main);
 	}
 
-	public void deleteAccount(Account account) {
-		// Account has to have a balance of 0 and it can't be the users main
-		// account.
-		// TODO should this check be in DefaultServelet instead?
+	/**
+	 * Deletes the account in the database. Requires that the account balance is
+	 * 0, and it must not be the customer's main account.
+	 * 
+	 * @param account
+	 *            : account object representing the account to be deleted in the
+	 *            database
+	 */
+	public void removeAccount(Account account) {
+		if (account == null){
+			System.out.println("removeAccount -> account is null");
+			return;
+		}
+		
+		
 		if (account.getBalance() == 0 && !account.getType().equals("MAIN")) {
 			account.getCustomer().removeAccount(account);
 			database.removeAccount(account);
-			System.out.println("BankApplication::deleteAccount -> Deleted account");
+			System.out.println("BankApplication::removeAccount -> Removed account");
 		} else {
-			System.out.println("BankApplication::deleteAccount -> Account not deleted.");
+			System.out.println("BankApplication::removeAccount -> Account not removed.");
 		}
 	}
+	
+	// TODO: kl 12.12 er vi i gang her.
 
-	public Account getAccount(String accountNumber) {
+	// ##############################
+	// account: getters
+	// ##############################
 
-		return database.getAccount(accountNumber);
+	/**
+	 * Fetches the account with the given ID from the database (if it exists).
+	 * If if returns null, no account exists in the database with the given ID.
+	 * 
+	 * @param accountID
+	 *            : unique String ID for accounts in database.
+	 * @return Account object from database.
+	 */
+	public Account getAccountByID(String accountID) {
+
+		// accountID must be integer
+		try {
+			Integer.parseInt(accountID);
+			return database.getAccount(accountID);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
 	}
 
-	public ArrayList<Account> getAccountsByUser(String username) {
+	/**
+	 * Returns all accounts belonging to the customer with the given username.
+	 * 
+	 * @param username
+	 *            : unique identifier for users in database.s
+	 * @return ArrayList with Account objects
+	 */
+
+	public ArrayList<Account> getAccountsByUsername(String username) {
 		if (username.equals(""))
 			return null;
 
 		return database.getAccountsByUser(username);
 	}
 
+	// ##############################
+	// account: setters
+	// ##############################
+	/**
+	 * Sets a new account to main, both locally (Customer object) and externally
+	 * (in database).
+	 * 
+	 * @param customer
+	 *            : Customer object, whose main account is changed
+	 * @param newMain
+	 *            : Account object, corresponding to the new main account for
+	 *            the given customer
+	 */
 	public void setNewMainAccount(Customer customer, Account newMain) {
 
-		Account oldMain = customer.getMainAccount();
-		database.setNewMainAccount(oldMain, newMain);
-		customer.setMainAccount(newMain);
+		if (customer == null) {
+			System.out.println("setNewMainAccount -> customer is null");
+			return;
+		}
 
+		if (newMain == null) {
+			System.out.println("setNewMainAccount -> newMain is null");
+			return;
+		}
+
+		if (!newMain.getCustomer().equals(customer)){
+			System.out.println("setNewMainAccount -> newMain does not belong to given customer");
+			return;
+		}
+		
+		Account oldMain = customer.getMainAccount();
+		customer.setMainAccount(newMain);
+		database.setNewMainAccount(oldMain, newMain);
+
+	}
+
+	/**
+	 * Sets interest for account with the given accountID, if the interest is
+	 * greater than - or equal to - zero.
+	 * 
+	 * @param accountID
+	 *            : unique ID for accounts in database.
+	 * @param interest
+	 *            : double value to set interest for in the database. 1.05 -> 5%
+	 */
+	public void setInterest(String accountID, double interest) {
+		if (interest >= 0)
+			database.setInterest(accountID, interest);
+	}
+
+	/**
+	 * Sets credit for account with the given accountID, if the credit is
+	 * greater than - or equal to - zero.
+	 * 
+	 * @param accountID
+	 *            : unique ID for accounts in database.
+	 * @param credit
+	 *            : double value to set credit for in the database.
+	 */
+	public void setCredit(String accountID, double credit) {
+		if (credit >= 0)
+			database.setCredit(accountID, credit);
 	}
 
 	//////////////////////////////
 	// USER-ACCOUNT INTERACTION //
 	//////////////////////////////
 
+	/**
+	 * Sets main account locally for the given customer to the new main account.
+	 * @param customer
+	 * @param newMain
+	 */
 	public void setMainAccount(Customer customer, Account newMain) {
 		customer.setMainAccount(newMain);
 	}
@@ -192,10 +451,9 @@ public class BankApplication {
 	public void transferFromAccountToCustomer(Account sourceAccount, String targetUsername, double transferAmount,
 			String message)
 			throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
-		Customer targetCustomer = getCustomer(targetUsername);
-		
-		transferFromAccountToAccount(sourceAccount, targetCustomer.getMainAccount(), transferAmount,
-				message);
+		Customer targetCustomer = (Customer) getUserByUsername(targetUsername);
+
+		transferFromAccountToAccount(sourceAccount, targetCustomer.getMainAccount(), transferAmount, message);
 	}
 
 	/**
@@ -203,7 +461,7 @@ public class BankApplication {
 	 * @param sourceAccount
 	 * @param targetAccountID
 	 * @param transferAmount
-	 * @param out 
+	 * @param out
 	 * @throws UserNotLoggedInException
 	 * @throws TransferException
 	 * @throws AccountNotfoundException
@@ -216,11 +474,10 @@ public class BankApplication {
 
 		if (targetAccount == null)
 			throw new AccountNotfoundException();
-		
+
 		if (sourceAccount.getBalance() + sourceAccount.getCredit() < transferAmount || transferAmount <= 0
 				|| sourceAccount.getAccountID().equals(targetAccount.getAccountID()))
 			throw new TransferException();
-
 
 		database.transferFromAccountToAccount(sourceAccount, targetAccount, transferAmount);
 		addTransactionToTH(sourceAccount, targetAccount, transferAmount, message);
@@ -260,12 +517,16 @@ public class BankApplication {
 		database.addAccountsToLocalCustomer(customer);
 
 	}
-	
+
 	public List<Account> getAllAccounts() {
-	
+
 		return database.getAllAccounts();
-		
+
 	}
+
+	// #########################
+	// BATCH JOBS
+	// #########################
 
 	public void applyInterestToAllAccounts() {
 
@@ -276,33 +537,19 @@ public class BankApplication {
 		// and update in database
 
 		for (Account account : allAccounts) {
-			double newBalance = account.getBalance()*account.getInterest();
+			double newBalance = account.getBalance() * account.getInterest();
 			database.setAccountBalance(account, newBalance);
 		}
 	}
-	
+
 	public void storeOldTransactionsInArchive() {
-		
-		// 1! Get all transactions in Transaction History
-		
-		// 2! Find ID interval for old transactions
-		
-		// 3.1! Delete old transactions from Transaction History
-		
-		// 3.a! Insert old transactions into Archive table
-		
-		
+
+		// 1 Get all transactions in Transaction History
+		// 2 Find ID interval for old transactions
+		// 3.a Delete old transactions from Transaction History
+		// 3.b Insert old transactions into Archive table
+
 		database.storeOldTransactionsInArchive();
-	}
-
-	public void setInterest(String accountID, double interest) {
-		if (interest >= 0)
-			database.setInterest(accountID, interest);
-	}
-
-	public void setCredit(String accountID, double credit) {
-		if (credit >= 0) 
-			database.setCredit(accountID, credit);
 	}
 
 }
