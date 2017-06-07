@@ -91,7 +91,7 @@ public class Account {
 	// ##########################
 
 	public void setBalance(double newBalance) {
-		this.balance = newBalance;
+		this.balance = Math.round(newBalance * 100.0) / 100.0;
 	}
 
 	/**

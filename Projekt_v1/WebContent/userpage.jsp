@@ -269,14 +269,14 @@ table, th, td {
 						%>
 						<tr>
 							<td><%=th.get(i).getDate()%></td>
-							<td><%=th.get(i).getFromUserName()%>/<%=th.get(i).getFromAccountID()%></td>
-							<td><%=th.get(i).getToUserName()%>/<%=th.get(i).getToAccountID()%></td>
-							<td><%=Valuta.convert(th.get(i).getAmount(), userLoggedIn)%></td>
+							<td><%=th.get(i).getSourceUsername()%>/<%=th.get(i).getSourceAccountID()%></td>
+							<td><%=th.get(i).getTargetUsername()%>/<%=th.get(i).getTargetAccountID()%></td>
+							<td><%=Valuta.convert(th.get(i).getTransferAmount(), userLoggedIn)%></td>
 							
-							<% if(userLoggedIn.getUsername().equals(th.get(i).getFromUserName())){ %> 
-							<td> <%=Valuta.convert(th.get(i).getFromBalance(), userLoggedIn)%> </td> 
+							<% if(userLoggedIn.getUsername().equals(th.get(i).getSourceUsername())){ %> 
+							<td> <%=Valuta.convert(th.get(i).getSourceBalance(), userLoggedIn)%> </td> 
 							<% }else{ %> 
-							<td> <%=Valuta.convert(th.get(i).getToBalance(), userLoggedIn)%> </td> <%}; %>
+							<td> <%=Valuta.convert(th.get(i).getTargetBalance(), userLoggedIn)%> </td> <%}; %>
 							
 							<td><%=th.get(i).getMessage()%></td>
 						</tr>

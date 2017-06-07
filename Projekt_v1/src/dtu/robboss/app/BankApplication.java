@@ -376,7 +376,7 @@ public class BankApplication {
 		if (username.equals(""))
 			return null;
 
-		return database.getAccountsByUser(username);
+		return database.getAccountsByUsername(username);
 	}
 
 	// ##############################
@@ -425,8 +425,12 @@ public class BankApplication {
 	 *            : double value to set interest for in the database. 1.05 -> 5%
 	 */
 	public void setInterest(String accountID, double interest) {
-		if (interest >= 0)
-			database.setInterest(accountID, interest);
+		if (interest < 0 || accountID == null || accountID.equals("")) {
+			System.out.println("setInterest -> invalid interest or accountID");
+			return;
+		}
+
+		database.setInterest(accountID, interest);
 	}
 
 	/**
@@ -512,8 +516,8 @@ public class BankApplication {
 	 * 
 	 * @param sourceAccount
 	 *            : account to send from
-	 * @param targetAccountID
-	 *            : ID for target account
+	 * @param targetAccount
+	 *            : account to send to
 	 * @param transferAmount
 	 *            : how much to transfer
 	 * 
@@ -618,8 +622,19 @@ public class BankApplication {
 		// Finalize date string
 		String dateFormated = year + "/" + month + "/" + day + "-" + hour + ":" + minute;
 
+		// Construct TransactionHistoryElement
+		String sourceID = sourceAccount.getAccountID();
+		String targetID = targetAccount.getAccountID();
+		String sourceUsername = sourceAccount.getCustomer().getUsername();
+		String targetUsername = targetAccount.getCustomer().getUsername();
+		double sourceBalance = sourceAccount.getBalance();
+		double targetBalance = targetAccount.getBalance();
+
+		TransactionHistoryElement the = new TransactionHistoryElement(dateFormated, sourceID, targetID, sourceUsername,
+				targetUsername, sourceBalance, targetBalance, transferAmount, message);
+
 		// Send information to database protocol
-		database.addTransactionToHistory(dateFormated, sourceAccount, targetAccount, transferAmount, message);
+		database.addTransactionToHistory(the);
 
 	}
 
@@ -667,7 +682,7 @@ public class BankApplication {
 
 		// 2update balances locally according to interest
 		// and update in database
-				
+
 		for (Account account : allAccounts) {
 			double newBalance = account.getBalance() * account.getInterest();
 			database.setAccountBalance(account, newBalance);
@@ -675,7 +690,8 @@ public class BankApplication {
 	}
 
 	/**
-	 * Stores all transactions that are more than 7 days old in the Transaction Archive table.
+	 * Stores all transactions that are more than 7 days old in the Transaction
+	 * Archive table.
 	 */
 	public void storeOldTransactionsInArchive() {
 
@@ -683,7 +699,7 @@ public class BankApplication {
 		// 2 Find ID interval for old transactions
 		// 3.a Delete old transactions from Transaction History
 		// 3.b Insert old transactions into Archive table
-		database.storeOldTransactionsInArchive();
+		database.moveOldTransactionsToArchive();
 	}
 
 }
