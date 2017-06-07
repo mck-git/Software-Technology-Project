@@ -243,7 +243,7 @@ public class DefaultServlet extends HttpServlet {
 //
 //		}
 
-		if (subject.equals("Delete Admin")) {
+		if (subject.equals("DeleteUser")) {
 			User userToDelete = (User) request.getSession().getAttribute("USER");
 			try {
 				app.startDatabaseConnection();
@@ -399,7 +399,7 @@ public class DefaultServlet extends HttpServlet {
 
 		}
 
-		if (subject.equals("Delete User")) {
+		if (subject.equals("DeleteUserByAdmin")) {
 			try {
 				app.startDatabaseConnection();
 				User userToDelete = app.getUser(request.getParameter("username"));
