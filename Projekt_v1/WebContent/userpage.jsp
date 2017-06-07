@@ -295,7 +295,7 @@ table, th, td {
 				<div class="inner"
 					style="display: inline-block; text-align: center; width: 100%;">
 					<form method="post" action="DS">
-						<input type="hidden" name="subject" value="DeleteUser" /> <input
+						<input type="hidden" name="subject" value="DeleteLoggedInUser" /> <input
 							type="submit"  value="Delete user"
 							onclick="return confirm('Do you wish to delete user?')" />
 					</form>

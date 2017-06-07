@@ -285,14 +285,15 @@ table, th, td {
 
 				<div class="inner">
 					<form method="post" action="DS" align="center">
-						<input type="submit" name="subject" value="Delete Admin"
+					<input type="hidden" name="subject" value="DeleteLoggedInUser"/>
+						<input type="submit"  value="Delete Admin"
 							onclick="return confirm('Do you wish to delete admin?')" />
 					</form>
 
 
 					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="LogOutUser" "/> <input
-							type="submit" value="Log out admin"
+						<input type="hidden" name="subject" value="LogOutUser"/> 
+						<input type="submit" value="Log out admin"
 							onclick="return confirm('Do you wish to log out?')" />
 					</form>
 

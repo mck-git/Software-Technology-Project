@@ -243,7 +243,7 @@ public class DefaultServlet extends HttpServlet {
 //
 //		}
 
-		if (subject.equals("DeleteUser")) {
+		if (subject.equals("DeleteLoggedInUser")) {
 			User userToDelete = (User) request.getSession().getAttribute("USER");
 			try {
 				app.startDatabaseConnection();
