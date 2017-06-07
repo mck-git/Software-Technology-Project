@@ -208,7 +208,7 @@ public class DatabaseProtocol {
 			if (rs.next()) {
 				// if such a user exists
 
-				Valuta currency = currencyStringToEnum(rs.getString("CURRENCY"));
+				Valuta currency = Valuta.currencyStringToEnum(rs.getString("CURRENCY"));
 				if (currency == null) {
 					System.out.println("getCustomer -> invalid currency");
 					return null;
@@ -228,36 +228,6 @@ public class DatabaseProtocol {
 
 		closeConnection();
 		return null;
-	}
-
-	/**
-	 * Converts a string representing a currency (e.g. "DKK") into the
-	 * corresponding enum Valuta object.
-	 * 
-	 * @param currencyString
-	 * @return If the string is not a valid currency, returns null.
-	 * 
-	 * @throws SQLException
-	 */
-	private Valuta currencyStringToEnum(String currencyString) throws SQLException {
-		Valuta currency = null;
-		switch (currencyString) {
-		case "EUR":
-			currency = Valuta.EUR;
-			break;
-		case "USD":
-			currency = Valuta.USD;
-			break;
-		case "GBP":
-			currency = Valuta.GBP;
-			break;
-		case "JPY":
-			currency = Valuta.JPY;
-			break;
-		default:
-			currency = Valuta.DKK;
-		}
-		return currency;
 	}
 
 	/**
