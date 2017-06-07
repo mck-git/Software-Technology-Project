@@ -515,9 +515,9 @@ public void storeOldTransactionsInArchive() {
 		try {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS");
 
-			if (!rs.next()) {
-				return null;
-			}
+//			if (!rs.next()) {
+//				return null;
+//			}
 
 			while (rs.next()) {
 				Customer customer = getCustomer(rs.getString("USERNAME"));
