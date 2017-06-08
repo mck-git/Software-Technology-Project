@@ -252,7 +252,7 @@ table, th, td {
 							}
 						%>
 						</select> <br /> Modify Interest: <input type="text" name="interest"
-							placeholder="etc 5% -> 1.05" /> <input type="submit"
+							placeholder="etc 5% is written 1.05" /> <input type="submit"
 							name="subject" value="Set Interest" /> <br /> Modify Credit: <input
 							type="text" name="credit" /> DKK <input type="submit"
 							name="subject" value="Set Credit" />
