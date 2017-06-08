@@ -126,7 +126,7 @@ table, th, td {
 					%>
 
 					ID:
-					<%=account.getAccountNumber()%>
+					<%=account.getAccountID()%>
 
 					- balance:
 					<%=Valuta.convert(account.getBalance(), userLoggedIn)%>
@@ -193,7 +193,7 @@ table, th, td {
 							<%
 								for (Account account : userLoggedIn.getAccounts()) {
 
-									String accountID = "" + account.getAccountNumber();
+									String accountID = "" + account.getAccountID();
 							%>
 							<option value=<%=accountID%>
 								<%if (account.equals(userLoggedIn.getMainAccount())) {%>
@@ -233,7 +233,7 @@ table, th, td {
 					Select account to edit: <select name="accountSelected">
 						<%
 							for (Account account : userLoggedIn.getAccounts()) {
-								String accountID = "" + account.getAccountNumber();
+								String accountID = "" + account.getAccountID();
 						%>
 						<option value=<%=accountID%>>AccountID: <%=accountID%>
 						</option>
@@ -269,14 +269,14 @@ table, th, td {
 						%>
 						<tr>
 							<td><%=th.get(i).getDate()%></td>
-							<td><%=th.get(i).getFromUserName()%>/<%=th.get(i).getFromAccountID()%></td>
-							<td><%=th.get(i).getToUserName()%>/<%=th.get(i).getToAccountID()%></td>
-							<td><%=Valuta.convert(th.get(i).getAmount(), userLoggedIn)%></td>
+							<td><%=th.get(i).getSourceUsername()%>/<%=th.get(i).getSourceAccountID()%></td>
+							<td><%=th.get(i).getTargetUsername()%>/<%=th.get(i).getTargetAccountID()%></td>
+							<td><%=Valuta.convert(th.get(i).getTransferAmount(), userLoggedIn)%></td>
 							
-							<% if(userLoggedIn.getUsername().equals(th.get(i).getFromUserName())){ %> 
-							<td> <%=Valuta.convert(th.get(i).getFromBalance(), userLoggedIn)%> </td> 
+							<% if(userLoggedIn.getUsername().equals(th.get(i).getSourceUsername())){ %> 
+							<td> <%=Valuta.convert(th.get(i).getSourceBalance(), userLoggedIn)%> </td> 
 							<% }else{ %> 
-							<td> <%=Valuta.convert(th.get(i).getToBalance(), userLoggedIn)%> </td> <%}; %>
+							<td> <%=Valuta.convert(th.get(i).getTargetBalance(), userLoggedIn)%> </td> <%}; %>
 							
 							<td><%=th.get(i).getMessage()%></td>
 						</tr>
@@ -295,7 +295,7 @@ table, th, td {
 				<div class="inner"
 					style="display: inline-block; text-align: center; width: 100%;">
 					<form method="post" action="DS">
-						<input type="hidden" name="subject" value="DeleteUser" /> <input
+						<input type="hidden" name="subject" value="DeleteLoggedInUser" /> <input
 							type="submit" value="Delete user"
 							onclick="return confirm('Do you wish to delete user?')" />
 					</form>

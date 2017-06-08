@@ -3,57 +3,60 @@ package dtu.robboss.app;
 public class TransactionHistoryElement {
 
 	String date;
-	
-	int fromAccountID, toAccountID;
-	double amount, fromBalance, toBalance;
-	String message, fromUserName, toUserName;
-	//Database format: DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
-	public TransactionHistoryElement(String date, int fromAccountID, int toAccountID, String fromUserName, String toUserName, double fromBalance, double toBalance, double amount, String message){ 
+
+	String sourceAccountID, targetAccountID;
+	double transferAmount, sourceBalance, targetBalance;
+	String message, sourceUsername, targetUsername;
+
+	// Database format: DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER,
+	// FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
+	public TransactionHistoryElement(String date, String sourceAccountID, String targetAccountID, String sourceUsername,
+			String targetUsername, double sourceBalance, double targetBalance, double transferAmount, String message) {
 		this.date = date;
-		this.fromAccountID = fromAccountID;
-		this.toAccountID = toAccountID;
-		this.fromUserName = fromUserName;
-		this.toUserName = toUserName;
-		this.fromBalance = fromBalance;
-		this.toBalance = toBalance;
-		this.amount = amount;
+		this.sourceAccountID = sourceAccountID;
+		this.targetAccountID = targetAccountID;
+		this.sourceUsername = sourceUsername;
+		this.targetUsername = targetUsername;
+		this.sourceBalance = sourceBalance;
+		this.targetBalance = targetBalance;
+		this.transferAmount = transferAmount;
 		this.message = message;
 	}
-	
-	public int getFromAccountID() {
-		return fromAccountID;
+
+	public String getSourceAccountID() {
+		return sourceAccountID;
 	}
 
-	public int getToAccountID() {
-		return toAccountID;
+	public String getTargetAccountID() {
+		return targetAccountID;
 	}
 
-	public double getFromBalance() {
-		return fromBalance;
+	public double getSourceBalance() {
+		return sourceBalance;
 	}
 
-	public double getToBalance() {
-		return toBalance;
+	public double getTargetBalance() {
+		return targetBalance;
 	}
 
-	public String getFromUserName() {
-		return fromUserName;
+	public String getSourceUsername() {
+		return sourceUsername;
 	}
 
-	public String getToUserName() {
-		return toUserName;
+	public String getTargetUsername() {
+		return targetUsername;
 	}
 
 	public String getDate() {
 		return this.date;
 	}
 
-	public double getAmount() {
-		return this.amount;
+	public double getTransferAmount() {
+		return this.transferAmount;
 	}
 
 	public String getMessage() {
 		return this.message;
 	}
-	
+
 }

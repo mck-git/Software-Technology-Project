@@ -32,6 +32,14 @@
 	max-height: 160px;
 }
 
+.innerScrollable {
+	width: 100%;
+	background: rgba(240, 230, 255, 0.9);
+	border-radius: 2px;
+	max-height: 160px;
+	overflow: scroll;
+}
+
 .outer {
 	background: rgba(150, 204, 250, 0.8);
 	width: 40%;
@@ -57,7 +65,6 @@ table, th, td {
 #accounts {
 	clear: both;
 	float: left;
-	overflow: scroll;
 }
 
 #customer {
@@ -174,7 +181,7 @@ table, th, td {
 						%>
 						<tr>
 							<td><%=customerFound.getUsername()%></td>
-							<td><%=account.getAccountNumber()%></td>
+							<td><%=account.getAccountID()%></td>
 							<td><%=Valuta.convert(account.getBalance(), customerFound)%></td>
 							<td><%=Valuta.convert(account.getCredit(), customerFound)%></td>
 							<td><%=account.getType()%></td>
@@ -219,8 +226,9 @@ table, th, td {
 				<h3 align="center" style="margin-top: 0;">Modify user</h3>
 				<div class="inner">
 					<form method="post" action="DS" align="center">
+						<input type="hidden" name="subject" value="DeleteUserAdmin" />
 						User name: <input type="text" name="username" /> <br> <input
-							type="submit" name="subject" value="Delete User">
+							type="submit" value="Delete User">
 					</form>
 				</div>
 
@@ -229,13 +237,13 @@ table, th, td {
 
 			<div id="modifyAccount" class="outer">
 				<h3 align="center" style="margin-top: 0;">Modify Account</h3>
-				<div class="inner">
+				<div class="innerScrollable">
 					<form method="post" action="DS" align="center">
 						Select Account: <select name="accountSelected" />
 						<%
 							if (customerFound != null)
 								for (Account account : customerFound.getAccounts()) {
-									String accountID = "" + account.getAccountNumber();
+									String accountID = "" + account.getAccountID();
 						%>
 						<option value=<%=accountID%>>AccountID:
 							<%=accountID%>
@@ -277,7 +285,8 @@ table, th, td {
 
 				<div class="inner">
 					<form method="post" action="DS" align="center">
-						<input type="submit" name="subject" value="Delete Admin"
+					<input type="hidden" name="subject" value="DeleteLoggedInUser"/>
+						<input type="submit"  value="Delete Admin"
 							onclick="return confirm('Do you wish to delete admin?')" />
 					</form>
 
