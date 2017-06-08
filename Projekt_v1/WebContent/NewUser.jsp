@@ -60,8 +60,8 @@ margin: 20px;
 		<form method = "post" action ="DS" align="center">
 		<input type="hidden" name = "subject" value = "CreateNewUser"/> 
 		Full name: 	<input type="text" name ="fullname" placeholder="Bob Ross" maxlength="100"/> 	<br>
-		User name: 	<input type="text" name ="username" placeholder="valid symbols: a-z" maxlength="20"/> 	<br>
-		Password: 	<input type="text" name ="password" placeholder="valid symbols: a-z, A-Z" maxlength="20"/> 	<br>
+		User name: 	<input type="text" name ="username" placeholder="Valid symbols: a-z" maxlength="20"/> 	<br>
+		Password: 	<input type="text" name ="password" placeholder="Valid symbols: a-z, A-Z" maxlength="20"/> 	<br>
 		Currency: 	
 		
 		<select name="currency">

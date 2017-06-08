@@ -252,9 +252,9 @@ table, th, td {
 							}
 						%>
 						</select> <br /> Modify Interest: <input type="text" name="interest"
-							placeholder="etc 5% is written 1.05" /> <input type="submit"
+							placeholder="Etc 5% is written 1.05" /> <input type="submit"
 							name="subject" value="Set Interest" /> <br /> Modify Credit: <input
-							type="text" name="credit" /> DKK <input type="submit"
+							type="text" name="credit" placeholder="Must be above 0" /> DKK <input type="submit"
 							name="subject" value="Set Credit" />
 					</form>
 				</div>
@@ -271,11 +271,11 @@ table, th, td {
 						<input type="radio" name="userType" value="customer" /> Customer 
 						<input type="radio" checked="checked" name="userType" value="admin" /> Admin <br> 
 						Full name: 
-						<input type="text" name="fullname" /> <br> 
+						<input type="text" name="fullname" placeholder="Bob Ross" maxlength="100" /> <br> 
 						User name: 
-						<input type="text" name="username" /> <br> 
+						<input type="text" name="username" placeholder="Valid symbols: a-z" maxlength="20" /> <br> 
 						Password: 
-						<input type="text" name="password" /> <br> 
+						<input type="text" name="password" placeholder="Valid symbols: a-z, A-Z" maxlength="20" /> <br> 
 						<input type="submit" value="Create User">
 					</form>
 				</div>
