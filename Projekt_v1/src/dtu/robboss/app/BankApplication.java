@@ -1,5 +1,6 @@
 package dtu.robboss.app;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -63,7 +64,7 @@ public class BankApplication {
 	// USER MANAGEMENT //
 	/////////////////////
 
-	public void setCurrency(Customer customer, Valuta currency)  {
+	public void setCurrency(Customer customer, Valuta currency) {
 
 		customer.setCurrency(currency);
 
@@ -75,7 +76,13 @@ public class BankApplication {
 
 	public int userCount() {
 
+		try {
 			return database.userCount();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return -1;
 	}
 
 	public void createCustomer(String fullname, String username, String password, Valuta currency)
@@ -96,7 +103,7 @@ public class BankApplication {
 		database.addAdmin(newAdmin);
 	}
 
-	public void deleteUser(User user)  {
+	public void deleteUser(User user) {
 		// TODO: Administer admin.
 		// if (!adminLoggedIn)
 		// throw new AdminNotLoggedInException();
@@ -141,7 +148,7 @@ public class BankApplication {
 		database.addAccount(customer, main);
 	}
 
-	public void deleteAccount(Account account)  {
+	public void deleteAccount(Account account) {
 		// Account has to have a balance of 0 and it can't be the users main
 		// account.
 		// TODO should this check be in DefaultServelet instead?
@@ -154,19 +161,19 @@ public class BankApplication {
 		}
 	}
 
-	public Account getAccount(String accountNumber)  {
+	public Account getAccount(String accountNumber) {
 
 		return database.getAccount(accountNumber);
 	}
 
-	public ArrayList<Account> getAccountsByUser(String username)  {
+	public ArrayList<Account> getAccountsByUser(String username) {
 		if (username.equals(""))
 			return null;
 
 		return database.getAccountsByUser(username);
 	}
 
-	public void setNewMainAccount(Customer customer, Account newMain)  {
+	public void setNewMainAccount(Customer customer, Account newMain) {
 
 		Account oldMain = customer.getMainAccount();
 		database.setNewMainAccount(oldMain, newMain);
@@ -220,11 +227,11 @@ public class BankApplication {
 
 	}
 
-	public List<TransactionHistoryElement> getTransactionHistory(Customer customer)  {
+	public List<TransactionHistoryElement> getTransactionHistory(Customer customer) {
 		return database.getTransactionHistory(customer);
 	}
 
-	private void addTransactionToTH(Account from, Account to, Double amount, String message)  {
+	private void addTransactionToTH(Account from, Account to, Double amount, String message) {
 
 		Calendar date = new GregorianCalendar();
 
@@ -247,20 +254,20 @@ public class BankApplication {
 
 	}
 
-	public void refreshAccountsForCustomer(Customer customer)  {
+	public void refreshAccountsForCustomer(Customer customer) {
 
 		customer.getAccounts().clear();
 		database.addAccountsToLocalCustomer(customer);
 
 	}
 	
-	public List<Account> getAllAccounts()  {
+	public List<Account> getAllAccounts() {
 	
 		return database.getAllAccounts();
 		
 	}
 
-	public void applyInterestToAllAccounts()  {
+	public void applyInterestToAllAccounts() {
 
 		// 1: get all accounts
 		List<Account> allAccounts = database.getAllAccounts();
@@ -274,7 +281,7 @@ public class BankApplication {
 		}
 	}
 	
-	public void storeOldTransactionsInArchive()  {
+	public void storeOldTransactionsInArchive() {
 		
 		// 1! Get all transactions in Transaction History
 		
@@ -296,14 +303,6 @@ public class BankApplication {
 	public void setCredit(String accountID, double credit) {
 		if (credit >= 0) 
 			database.setCredit(accountID, credit);
-	}
-	
-	public void startDatabaseConnection(){
-		database.startConnection();
-	}
-	
-	public void closeDatabaseConnection(){
-		database.closeConnection();
 	}
 
 }
