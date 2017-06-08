@@ -102,6 +102,7 @@ table, th, td {
 	Admin userLoggedIn = (Admin) session.getAttribute("USER");
 	//ArrayList<Account> accountsFound = (ArrayList<Account>) session.getAttribute("ACCOUNTSFOUND"); 
 	Customer customerFound = (Customer) session.getAttribute("CUSTOMERFOUND");
+	String infomessage = (String) request.getAttribute("INFOMESSAGE");
 %>
 
 </head>
@@ -116,6 +117,11 @@ table, th, td {
 				<%=userLoggedIn.getFullName() %>, you are so smart and amazing!
 			</h1>
 		</div>
+
+		<% if(infomessage != null) { %>
+		<p style="text-align: center; color: red;"> <%=infomessage %> </p>
+		<% } %>
+
 
 		<!-- CONTENT AREA -->
 		<div id="content_area">

@@ -9,6 +9,12 @@ import javax.sql.DataSource;
 
 import dtu.robboss.exceptions.AccountNotfoundException;
 import dtu.robboss.exceptions.AlreadyExistsException;
+import dtu.robboss.exceptions.InvalidCreditException;
+import dtu.robboss.exceptions.InvalidCurrencyException;
+import dtu.robboss.exceptions.InvalidInterestException;
+import dtu.robboss.exceptions.InvalidUsernameOrPasswordException;
+import dtu.robboss.exceptions.MainAccountException;
+import dtu.robboss.exceptions.NotEmptyAccountException;
 import dtu.robboss.exceptions.TransferException;
 import dtu.robboss.exceptions.UnknownLoginException;
 import dtu.robboss.exceptions.UserNotLoggedInException;
@@ -128,18 +134,20 @@ public class BankApplication {
 	 * @param password
 	 * @param currency
 	 * @throws AlreadyExistsException
+	 * @throws InvalidUsernameOrPasswordException 
+	 * @throws InvalidCurrencyException 
 	 */
 	public void createCustomer(String fullname, String username, String password, Valuta currency)
-			throws AlreadyExistsException {
+			throws AlreadyExistsException, InvalidUsernameOrPasswordException, InvalidCurrencyException {
 
 		if (!newUserHasValidParameters(fullname, username, password)) {
 			System.out.println("createCustomer");
-			return;
+			throw new InvalidUsernameOrPasswordException();
 		}
 
 		if (!isValidCurrency(currency)) {
 			System.out.println("createCustomer -> invalid currency");
-			return;
+			throw new InvalidCurrencyException();
 		}
 
 		// Create account locally and in database
@@ -199,11 +207,11 @@ public class BankApplication {
 				|| currency.name().equals("GBP") || currency.name().equals("JPY"));
 	}
 
-	public void createAdmin(String fullname, String username, String password) throws AlreadyExistsException {
+	public void createAdmin(String fullname, String username, String password) throws AlreadyExistsException, InvalidUsernameOrPasswordException {
 
 		if (!newUserHasValidParameters(fullname, username, password)) {
 			System.out.println("createAdmin");
-			return;
+			throw new InvalidUsernameOrPasswordException();
 		}
 
 		Admin newAdmin = new Admin(fullname, username, password);
@@ -216,11 +224,13 @@ public class BankApplication {
 	 * belonging to the customer have balance 0.
 	 * 
 	 * @param user
+	 * @throws UserNotfoundException 
+	 * @throws NotEmptyAccountException 
 	 */
-	public void removeUser(User user) {
+	public void removeUser(User user) throws UserNotfoundException, NotEmptyAccountException {
 		if (user == null) {
 			System.out.println("removeUser -> user is null");
-			return;
+			throw new UserNotfoundException();
 		}
 
 		if (user instanceof Customer) {
@@ -233,7 +243,7 @@ public class BankApplication {
 			for (Account account : ((Customer) user).getAccounts()) {
 				if (account.getBalance() != 0) {
 					System.out.println("removeUser -> Customer has account balance different from 0");
-					return;
+					throw new NotEmptyAccountException();
 				}
 			}
 		}
@@ -257,6 +267,9 @@ public class BankApplication {
 
 		User foundUser = database.getUserByUsername(username);
 
+		if(foundUser == null)
+			throw new UserNotfoundException();
+		
 		if (foundUser instanceof Customer) {
 			refreshAccountsForCustomer((Customer) foundUser);
 
@@ -307,21 +320,24 @@ public class BankApplication {
 	 * @param account
 	 *            : account object representing the account to be deleted in the
 	 *            database
+	 * @throws AccountNotfoundException 
+	 * @throws NotEmptyAccountException 
+	 * @throws MainAccountException 
 	 */
-	public void removeAccount(Account account) {
+	public void removeAccount(Account account) throws AccountNotfoundException, NotEmptyAccountException, MainAccountException {
 		if (account == null) {
 			System.out.println("removeAccount -> account is null");
-			return;
+			throw new AccountNotfoundException();
 		}
 
 		if (account.getBalance() != 0) {
 			System.out.println("removeAccount -> account balance not zero");
-			return;
+			throw new NotEmptyAccountException();
 		}
 
 		if (account.getType().equals("MAIN")) {
 			System.out.println("removeAccount -> account is main account");
-			return;
+			throw new MainAccountException();
 		}
 
 		account.getCustomer().removeAccount(account);
@@ -341,8 +357,9 @@ public class BankApplication {
 	 * @param accountID
 	 *            : unique String ID for accounts in database.
 	 * @return Account object from database.
+	 * @throws AccountNotfoundException 
 	 */
-	public Account getAccountByID(String accountID) {
+	public Account getAccountByID(String accountID) throws AccountNotfoundException {
 
 		// accountID must be integer
 		try {
@@ -350,8 +367,7 @@ public class BankApplication {
 			return database.getAccount(accountID);
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw new AccountNotfoundException();
 		}
 
 	}
@@ -415,11 +431,12 @@ public class BankApplication {
 	 *            : unique ID for accounts in database.
 	 * @param interest
 	 *            : double value to set interest for in the database. 1.05 -> 5%
+	 * @throws InvalidInterestException 
 	 */
-	public void setInterest(String accountID, double interest) {
+	public void setInterest(String accountID, double interest) throws InvalidInterestException {
 		if (interest < 0 || accountID == null || accountID.equals("")) {
 			System.out.println("setInterest -> invalid interest or accountID");
-			return;
+			throw new InvalidInterestException();
 		}
 
 		database.setInterest(accountID, interest);
@@ -433,10 +450,14 @@ public class BankApplication {
 	 *            : unique ID for accounts in database.
 	 * @param credit
 	 *            : double value to set credit for in the database.
+	 * @throws InvalidCreditException 
 	 */
-	public void setCredit(String accountID, double credit) {
-		if (credit >= 0)
+	public void setCredit(String accountID, double credit) throws InvalidCreditException {
+		if (credit < 0)
+			throw new InvalidCreditException();
+			
 			database.setCredit(accountID, credit);
+		
 	}
 
 	//////////////////////////////
@@ -491,13 +512,13 @@ public class BankApplication {
 			String message)
 			throws UserNotLoggedInException, TransferException, UserNotfoundException, AccountNotfoundException {
 
-		try {
 			Customer targetCustomer = (Customer) getUserByUsername(targetUsername);
+			
+			if(targetCustomer == null)
+				throw new UserNotfoundException();
+			
 			transferFromAccountToAccount(sourceAccount, targetCustomer.getMainAccount(), transferAmount, message);
 
-		} catch (Exception e) {
-			System.out.println("transferFromAccountToCustomer -> target is not a customer");
-		}
 
 	}
 
@@ -521,23 +542,24 @@ public class BankApplication {
 	 * @throws AccountNotfoundException
 	 *             : if targetAccount is null (see details in
 	 *             transferFromAccountToAccount)
+	 * @throws UserNotfoundException 
 	 */
 	public void transferFromAccountToAccount(Account sourceAccount, Account targetAccount, double transferAmount,
-			String message) throws UserNotLoggedInException, TransferException, AccountNotfoundException {
+			String message) throws UserNotLoggedInException, TransferException, AccountNotfoundException, UserNotfoundException {
 
 		if (userLoggedIn == null) {
 			System.out.println("transferFromAccountToAccount -> userLoggedIn is null");
-			return;
+			throw new UserNotfoundException();
 		}
 
 		if (sourceAccount == null) {
 			System.out.println("transferFromAccountToAccount -> sourceAccount is null");
-			return;
+			throw new AccountNotfoundException();
 		}
 
 		if (targetAccount == null) {
 			System.out.println("transferFromAccountToAccount -> targetAccount is null");
-			return;
+			throw new AccountNotfoundException();
 		}
 
 		if (!userLoggedIn.getUsername().equals(sourceAccount.getCustomer().getUsername())) {

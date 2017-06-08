@@ -1,12 +1,14 @@
-<!DOCTYPE HTML>
+<!DOCTYPE HTML><%@page language="java"
+	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <html>
 <head>
+<title>login</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <style>
 .box {
 	width: 350px;
-	height: 300px;
+	height: 320px;
 	background-color: rgba(255, 255, 255, 0.7);
 	position: absolute;
 	top: 0;
@@ -36,7 +38,9 @@
   }
 </style>
 
-
+<%
+	String message = (String) request.getAttribute("INFOMESSAGE");
+%>
 
 </head>
 <body>
@@ -47,11 +51,15 @@
 	<div class="page">
 		<div class="box">
 			<h1>Login</h1>
-
+			
+			<% if(message != null){ %>
+			<p style="color:red"><%=message%>
+			<%} %>
+			
 			<form method="post" action="DS">
 				<input type="hidden" name = "subject" value = "Login"/> 
-				<br />User Name: <br /> <input name="username" /> <br /> 
-				<br />Password: <br /> <input type="password" name="password" /> 
+				<br />User Name: <br /> <input name="username" maxlength="20" /> <br /> 
+				<br />Password: <br /> <input type="password" name="password" maxlength="20" /> 
 				<br> <input type="submit" value="Login" />
 			</form>
 			
@@ -72,7 +80,4 @@
 </body>
 
 </html>
-
-
-
 

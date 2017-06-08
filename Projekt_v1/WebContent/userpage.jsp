@@ -93,7 +93,7 @@ table, th, td {
 	//If USER is null, redirect to login page.
 	if(session.getAttribute("USER") == null)
 		response.sendRedirect("login.html");
-
+	String infomessage = (String) request.getAttribute("INFOMESSAGE");
 	Customer userLoggedIn = (Customer) session.getAttribute("USER");
 	ArrayList<TransactionHistoryElement> th = (ArrayList<TransactionHistoryElement>) session.getAttribute("TRANSACTIONHISTORY");
 %>
@@ -110,7 +110,11 @@ table, th, td {
 				<%=userLoggedIn.getFullName()%>
 			</h1>
 		</div>
-
+	
+		<% if(infomessage != null){ %>
+		<p style="text-align: center; color: red" > <%=infomessage %> </p>
+		<%} %>
+	
 		<!-- CONTENT AREA -->
 		<div id="content_area">
 
