@@ -117,14 +117,7 @@ public class BankApplication {
 	 *         returns -1.
 	 */
 	public int customerCount() {
-
-		try {
-			return database.customerCount();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		return -1;
+		return database.customerCount();
 	}
 
 	/**
@@ -701,5 +694,18 @@ public class BankApplication {
 		// 3.b Insert old transactions into Archive table
 		database.moveOldTransactionsToArchive();
 	}
+	
+	// ######################
+	// DATABASE CONNECTION
+	// ######################
+	
+	public void startDatabaseConnection(){
+		database.startConnection();
+	}
+	
+	public void closeDatabaseConnection(){
+		database.closeConnection();
+	}
+
 
 }
