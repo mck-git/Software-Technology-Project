@@ -226,7 +226,7 @@ table, th, td {
 				<h3 align="center" style="margin-top: 0;">Modify user</h3>
 				<div class="inner">
 					<form method="post" action="DS" style="text-align: center;">
-						<input type="hidden" name="subject" value="DeleteUserAdmin" />
+						<input type="hidden" name="subject" value="DeleteUserByAdmin" />
 						User name: <input type="text" name="username" /> <br> <input
 							type="submit" value="Delete User">
 					</form>
@@ -267,13 +267,16 @@ table, th, td {
 				<div class="inner">
 					<form method="post" action="DS" style="text-align: center;">
 						<input type="hidden" name="subject" value="CreateNewUserAdmin" />
-						User type: <input type="radio" name="userType" value="customer" />
-						Customer <input type="radio" checked="checked" name="userType"
-							value="admin" /> Admin <br> Full name: <input type="text"
-							name="fullname" /> <br> User name: <input type="text"
-							name="username" /> <br> Password: <input type="text"
-							name="password" /> <br> <input type="submit"
-							value="Create User">
+						User type: 
+						<input type="radio" name="userType" value="customer" /> Customer 
+						<input type="radio" checked="checked" name="userType" value="admin" /> Admin <br> 
+						Full name: 
+						<input type="text" name="fullname" /> <br> 
+						User name: 
+						<input type="text" name="username" /> <br> 
+						Password: 
+						<input type="text" name="password" /> <br> 
+						<input type="submit" value="Create User">
 					</form>
 				</div>
 

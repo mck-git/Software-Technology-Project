@@ -384,8 +384,14 @@ public class DefaultServlet extends HttpServlet {
 				String fullname = request.getParameter("fullname");
 				String username = request.getParameter("username");
 				String password = request.getParameter("password");
-				Valuta currency = Valuta.currencyStringToEnum(request.getParameter("currency"));
-
+				String currencyString = request.getParameter("currency");
+				
+				Valuta currency;
+				if(currencyString != null)
+					currency = Valuta.currencyStringToEnum(currencyString);
+				else 
+					currency = Valuta.DKK;
+				
 				try {
 					app.startDatabaseConnection();
 					app.createCustomer(fullname, username, password, currency);
