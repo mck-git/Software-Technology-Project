@@ -182,6 +182,7 @@ public class DefaultServlet extends HttpServlet {
 			 * returning to the login page.
 			 */
 			request.getSession().removeAttribute("USER");
+			request.getSession().removeAttribute("CUSTOMERFOUND");
 			app.logOut();
 			RequestDispatcher rd = request.getRequestDispatcher("login.html");
 			rd.forward(request, response);

@@ -113,7 +113,7 @@ table, th, td {
 		<div id="header">
 			<h1>
 				Welcome
-				<%=userLoggedIn.getUsername()%>, you are so smart and amazing!
+				<%=userLoggedIn.getFullName() %>, you are so smart and amazing!
 			</h1>
 		</div>
 
@@ -161,9 +161,9 @@ table, th, td {
 
 
 			<div id="accounts" class="outer" style="width: 60%;">
-				<h3 align="center" style="margin-top: 0;">Accounts</h3>
+				<h3 align="center" style="margin-top: 0">Accounts</h3>
 
-				<div class="inner">
+				<div class="innerScrollable">
 
 					<table style="width: 100%">
 						<tr>
