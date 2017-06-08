@@ -87,7 +87,6 @@ public class DefaultServlet extends HttpServlet {
 			} catch (AlreadyExistsException e) {
 				System.out.println(e.getMessage());
 				app.closeDatabaseConnection();
-
 				response.sendRedirect("login.html");
 			}
 		}
@@ -164,8 +163,7 @@ public class DefaultServlet extends HttpServlet {
 
 			} catch (UserNotLoggedInException | TransferException | AccountNotfoundException | UserNotfoundException
 					| NumberFormatException e) {
-				System.out
-						.println("Error in DefaultServlet::doPost -> transfermoney\nError message: " + e.getMessage());
+				System.out.println("Error in DefaultServlet::doPost -> transfermoney\nError message: " + e.getMessage());
 			}
 
 			// After the transfer is done, the local account information is
@@ -290,7 +288,7 @@ public class DefaultServlet extends HttpServlet {
 				}
 
 				// Checks if user logged in is an admin
-				if (userLoggedIn instanceof Admin) {
+				else if (userLoggedIn instanceof Admin) {
 					// Cast sfrom user to admin and sets admin as the session
 					// attribute
 					Admin adminLoggedIn = (Admin) userLoggedIn;
@@ -353,17 +351,20 @@ public class DefaultServlet extends HttpServlet {
 					// Searching for a specific user
 					// This finds all information about the user, including all
 					// his/hers accounts
-					Customer customerFound = (Customer) app.getUserByUsername(searchToken);
+					User userFound = app.getUserByUsername(searchToken);
+					if(userFound instanceof Customer){
+						Customer customerFound = (Customer) userFound;
 
-					// Sets the attribute in session scope as the search result
-					session.setAttribute("CUSTOMERFOUND", customerFound);
+						// Sets the attribute in session scope as the search result
+						session.setAttribute("CUSTOMERFOUND", customerFound);
+					}
 				}
 			} catch (Exception e) {
 				System.out.println("DefaultServlet::doPost -> Search \nError message: " + e.getMessage());
 				e.printStackTrace();
 			}
 
-			app.startDatabaseConnection();
+			app.closeDatabaseConnection();
 
 			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 			rd.forward(request, response);
@@ -387,13 +388,12 @@ public class DefaultServlet extends HttpServlet {
 				try {
 					app.startDatabaseConnection();
 					app.createCustomer(fullname, username, password, currency);
-					app.closeDatabaseConnection();
 
 				} catch (AlreadyExistsException e) {
-					app.closeDatabaseConnection();
 
 					System.out.println("DefaultServlet::doPost -> CreateNewCustomer\nError message: " + e.getMessage());
 				}
+				
 			} else if (request.getParameter("userType").equals("admin")) {
 				// Creating an admin
 
@@ -404,15 +404,13 @@ public class DefaultServlet extends HttpServlet {
 				try {
 					app.startDatabaseConnection();
 					app.createAdmin(fullname, username, password);
-					app.closeDatabaseConnection();
 
 				} catch (AlreadyExistsException e) {
-					app.closeDatabaseConnection();
-
 					System.out.println("DefaultServlet::doPost -> CreateNewAdmin\nError message: " + e.getMessage());
 				}
 			}
-
+			
+			app.closeDatabaseConnection();
 			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 			rd.forward(request, response);
 		}
@@ -430,16 +428,15 @@ public class DefaultServlet extends HttpServlet {
 
 				app.removeUser(userToDelete);
 
-				app.closeDatabaseConnection();
 
-				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
-				// TODO: if admin deletes itself, redirect to login page instead
-				rd.forward(request, response);
 			} catch (NullPointerException | UserNotfoundException e) {
-				app.closeDatabaseConnection();
-
 				System.out.println("DefaultServlet::doPost -> DeleteUserAdmin\nErorr message: Could not remove user.");
 			}
+			
+			app.closeDatabaseConnection();
+			// TODO: if admin deletes itself, redirect to login page instead
+			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+			rd.forward(request, response);
 		}
 
 		if (subject.equals("Perform Batch")) {
@@ -448,20 +445,16 @@ public class DefaultServlet extends HttpServlet {
 			 */
 			try {
 				app.startDatabaseConnection();
-
 				app.applyInterestToAllAccounts();
 				app.storeOldTransactionsInArchive();
 
-				app.closeDatabaseConnection();
-
-				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
-				rd.forward(request, response);
-
 			} catch (Exception e) {
-				app.closeDatabaseConnection();
-
 				e.printStackTrace();
 			}
+			
+			app.closeDatabaseConnection();
+			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+			rd.forward(request, response);
 		}
 
 		if (subject.equals("Apply Interest")) {
@@ -469,41 +462,37 @@ public class DefaultServlet extends HttpServlet {
 			try {
 
 				app.startDatabaseConnection();
-
 				app.applyInterestToAllAccounts();
 
 				if (request.getSession().getAttribute("CUSTOMERFOUND") != null )
 					app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
-				app.closeDatabaseConnection();
-
-				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
-				rd.forward(request, response);
 
 			} catch (Exception e) {
-				app.closeDatabaseConnection();
-
 				e.printStackTrace();
 			}
+			
+			app.closeDatabaseConnection();
+			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+			rd.forward(request, response);
 		}
+		
 		if (subject.equals("Archive Old Transactions")) {
 
 			try {
 
 				app.startDatabaseConnection();
-
 				app.storeOldTransactionsInArchive();
 
-				app.closeDatabaseConnection();
-
-				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
-				rd.forward(request, response);
 
 			} catch (Exception e) {
-				app.closeDatabaseConnection();
-
 				e.printStackTrace();
 			}
+			
+			app.closeDatabaseConnection();
+			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+			rd.forward(request, response);
 		}
+		
 		if (subject.equals("Set Interest")) {
 
 			try {
@@ -516,16 +505,14 @@ public class DefaultServlet extends HttpServlet {
 				app.setInterest(accountID, interest);
 				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
-				app.closeDatabaseConnection();
-
-				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
-				rd.forward(request, response);
 
 			} catch (Exception e) {
-				app.closeDatabaseConnection();
-
 				e.printStackTrace();
 			}
+
+			app.closeDatabaseConnection();
+			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+			rd.forward(request, response);
 		}
 
 		if (subject.equals("Set Credit")) {
@@ -540,16 +527,14 @@ public class DefaultServlet extends HttpServlet {
 				app.setCredit(accountID, credit);
 				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
-				app.closeDatabaseConnection();
-
-				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
-				rd.forward(request, response);
 
 			} catch (Exception e) {
-				app.closeDatabaseConnection();
-
 				e.printStackTrace();
 			}
+
+			app.closeDatabaseConnection();
+			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+			rd.forward(request, response);
 		}
 
 		if (subject.equals("DeleteLoggedInUser")) {
@@ -562,18 +547,14 @@ public class DefaultServlet extends HttpServlet {
 				app.removeUser(userToDelete);
 				request.getSession().removeAttribute("USER");
 
-				app.closeDatabaseConnection();
-
-				RequestDispatcher rd = request.getRequestDispatcher("login.html");
-				rd.forward(request, response);
-
 			} catch (NullPointerException e) {
 				// e.printStackTrace();
-
-				app.closeDatabaseConnection();
-
 				System.out.println("DefaultServlet::doPost -> DeleteUser. \nError message: Could not remove user.");
 			}
+			
+			app.closeDatabaseConnection();
+			RequestDispatcher rd = request.getRequestDispatcher("login.html");
+			rd.forward(request, response);
 		}
 	}
 

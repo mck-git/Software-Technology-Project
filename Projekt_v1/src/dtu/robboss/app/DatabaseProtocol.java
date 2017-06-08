@@ -51,7 +51,8 @@ public class DatabaseProtocol {
 
 	public void startConnection() {
 		try {
-			con = dataSource.getConnection("DTU02", "FAGP2017");
+			if(con.isClosed())
+				con = dataSource.getConnection("DTU02", "FAGP2017");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

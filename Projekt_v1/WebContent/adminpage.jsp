@@ -143,16 +143,16 @@ table, th, td {
 					Batch Jobs:<br> 1 - Apply interest to all accounts <br> 2
 					- Move old transactions to archive table <br>
 
-					<form method="post" action="DS" align="center">
+					<form method="post" action="DS" style="text-align: center;">
 						<input type="submit" name="subject" value="Apply Interest" />
 					</form>
 
-					<form method="post" action="DS" align="center">
+					<form method="post" action="DS" style="text-align: center;">
 						<input type="submit" name="subject"
 							value="Archive Old Transactions" />
 					</form>
 
-					<form method="post" action="DS" align="center">
+					<form method="post" action="DS" style="text-align: center;">
 						<input type="submit" name="subject" value="Perform Batch" />
 					</form>
 
@@ -160,7 +160,7 @@ table, th, td {
 			</div>
 
 
-			<div id="accounts" class="outer" , style="width: 60%;">
+			<div id="accounts" class="outer" style="width: 60%;">
 				<h3 align="center" style="margin-top: 0;">Accounts</h3>
 
 				<div class="inner">
@@ -198,7 +198,7 @@ table, th, td {
 			</div>
 
 
-			<div id="customer" class="outer" , style="width: 23%">
+			<div id="customer" class="outer" style="width: 23%">
 				<h3 align="center" style="margin-top: 0;">Customer</h3>
 				<div class="inner">
 					<%
@@ -225,7 +225,7 @@ table, th, td {
 			<div id="modifyUser" class="outer">
 				<h3 align="center" style="margin-top: 0;">Modify user</h3>
 				<div class="inner">
-					<form method="post" action="DS" align="center">
+					<form method="post" action="DS" style="text-align: center;">
 						<input type="hidden" name="subject" value="DeleteUserAdmin" />
 						User name: <input type="text" name="username" /> <br> <input
 							type="submit" value="Delete User">
@@ -238,8 +238,8 @@ table, th, td {
 			<div id="modifyAccount" class="outer">
 				<h3 align="center" style="margin-top: 0;">Modify Account</h3>
 				<div class="innerScrollable">
-					<form method="post" action="DS" align="center">
-						Select Account: <select name="accountSelected" />
+					<form method="post" action="DS" style="text-align: center;">
+						Select Account: <select name="accountSelected" >
 						<%
 							if (customerFound != null)
 								for (Account account : customerFound.getAccounts()) {
@@ -265,7 +265,7 @@ table, th, td {
 			<div id="createUser" class="outer">
 				<h3 align="center" style="margin-top: 0;">Create user</h3>
 				<div class="inner">
-					<form method="post" action="DS" align="center">
+					<form method="post" action="DS" style="text-align: center;">
 						<input type="hidden" name="subject" value="CreateNewUserAdmin" />
 						User type: <input type="radio" name="userType" value="customer" />
 						Customer <input type="radio" checked="checked" name="userType"
@@ -284,15 +284,15 @@ table, th, td {
 				<h3 align="center" style="margin-top: 0;">Menu</h3>
 
 				<div class="inner">
-					<form method="post" action="DS" align="center">
+					<form method="post" action="DS" style="text-align: center;">
 					<input type="hidden" name="subject" value="DeleteLoggedInUser"/>
 						<input type="submit"  value="Delete Admin"
 							onclick="return confirm('Do you wish to delete admin?')" />
 					</form>
 
 
-					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="LogOutUser" "/> <input
+					<form method="post" action="DS" style="text-align: center;">
+						<input type="hidden" name="subject" value="LogOutUser"/> <input
 							type="submit" value="Log out admin"
 							onclick="return confirm('Do you wish to log out?')" />
 					</form>
