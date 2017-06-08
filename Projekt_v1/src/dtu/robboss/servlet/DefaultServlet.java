@@ -467,14 +467,15 @@ public class DefaultServlet extends HttpServlet {
 		if (subject.equals("Apply Interest")) {
 
 			try {
-				
+
 				app.startDatabaseConnection();
 
 				app.applyInterestToAllAccounts();
-				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
+
+				if (request.getSession().getAttribute("CUSTOMERFOUND") != null )
+					app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 				app.closeDatabaseConnection();
 
-				
 				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 				rd.forward(request, response);
 
@@ -487,7 +488,7 @@ public class DefaultServlet extends HttpServlet {
 		if (subject.equals("Archive Old Transactions")) {
 
 			try {
-				
+
 				app.startDatabaseConnection();
 
 				app.storeOldTransactionsInArchive();
@@ -514,7 +515,7 @@ public class DefaultServlet extends HttpServlet {
 				// Sets interest in database
 				app.setInterest(accountID, interest);
 				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
-				
+
 				app.closeDatabaseConnection();
 
 				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
@@ -538,7 +539,7 @@ public class DefaultServlet extends HttpServlet {
 				// Sets credit in database
 				app.setCredit(accountID, credit);
 				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
-				
+
 				app.closeDatabaseConnection();
 
 				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
