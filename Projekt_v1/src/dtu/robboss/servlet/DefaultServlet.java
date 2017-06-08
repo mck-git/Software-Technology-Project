@@ -343,21 +343,28 @@ public class DefaultServlet extends HttpServlet {
 					// Searching for a specific account.
 					// This utilizes the fact that getAccount() creates a
 					// customer object with only that one account in it.
-					Customer customerFound = app.getAccountByID(searchToken).getCustomer();
-
-					// Sets the attribute in session scope as the search result
-					session.setAttribute("CUSTOMERFOUND", customerFound);
+					Account accountFound = app.getAccountByID("searchToken");
+						if(accountFound != null){
+						Customer customerFound = accountFound.getCustomer();
+	
+						// Sets the attribute in session scope as the search result
+						session.setAttribute("CUSTOMERFOUND", customerFound);
+					} else {
+						session.removeAttribute("CUSTOMERFOUND");
+					}
 
 				} else if (searchBy.equals("user")) {
 					// Searching for a specific user
 					// This finds all information about the user, including all
 					// his/hers accounts
 					User userFound = app.getUserByUsername(searchToken);
-					if(userFound instanceof Customer){
+					if(userFound instanceof Customer && userFound != null){
 						Customer customerFound = (Customer) userFound;
 
 						// Sets the attribute in session scope as the search result
 						session.setAttribute("CUSTOMERFOUND", customerFound);
+					} else {
+						session.removeAttribute("CUSTOMERFOUND");
 					}
 				}
 			} catch (Exception e) {
@@ -378,6 +385,9 @@ public class DefaultServlet extends HttpServlet {
 			 * except this also has a usertype which can either be "customer" or
 			 * "admin"
 			 */
+			
+			
+			
 			if (request.getParameter("userType").equals("customer")) {
 				// Creating a customer
 
@@ -386,6 +396,8 @@ public class DefaultServlet extends HttpServlet {
 				String password = request.getParameter("password");
 				String currencyString = request.getParameter("currency");
 				
+				
+				
 				Valuta currency;
 				if(currencyString != null)
 					currency = Valuta.currencyStringToEnum(currencyString);
@@ -393,10 +405,17 @@ public class DefaultServlet extends HttpServlet {
 					currency = Valuta.DKK;
 				
 				try {
+					
+					// checks if username is all lower case TODO make this viewable
+					for (int i = 0; i < username.length(); i++) {
+						if (("" + username.charAt(i)).matches("[^a-z]"))
+							throw new InvalidUsernameException();
+					}
+					
 					app.startDatabaseConnection();
 					app.createCustomer(fullname, username, password, currency);
 
-				} catch (AlreadyExistsException e) {
+				} catch (AlreadyExistsException | InvalidUsernameException e) {
 
 					System.out.println("DefaultServlet::doPost -> CreateNewCustomer\nError message: " + e.getMessage());
 				}
@@ -409,10 +428,17 @@ public class DefaultServlet extends HttpServlet {
 				String password = request.getParameter("password");
 
 				try {
+					
+					// checks if username is all lower case TODO make this viewable
+					for (int i = 0; i < username.length(); i++) {
+						if (("" + username.charAt(i)).matches("[^a-z]"))
+							throw new InvalidUsernameException();
+					}
+					
 					app.startDatabaseConnection();
 					app.createAdmin(fullname, username, password);
 
-				} catch (AlreadyExistsException e) {
+				} catch (AlreadyExistsException | InvalidUsernameException e) {
 					System.out.println("DefaultServlet::doPost -> CreateNewAdmin\nError message: " + e.getMessage());
 				}
 			}
