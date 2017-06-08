@@ -32,7 +32,7 @@ public class DatabaseProtocol {
 	// Connection //
 	////////////////
 
-	private Statement startStatement(){
+	private Statement startStatement() {
 		try {
 			return con.createStatement();
 		} catch (SQLException e) {
@@ -40,10 +40,10 @@ public class DatabaseProtocol {
 		}
 		return null;
 	}
-	
+
 	public void closeConnection() {
 		try {
-				con.close();
+			con.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -51,14 +51,11 @@ public class DatabaseProtocol {
 
 	public void startConnection() {
 		try {
-			if(con.isClosed())
-				con = dataSource.getConnection("DTU02", "FAGP2017");
+			con = dataSource.getConnection("DTU02", "FAGP2017");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
-
-
 
 	////////////////////
 	// CUSTOMER COUNT //
@@ -249,7 +246,7 @@ public class DatabaseProtocol {
 	public void setCurrency(Customer customer, Valuta currency) {
 
 		if (customer == null) {
-			
+
 			System.out.println("setCurrency -> customer is null");
 			return;
 		}
@@ -260,12 +257,12 @@ public class DatabaseProtocol {
 		}
 
 		try {
-			
+
 			Statement stmt = startStatement();
 
 			stmt.executeUpdate("UPDATE DTUGRP04.CUSTOMERS SET CURRENCY = '" + currency.name() + "' WHERE USERNAME = '"
 					+ customer.getUsername() + "'");
-			
+
 			stmt.close();
 		} catch (SQLException e) {
 
@@ -542,16 +539,15 @@ public class DatabaseProtocol {
 		oldMain.setType("NORMAL");
 		newMain.setType("MAIN");
 
-
 		try {
-			
+
 			Statement stmt = startStatement();
 
 			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET TYPE = '" + oldMain.getType() + "' WHERE ID = '"
 					+ oldMain.getAccountID() + "'");
 			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET TYPE = '" + newMain.getType() + "' WHERE ID = '"
 					+ newMain.getAccountID() + "'");
-			
+
 			stmt.close();
 		} catch (SQLException e) {
 			System.out.println("Error in DatabaseProtocol::selectNewMainAccount");
@@ -623,7 +619,6 @@ public class DatabaseProtocol {
 		sourceAccount.changeBalance(-transferAmount);
 		targetAccount.changeBalance(transferAmount);
 
-
 		try {
 			Statement stmt = startStatement();
 
@@ -655,10 +650,9 @@ public class DatabaseProtocol {
 			return;
 		}
 
-
 		account.setBalance(newBalance);
 		try {
-			
+
 			Statement stmt = startStatement();
 
 			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + account.getBalance() + "' WHERE ID = '"
