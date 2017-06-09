@@ -1,18 +1,18 @@
 package dtu.robboss.exceptions;
 
-public class UnknownLoginException extends Exception {
+public class CurrencyException extends Exception {
 	String specification;
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public UnknownLoginException(String specification){
+	public CurrencyException(String specification){
 		this.specification = specification;
 	}
 	
 	public String getMessage(){
-		return "Login error: " + specification;
+		return "Currency error: " + specification;
 	}
 
 }

@@ -22,18 +22,7 @@ import dtu.robboss.app.Customer;
 import dtu.robboss.app.TransactionHistoryElement;
 import dtu.robboss.app.User;
 import dtu.robboss.app.Valuta;
-import dtu.robboss.exceptions.AccountNotfoundException;
-import dtu.robboss.exceptions.AlreadyExistsException;
-import dtu.robboss.exceptions.InvalidCreditException;
-import dtu.robboss.exceptions.InvalidCurrencyException;
-import dtu.robboss.exceptions.InvalidInterestException;
-import dtu.robboss.exceptions.InvalidUsernameOrPasswordException;
-import dtu.robboss.exceptions.MainAccountException;
-import dtu.robboss.exceptions.NotEmptyAccountException;
-import dtu.robboss.exceptions.TransferException;
-import dtu.robboss.exceptions.UnknownLoginException;
-import dtu.robboss.exceptions.UserNotLoggedInException;
-import dtu.robboss.exceptions.UserNotfoundException;
+import dtu.robboss.exceptions.*;
 
 /**
  * Servlet implementation class DefaultServlet
@@ -76,7 +65,7 @@ public class DefaultServlet extends HttpServlet {
 			try {
 				for (int i = 0; i < username.length(); i++) {
 					if (("" + username.charAt(i)).matches("[^a-z]"))
-						throw new InvalidUsernameOrPasswordException();
+						throw new UserException("invalid username, password or empty full name");
 				}
 
 				// Creates customer in database and sets subject to login
@@ -84,22 +73,27 @@ public class DefaultServlet extends HttpServlet {
 				app.closeDatabaseConnection();
 				subject = "Login";
 
-			} catch (InvalidUsernameOrPasswordException e) {
-				String infomessage = "Not a valid username or password. Try again.";
+			} catch (UserException e) {
+				String infomessage = e.getMessage();
 				request.setAttribute("INFOMESSAGE", infomessage);
-				System.out.println(e.getMessage());
+//				System.out.println(e.getMessage());
 				app.closeDatabaseConnection();
 				RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
 				rd.forward(request, response);
 			} catch (AlreadyExistsException e) {
-				String infomessage = "Username already taken. Try again.";
+				String infomessage = e.getMessage();
 				request.setAttribute("INFOMESSAGE", infomessage);
 				System.out.println(e.getMessage());
 				app.closeDatabaseConnection();
 				RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
 				rd.forward(request, response);
-			} catch (InvalidCurrencyException e) {
-				e.printStackTrace();
+			} catch (CurrencyException e) {
+				String infomessage = e.getMessage();
+				request.setAttribute("INFOMESSAGE", infomessage);
+//				System.out.println(e.getMessage());
+				app.closeDatabaseConnection();
+				RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+				rd.forward(request, response);
 			}
 		}
 
@@ -153,7 +147,7 @@ public class DefaultServlet extends HttpServlet {
 				Account sourceAccount = app.getAccountByID(accountIDFrom);
 				
 				if (loggedInCustomer == null)
-					throw new UserNotfoundException();
+					throw new UserException("no customer logged in");
 
 				// Revert transferAmount to DKK which is the currency the
 				// database operates on
@@ -174,8 +168,7 @@ public class DefaultServlet extends HttpServlet {
 				List<TransactionHistoryElement> th = app.getTransactionHistory((Customer) session.getAttribute("USER"));
 				session.setAttribute("TRANSACTIONHISTORY", th);
 
-			} catch (UserNotLoggedInException | TransferException | AccountNotfoundException | UserNotfoundException
-					| NumberFormatException e) {
+			} catch (NumberFormatException | UserException | AccountException | TransferException e) {
 				String infomessage = e.getMessage();
 				request.setAttribute("INFOMESSAGE", infomessage);
 //				System.out.println("Error in DefaultServlet::doPost -> transfermoney\nError message: " + e.getMessage());
@@ -256,7 +249,7 @@ public class DefaultServlet extends HttpServlet {
 			Account delete = loggedInCustomer.getAccountByID(accountID);
 
 				app.removeAccount(delete);
-			} catch (AccountNotfoundException | NotEmptyAccountException | MainAccountException e) {
+			} catch (AccountException  e) {
 				String infomessage = e.getMessage();
 				request.setAttribute("INFOMESSAGE", infomessage);
 //				e.printStackTrace();
@@ -325,7 +318,7 @@ public class DefaultServlet extends HttpServlet {
 					rd.forward(request, response);
 				}
 
-			} catch (UnknownLoginException | UserNotfoundException e) {
+			} catch (UserException | UnknownLoginException e) {
 				System.out.println("DefaultServlet::doPost -> Login\nError message: " + e.getMessage());
 				String infomessage = e.getMessage();
 				app.closeDatabaseConnection();
@@ -374,7 +367,7 @@ public class DefaultServlet extends HttpServlet {
 						session.setAttribute("CUSTOMERFOUND", customerFound);
 					} else {
 						session.removeAttribute("CUSTOMERFOUND");
-						throw new AccountNotfoundException();
+						throw new AccountException("account not found");
 					}
 
 				} else if (searchBy.equals("user")) { 
@@ -390,10 +383,10 @@ public class DefaultServlet extends HttpServlet {
 						session.setAttribute("CUSTOMERFOUND", customerFound);
 					} else {
 						session.removeAttribute("CUSTOMERFOUND");
-						throw new UserNotfoundException();
+						throw new UserException("customer not found");
 					}
 				}
-			} catch (UserNotfoundException | AccountNotfoundException e) {
+			} catch (UserException | AccountException e) {
 				String infomessage = e.getMessage();
 				request.setAttribute("INFOMESSAGE", infomessage);
 //				System.out.println("DefaultServlet::doPost -> Search \nError message: " + e.getMessage());
@@ -435,12 +428,12 @@ public class DefaultServlet extends HttpServlet {
 					
 					for (int i = 0; i < username.length(); i++) {
 						if (("" + username.charAt(i)).matches("[^a-z]"))
-							throw new InvalidUsernameOrPasswordException();
+							throw new UserException("invalid username, password or empty full name");
 					}
 					
 					app.createCustomer(fullname, username, password, currency);
 
-				} catch (AlreadyExistsException | InvalidUsernameOrPasswordException | InvalidCurrencyException e) {
+				} catch (AlreadyExistsException | UserException | CurrencyException e) {
 					String infomessage = e.getMessage();
 					request.setAttribute("INFOMESSAGE", infomessage);
 //					System.out.println("DefaultServlet::doPost -> CreateNewCustomer\nError message: " + e.getMessage());
@@ -458,12 +451,12 @@ public class DefaultServlet extends HttpServlet {
 					
 					for (int i = 0; i < username.length(); i++) {
 						if (("" + username.charAt(i)).matches("[^a-z]"))
-							throw new InvalidUsernameOrPasswordException();
+							throw new UserException("invalid username, password or empty full name");
 					}
 					
 					app.createAdmin(fullname, username, password);
 
-				} catch (AlreadyExistsException | InvalidUsernameOrPasswordException e) {
+				} catch (AlreadyExistsException | UserException e) {
 					String infomessage = e.getMessage();
 					request.setAttribute("INFOMESSAGE", infomessage);
 					System.out.println("DefaultServlet::doPost -> CreateNewAdmin\nError message: " + e.getMessage());
@@ -489,7 +482,7 @@ public class DefaultServlet extends HttpServlet {
 				app.removeUser(userToDelete);
 
 
-			} catch (NullPointerException | UserNotfoundException | NotEmptyAccountException e) {
+			} catch (NullPointerException | UserException | AccountException e) {
 				String infomessage = e.getMessage();
 				request.setAttribute("INFOMESSAGE", infomessage);
 				System.out.println("DefaultServlet::doPost -> DeleteUserAdmin\nErorr message: Could not remove user.");
@@ -568,7 +561,7 @@ public class DefaultServlet extends HttpServlet {
 				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
 
-			} catch (InvalidInterestException e) {
+			} catch (InterestException e) {
 				String infomessage = e.getMessage();
 				request.setAttribute("INFOMESSAGE", infomessage);
 //				e.printStackTrace();
@@ -592,7 +585,7 @@ public class DefaultServlet extends HttpServlet {
 				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
 
-			} catch (InvalidCreditException e) {
+			} catch (CreditException e) {
 				String infomessage = e.getMessage();
 				request.setAttribute("INFOMESSAGE", infomessage);
 //				e.printStackTrace();
@@ -613,7 +606,7 @@ public class DefaultServlet extends HttpServlet {
 				app.removeUser(userToDelete);
 				request.getSession().removeAttribute("USER");
 
-			} catch (NullPointerException | UserNotfoundException | NotEmptyAccountException e) {
+			} catch (NullPointerException | UserException | AccountException e) {
 				String infomessage = e.getMessage();
 				request.setAttribute("INFOMESSAGE", infomessage);
 				System.out.println("DefaultServlet::doPost -> DeleteUser. \nError message: Could not remove user.");

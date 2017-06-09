@@ -8,7 +8,7 @@
 
 <html>
 <head>
-<title>userpage</title>
+<title>customerpage</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <style>
 #container {
@@ -212,7 +212,7 @@ table, th, td {
 							%>
 						</select> <br> Send to: <input type="radio" name="receiverType"
 							value="account" /> Account <input type="radio" checked="checked"
-							name="receiverType" value="user" /> User <br> Receiver: <input
+							name="receiverType" value="user" /> Customer <br> Receiver: <input
 							type="text" name="receiver" maxlength="20" /> <br> <br> Message:
 						<textarea name="message" style="height: 3em; width: 90%;"
 							maxlength="140"></textarea>

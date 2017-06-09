@@ -369,12 +369,17 @@ public class DatabaseProtocol {
 			System.out.println("addAccount -> customer is invalid");
 			return;
 		}
-
+		
+		double money = 0.0;
+		
+		if(main)
+			money = 100.0;
+		
 		try {
 			Statement stmt = startStatement();
 
 			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + "(USERNAME, TYPE, BALANCE, CREDIT, INTEREST)"
-					+ "VALUES ('" + customer.getUsername() + "', '" + (main ? "MAIN" : "NORMAL") + "', 0, 0 , 1.05)");
+					+ "VALUES ('" + customer.getUsername() + "', '" + (main ? "MAIN" : "NORMAL") + "', "+ money +", 0 , 1.05)");
 
 			stmt.close();
 		} catch (SQLException e) {
