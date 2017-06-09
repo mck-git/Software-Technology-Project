@@ -34,8 +34,11 @@ public class DatabaseProtocol {
 
 
 	public void closeConnection() {
+		if(con == null)
+			return;
+		
 		try {
-			if(!con.getAutoCommit()){
+			if(!con.getAutoCommit() && !con.isClosed()){
 				con.commit();
 			}
 			

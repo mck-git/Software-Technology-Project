@@ -134,7 +134,7 @@ table, th, td {
 					<form method="post" action="DS">
 						Search by: <input type="radio" name="searchBy" value="account" />
 						Account <input type="radio" checked="checked" name="searchBy"
-							value="user" /> User <br> Search for: <input type="text"
+							value="user" /> Customer <br> Search for: <input type="text"
 							name="searchToken" /> <br> <input type="submit"
 							name="subject" value="Search" />
 					</form>
