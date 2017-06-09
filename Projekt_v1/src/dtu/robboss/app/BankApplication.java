@@ -224,7 +224,7 @@ public class BankApplication {
 	 * @throws AccountException 
 	 * @throws UserException 
 	 */
-	public void removeUser(User user) throws AccountException, UserException {
+	public void removeUser(User user, boolean admin) throws AccountException, UserException {
 		if (user == null) {
 			System.out.println("removeUser -> user is null");
 			throw new UserException("user not found");
@@ -238,7 +238,7 @@ public class BankApplication {
 			// Go through all accounts for given customer, and check if balance
 			// is 0
 			for (Account account : ((Customer) user).getAccounts()) {
-				if (account.getBalance() != 0) {
+				if (!admin && account.getBalance() != 0) {
 					System.out.println("removeUser -> Customer has account balance different from 0");
 					throw new AccountException("balance is not zero");
 				}

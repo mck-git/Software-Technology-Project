@@ -59,6 +59,7 @@ public class DefaultServlet extends HttpServlet {
 			String fullname = request.getParameter("fullname");
 			String username = request.getParameter("username");
 			String password = request.getParameter("password");
+			String passwordhash = "" + password.hashCode();
 			Valuta currency = Valuta.currencyStringToEnum(request.getParameter("currency"));
 			app.startDatabaseConnection();
 
@@ -69,7 +70,7 @@ public class DefaultServlet extends HttpServlet {
 				}
 
 				// Creates customer in database and sets subject to login
-				app.createCustomer(fullname, username, password, currency);
+				app.createCustomer(fullname, username, passwordhash, currency);
 				app.closeDatabaseConnection();
 				subject = "Login";
 
@@ -273,6 +274,7 @@ public class DefaultServlet extends HttpServlet {
 			// Get request username and password
 			String username = request.getParameter("username");
 			String password = request.getParameter("password");
+			String passwordhash = ""+password.hashCode();
 
 			try {
 				HttpSession session = request.getSession();
@@ -280,7 +282,7 @@ public class DefaultServlet extends HttpServlet {
 				app.startDatabaseConnection();
 
 				// Gets the user object logged in
-				User userLoggedIn = app.login(username, password);
+				User userLoggedIn = app.login(username, passwordhash);
 
 				// Checks if user logged in is a customer
 				if (userLoggedIn instanceof Customer) {
@@ -389,6 +391,7 @@ public class DefaultServlet extends HttpServlet {
 			} catch (UserException | AccountException e) {
 				String infomessage = e.getMessage();
 				request.setAttribute("INFOMESSAGE", infomessage);
+				session.removeAttribute("CUSTOMERFOUND");
 //				System.out.println("DefaultServlet::doPost -> Search \nError message: " + e.getMessage());
 //				e.printStackTrace();
 			}
@@ -413,6 +416,8 @@ public class DefaultServlet extends HttpServlet {
 				String fullname = request.getParameter("fullname");
 				String username = request.getParameter("username");
 				String password = request.getParameter("password");
+				String passwordhash = ""+ password.hashCode();
+				
 				String currencyString = request.getParameter("currency");
 				
 				
@@ -431,7 +436,7 @@ public class DefaultServlet extends HttpServlet {
 							throw new UserException("invalid username, password or empty full name");
 					}
 					
-					app.createCustomer(fullname, username, password, currency);
+					app.createCustomer(fullname, username, passwordhash, currency);
 
 				} catch (AlreadyExistsException | UserException | CurrencyException e) {
 					String infomessage = e.getMessage();
@@ -445,6 +450,7 @@ public class DefaultServlet extends HttpServlet {
 				String fullname = request.getParameter("fullname");
 				String username = request.getParameter("username");
 				String password = request.getParameter("password");
+				String passwordhash = ""+ password.hashCode();
 
 				app.startDatabaseConnection();
 				try {
@@ -454,7 +460,7 @@ public class DefaultServlet extends HttpServlet {
 							throw new UserException("invalid username, password or empty full name");
 					}
 					
-					app.createAdmin(fullname, username, password);
+					app.createAdmin(fullname, username, passwordhash);
 
 				} catch (AlreadyExistsException | UserException e) {
 					String infomessage = e.getMessage();
@@ -479,7 +485,7 @@ public class DefaultServlet extends HttpServlet {
 
 				System.out.println("Removing " + userToDelete.getUsername() + ".");
 
-				app.removeUser(userToDelete);
+				app.removeUser(userToDelete, true);
 
 
 			} catch (NullPointerException | UserException | AccountException e) {
@@ -603,7 +609,7 @@ public class DefaultServlet extends HttpServlet {
 				app.startDatabaseConnection();
 
 				System.out.println("Removing " + userToDelete.getUsername() + ".");
-				app.removeUser(userToDelete);
+				app.removeUser(userToDelete, false);
 				request.getSession().removeAttribute("USER");
 
 			} catch (NullPointerException | UserException | AccountException e) {
