@@ -1,4 +1,4 @@
-package dtu.robboss.servlet;
+package dtu.robboss.app;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -15,13 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import dtu.robboss.app.Account;
-import dtu.robboss.app.Admin;
-import dtu.robboss.app.BankApplication;
-import dtu.robboss.app.Customer;
-import dtu.robboss.app.TransactionHistoryElement;
-import dtu.robboss.app.User;
-import dtu.robboss.app.Valuta;
 import dtu.robboss.exceptions.*;
 
 /**
