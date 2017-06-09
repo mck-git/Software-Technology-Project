@@ -354,7 +354,7 @@ public class DefaultServlet extends HttpServlet {
 					// Searching for a specific account.
 					// This utilizes the fact that getAccount() creates a
 					// customer object with only that one account in it.
-					Account accountFound = app.getAccountByID("searchToken");
+					Account accountFound = app.getAccountByID(searchToken);
 						if(accountFound != null){
 						Customer customerFound = accountFound.getCustomer();
 	
