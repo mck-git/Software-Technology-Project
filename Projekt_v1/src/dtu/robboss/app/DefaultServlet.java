@@ -229,6 +229,9 @@ public class DefaultServlet extends HttpServlet {
 			app.startDatabaseConnection();
 			app.applyInterestToAllAccounts();
 			app.storeOldTransactionsInArchive();
+			
+			if (request.getSession().getAttribute("CUSTOMERFOUND") != null)
+				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
 		} catch (Exception e) {
 			e.printStackTrace();
