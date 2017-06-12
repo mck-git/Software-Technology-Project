@@ -104,7 +104,7 @@ public class DefaultServlet extends HttpServlet {
 			break;
 		default:
 			app.logOut();
-			response.sendRedirect("login.jsp");
+			response.sendRedirect("loginPage.jsp");
 		}
 		
 	}
@@ -129,7 +129,7 @@ public class DefaultServlet extends HttpServlet {
 		}
 
 		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -154,7 +154,7 @@ public class DefaultServlet extends HttpServlet {
 		}
 
 		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -179,7 +179,7 @@ public class DefaultServlet extends HttpServlet {
 		}
 
 		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -197,7 +197,7 @@ public class DefaultServlet extends HttpServlet {
 		}
 
 		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
 		rd.forward(request, response);
 	}
 	/**
@@ -217,7 +217,7 @@ public class DefaultServlet extends HttpServlet {
 		}
 
 		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -238,7 +238,7 @@ public class DefaultServlet extends HttpServlet {
 		}
 
 		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -269,10 +269,10 @@ public class DefaultServlet extends HttpServlet {
 		User userLoggedIn = (User) request.getSession().getAttribute("USER");
 		
 		if(userLoggedIn.equals(userToDelete)){
-			RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+			RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
 			rd.forward(request, response);
 		} else {
-			RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+			RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
 			rd.forward(request, response);
 		}
 	}
@@ -342,7 +342,7 @@ public class DefaultServlet extends HttpServlet {
 		}
 
 		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -397,7 +397,7 @@ public class DefaultServlet extends HttpServlet {
 
 		app.closeDatabaseConnection();
 
-		RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -447,7 +447,7 @@ public class DefaultServlet extends HttpServlet {
 
 				app.closeDatabaseConnection();
 
-				RequestDispatcher rd = request.getRequestDispatcher("customerpage.jsp");
+				RequestDispatcher rd = request.getRequestDispatcher("customerPage.jsp");
 				rd.forward(request, response);
 			}
 
@@ -463,7 +463,7 @@ public class DefaultServlet extends HttpServlet {
 
 				app.closeDatabaseConnection();
 
-				RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
+				RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
 				rd.forward(request, response);
 			}
 
@@ -473,7 +473,7 @@ public class DefaultServlet extends HttpServlet {
 			app.closeDatabaseConnection();
 
 			request.setAttribute("INFOMESSAGE", infomessage);
-			RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+			RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
 			rd.forward(request, response);
 		}
 	}
@@ -500,7 +500,7 @@ public class DefaultServlet extends HttpServlet {
 
 		app.closeDatabaseConnection();
 
-		RequestDispatcher rd = request.getRequestDispatcher("customerpage.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("customerPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -520,7 +520,7 @@ public class DefaultServlet extends HttpServlet {
 
 		app.closeDatabaseConnection();
 
-		RequestDispatcher rd = request.getRequestDispatcher("customerpage.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("customerPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -538,7 +538,7 @@ public class DefaultServlet extends HttpServlet {
 
 		app.closeDatabaseConnection();
 
-		RequestDispatcher rd = request.getRequestDispatcher("customerpage.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("customerPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -550,7 +550,7 @@ public class DefaultServlet extends HttpServlet {
 		request.getSession().removeAttribute("USER");
 		request.getSession().removeAttribute("CUSTOMERFOUND");
 		app.logOut();
-		RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -613,7 +613,7 @@ public class DefaultServlet extends HttpServlet {
 
 		app.closeDatabaseConnection();
 
-		RequestDispatcher rd = request.getRequestDispatcher("customerpage.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("customerPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -631,7 +631,7 @@ public class DefaultServlet extends HttpServlet {
 
 		app.closeDatabaseConnection();
 
-		RequestDispatcher rd = request.getRequestDispatcher("customerpage.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("customerPage.jsp");
 		rd.forward(request, response);
 	}
 
@@ -673,21 +673,21 @@ public class DefaultServlet extends HttpServlet {
 			request.setAttribute("INFOMESSAGE", infomessage);
 			// System.out.println(e.getMessage());
 			app.closeDatabaseConnection();
-			RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+			RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
 			rd.forward(request, response);
 		} catch (AlreadyExistsException e) {
 			String infomessage = e.getMessage();
 			request.setAttribute("INFOMESSAGE", infomessage);
 			System.out.println(e.getMessage());
 			app.closeDatabaseConnection();
-			RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+			RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
 			rd.forward(request, response);
 		} catch (CurrencyException e) {
 			String infomessage = e.getMessage();
 			request.setAttribute("INFOMESSAGE", infomessage);
 			// System.out.println(e.getMessage());
 			app.closeDatabaseConnection();
-			RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+			RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
 			rd.forward(request, response);
 		}
 	}

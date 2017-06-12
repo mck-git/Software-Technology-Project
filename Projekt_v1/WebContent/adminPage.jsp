@@ -8,7 +8,7 @@
 
 <html>
 <head>
-<title>adminpage</title>
+<title>admin page</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <style>
 #container {
