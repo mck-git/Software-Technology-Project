@@ -3,11 +3,11 @@ package dtu.robboss.app;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 
-public enum Valuta {
+public enum Currency {
 
 	DKK(1), EUR(0.13), USD(0.15), GBP(0.12), JPY(16.81);
 
-	Valuta(double value) {
+	Currency(double value) {
 		this.value = value;
 	}
 
@@ -38,23 +38,23 @@ public enum Valuta {
 	 * 
 	 * @throws SQLException
 	 */
-	public static Valuta currencyStringToEnum(String currencyString) {
-		Valuta currency = null;
+	public static Currency currencyStringToEnum(String currencyString) {
+		Currency currency = null;
 		switch (currencyString) {
 		case "EUR":
-			currency = Valuta.EUR;
+			currency = Currency.EUR;
 			break;
 		case "USD":
-			currency = Valuta.USD;
+			currency = Currency.USD;
 			break;
 		case "GBP":
-			currency = Valuta.GBP;
+			currency = Currency.GBP;
 			break;
 		case "JPY":
-			currency = Valuta.JPY;
+			currency = Currency.JPY;
 			break;
 		default:
-			currency = Valuta.DKK;
+			currency = Currency.DKK;
 		}
 		return currency;
 	}

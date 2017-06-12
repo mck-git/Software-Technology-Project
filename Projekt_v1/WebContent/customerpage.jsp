@@ -2,7 +2,7 @@
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dtu.robboss.app.Customer"%>
 <%@ page import="dtu.robboss.app.Account"%>
-<%@ page import="dtu.robboss.app.Valuta"%>
+<%@ page import="dtu.robboss.app.Currency"%>
 <%@ page import="dtu.robboss.app.TransactionHistoryElement"%>
 <%@ page import="java.util.ArrayList"%>
 
@@ -133,10 +133,10 @@ table, th, td {
 					<%=account.getAccountID()%>
 
 					- balance:
-					<%=Valuta.convert(account.getBalance(), userLoggedIn)%>
+					<%=Currency.convert(account.getBalance(), userLoggedIn)%>
 
 					- credit:
-					<%=Valuta.convert(account.getCredit(), userLoggedIn)%>
+					<%=Currency.convert(account.getCredit(), userLoggedIn)%>
 
 					- interest:
 					<%=account.getInterest()%>
@@ -275,12 +275,12 @@ table, th, td {
 							<td><%=th.get(i).getDate()%></td>
 							<td><%=th.get(i).getSourceUsername()%>/<%=th.get(i).getSourceAccountID()%></td>
 							<td><%=th.get(i).getTargetUsername()%>/<%=th.get(i).getTargetAccountID()%></td>
-							<td><%=Valuta.convert(th.get(i).getTransferAmount(), userLoggedIn)%></td>
+							<td><%=Currency.convert(th.get(i).getTransferAmount(), userLoggedIn)%></td>
 							
 							<% if(userLoggedIn.getUsername().equals(th.get(i).getSourceUsername())){ %> 
-							<td> <%=Valuta.convert(th.get(i).getSourceBalance(), userLoggedIn)%> </td> 
+							<td> <%=Currency.convert(th.get(i).getSourceBalance(), userLoggedIn)%> </td> 
 							<% }else{ %> 
-							<td> <%=Valuta.convert(th.get(i).getTargetBalance(), userLoggedIn)%> </td> <%}; %>
+							<td> <%=Currency.convert(th.get(i).getTargetBalance(), userLoggedIn)%> </td> <%}; %>
 							
 							<td><%=th.get(i).getMessage()%></td>
 						</tr>

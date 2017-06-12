@@ -295,11 +295,11 @@ public class DefaultServlet extends HttpServlet {
 
 			String currencyString = request.getParameter("currency");
 
-			Valuta currency;
+			Currency currency;
 			if (currencyString != null)
-				currency = Valuta.currencyStringToEnum(currencyString);
+				currency = Currency.currencyStringToEnum(currencyString);
 			else
-				currency = Valuta.DKK;
+				currency = Currency.DKK;
 
 			app.startDatabaseConnection();
 			try {
@@ -585,7 +585,7 @@ public class DefaultServlet extends HttpServlet {
 
 			// Revert transferAmount to DKK which is the currency the
 			// database operates on
-			double amount = Valuta.revert(Double.parseDouble(transferAmount), loggedInCustomer);
+			double amount = Currency.revert(Double.parseDouble(transferAmount), loggedInCustomer);
 
 			// The customer wants to transfer to a specific account
 			if (recieverType.equals("account")) {
@@ -623,7 +623,7 @@ public class DefaultServlet extends HttpServlet {
 	 */
 	private void selectCurrency() throws ServletException, IOException {
 		Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
-		Valuta currency = Valuta.currencyStringToEnum(request.getParameter("currency"));
+		Currency currency = Currency.currencyStringToEnum(request.getParameter("currency"));
 
 		app.startDatabaseConnection();
 
@@ -647,7 +647,7 @@ public class DefaultServlet extends HttpServlet {
 		String password = request.getParameter("password");
 		String passwordhash = "" + password.hashCode();
 		
-		Valuta currency = Valuta.currencyStringToEnum(request.getParameter("currency"));
+		Currency currency = Currency.currencyStringToEnum(request.getParameter("currency"));
 		app.startDatabaseConnection();
 
 		System.out.println("Got parameters from response object");

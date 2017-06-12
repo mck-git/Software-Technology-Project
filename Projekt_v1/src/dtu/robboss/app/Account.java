@@ -77,8 +77,8 @@ public class Account {
 
 	public String toString() {
 
-		String balance = Valuta.convert(this.balance, this.customer);
-		String credit = Valuta.convert(this.credit, this.customer);
+		String balance = Currency.convert(this.balance, this.customer);
+		String credit = Currency.convert(this.credit, this.customer);
 
 		String s = "ID: " + this.id + ", balance: " + balance + ", credit: " + credit + ", interest: " + this.interest
 				+ ", type: " + this.type;

@@ -227,7 +227,7 @@ public class DatabaseProtocol {
 			if (rs.next()) {
 				// if such a user exists
 
-				Valuta currency = Valuta.currencyStringToEnum(rs.getString("CURRENCY"));
+				Currency currency = Currency.currencyStringToEnum(rs.getString("CURRENCY"));
 				if (currency == null) {
 					System.out.println("getCustomer -> invalid currency");
 					getCustomerPstmt.close();
@@ -260,7 +260,7 @@ public class DatabaseProtocol {
 	 *            : enum of type Valuta, corresponding to the currencies DKK,
 	 *            EUR, USD, GDP, JPY
 	 */
-	public void setCurrency(Customer customer, Valuta currency) {
+	public void setCurrency(Customer customer, Currency currency) {
 
 		if (customer == null) {
 

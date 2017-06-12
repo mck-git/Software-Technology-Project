@@ -1,6 +1,6 @@
 <!DOCTYPE HTML><%@page language="java"
 	contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="dtu.robboss.app.Valuta"%>
+<%@ page import="dtu.robboss.app.Currency"%>
 <%@ page import="dtu.robboss.app.Customer"%>
 <%@ page import="dtu.robboss.app.Account"%>
 <%@ page import="dtu.robboss.app.Admin"%>
@@ -188,8 +188,8 @@ table, th, td {
 						<tr>
 							<td><%=customerFound.getUsername()%></td>
 							<td><%=account.getAccountID()%></td>
-							<td><%=Valuta.convert(account.getBalance(), customerFound)%></td>
-							<td><%=Valuta.convert(account.getCredit(), customerFound)%></td>
+							<td><%=Currency.convert(account.getBalance(), customerFound)%></td>
+							<td><%=Currency.convert(account.getCredit(), customerFound)%></td>
 							<td><%=account.getType()%></td>
 							<td><%=account.getInterest()%></td>
 						</tr>

@@ -95,7 +95,7 @@ public class BankApplication {
 	 *            : Currency enum to set for customer. Valid currencies are:
 	 *            DKK, EUR, USD, GBP, JPY.
 	 */
-	public void setCurrency(Customer customer, Valuta currency) {
+	public void setCurrency(Customer customer, Currency currency) {
 
 		if (customer == null) {
 			System.out.println("setCurrency -> customer is null");
@@ -134,7 +134,7 @@ public class BankApplication {
 	 * @throws CurrencyException 
 	 * @throws UserException 
 	 */
-	public void createCustomer(String fullname, String username, String password, Valuta currency)
+	public void createCustomer(String fullname, String username, String password, Currency currency)
 			throws AlreadyExistsException, CurrencyException, UserException {
 
 		if (!newUserHasValidParameters(fullname, username, password)) {
@@ -196,7 +196,7 @@ public class BankApplication {
 	 *            : Valid currencies are: DKK, EUR, USD, GBP, JPY.
 	 * @return True if currency is valid.
 	 */
-	private boolean isValidCurrency(Valuta currency) {
+	private boolean isValidCurrency(Currency currency) {
 		if (currency == null)
 			return false;
 
