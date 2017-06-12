@@ -1,9 +1,9 @@
 package dtu.robboss.app;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -32,17 +32,16 @@ public class DatabaseProtocol {
 	// Connection //
 	////////////////
 
-	private Statement startStatement() {
-		try {
-			return con.createStatement();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 	public void closeConnection() {
+		if(con == null)
+			return;
+		
 		try {
+			if(!con.getAutoCommit() && !con.isClosed()){
+				con.commit();
+			}
+			
 			con.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -52,6 +51,8 @@ public class DatabaseProtocol {
 	public void startConnection() {
 		try {
 			con = dataSource.getConnection("DTU02", "FAGP2017");
+			con.setAutoCommit(false);
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -71,15 +72,15 @@ public class DatabaseProtocol {
 	 */
 	public int customerCount() {
 		try {
-			Statement stmt = startStatement();
-			ResultSet rs = stmt.executeQuery("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.CUSTOMERS");
-
+			
+			PreparedStatement customerCountPstmt = con.prepareStatement("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.CUSTOMERS");
+			ResultSet rs = customerCountPstmt.executeQuery();
 			if (rs.next()) {
 				int userCount = Integer.parseInt(rs.getString("USERCOUNT"));
 				closeConnection();
 				return userCount;
 			}
-			stmt.close();
+			customerCountPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -120,16 +121,27 @@ public class DatabaseProtocol {
 
 		try {
 
-			Statement stmt = startStatement();
-
 			if (user instanceof Customer) {
-				stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + user.getUsername() + "'");
-				stmt.executeUpdate("DELETE FROM DTUGRP04.CUSTOMERS WHERE USERNAME = '" + user.getUsername() + "'");
+				PreparedStatement deleteCustomerPstmt = con.prepareStatement("DELETE FROM DTUGRP04.CUSTOMERS WHERE USERNAME = ?");
+				PreparedStatement deleteAccountsPstmt = con.prepareStatement("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = ?");
+				
+				deleteCustomerPstmt.setString(1, user.getUsername());
+				deleteAccountsPstmt.setString(1, user.getUsername());
+				
+				deleteCustomerPstmt.executeUpdate();
+				deleteAccountsPstmt.executeUpdate();
+				
+				deleteCustomerPstmt.close();
+				deleteAccountsPstmt.close();
+				
 
-			} else
-				stmt.executeUpdate("DELETE FROM DTUGRP04.ADMINS WHERE USERNAME = '" + user.getUsername() + "'");
+			} else{
+				PreparedStatement deleteAdminPstmt = con.prepareStatement("DELETE FROM DTUGRP04.ADMINS WHERE USERNAME = ?");
+				deleteAdminPstmt.setString(1, user.getUsername());
+				deleteAdminPstmt.executeUpdate();
+				deleteAdminPstmt.close();
+			}
 
-			stmt.close();
 		} catch (SQLException e) {
 			System.out.println("Could not remove user.");
 			e.printStackTrace();
@@ -176,14 +188,17 @@ public class DatabaseProtocol {
 			throw new AlreadyExistsException("User");
 
 		try {
-			Statement stmt = startStatement();
+			PreparedStatement addCustomerPstmt = con.prepareStatement("INSERT INTO DTUGRP04.CUSTOMERS (USERNAME, FULLNAME, PASSWORD, CURRENCY) VALUES(?,?,?,?)");
+			
+			addCustomerPstmt.setString(1, customer.getUsername());
+			addCustomerPstmt.setString(2, customer.getFullName());
+			addCustomerPstmt.setString(3, customer.getPassword());
+			addCustomerPstmt.setString(4, customer.getCurrency().name());
 
-			stmt.executeUpdate("INSERT INTO DTUGRP04.CUSTOMERS (USERNAME, FULLNAME, PASSWORD, CURRENCY) VALUES('"
-					+ customer.getUsername() + "', '" + customer.getFullName() + "', '" + customer.getPassword()
-					+ "', '" + customer.getCurrency() + "')");
-
-			stmt.close();
-
+			addCustomerPstmt.executeUpdate();
+			
+			addCustomerPstmt.close();
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -204,26 +219,28 @@ public class DatabaseProtocol {
 		}
 
 		try {
-			Statement stmt = startStatement();
-
-			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.CUSTOMERS WHERE USERNAME = '" + username + "'");
+			PreparedStatement getCustomerPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.CUSTOMERS WHERE USERNAME = ?");
+			getCustomerPstmt.setString(1, username);
+			
+			ResultSet rs = getCustomerPstmt.executeQuery();
+			
 			if (rs.next()) {
 				// if such a user exists
 
 				Valuta currency = Valuta.currencyStringToEnum(rs.getString("CURRENCY"));
 				if (currency == null) {
 					System.out.println("getCustomer -> invalid currency");
-					stmt.close();
+					getCustomerPstmt.close();
 					return null;
 				}
 
 				Customer customer = new Customer(rs.getString("FULLNAME"), rs.getString("USERNAME"),
 						rs.getString("PASSWORD"), currency);
-				stmt.close();
+				getCustomerPstmt.close();
 				return customer;
 			}
 
-			stmt.close();
+			getCustomerPstmt.close();
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -258,12 +275,15 @@ public class DatabaseProtocol {
 
 		try {
 
-			Statement stmt = startStatement();
-
-			stmt.executeUpdate("UPDATE DTUGRP04.CUSTOMERS SET CURRENCY = '" + currency.name() + "' WHERE USERNAME = '"
-					+ customer.getUsername() + "'");
-
-			stmt.close();
+			PreparedStatement updateCurrencyPstmt = con.prepareStatement("UPDATE DTUGRP04.CUSTOMERS SET CURRENCY = ? WHERE USERNAME = ?");
+			
+			updateCurrencyPstmt.setString(1, currency.name());
+			updateCurrencyPstmt.setString(2, customer.getUsername());
+			
+			updateCurrencyPstmt.executeUpdate();
+			
+			updateCurrencyPstmt.close();
+			
 		} catch (SQLException e) {
 
 			e.printStackTrace();
@@ -292,10 +312,15 @@ public class DatabaseProtocol {
 		if (containsUser(admin))
 			throw new AlreadyExistsException("User");
 		try {
-			Statement stmt = startStatement();
-			stmt.executeUpdate("INSERT INTO DTUGRP04.ADMINS (USERNAME, FULLNAME, PASSWORD) VALUES('"
-					+ admin.getUsername() + "', '" + admin.getFullName() + "', '" + admin.getPassword() + "')");
-			stmt.close();
+			PreparedStatement insertAdminPstmt = con.prepareStatement("INSERT INTO DTUGRP04.ADMINS (USERNAME, FULLNAME, PASSWORD) VALUES(?,?,?)");
+			
+			insertAdminPstmt.setString(1, admin.getUsername());
+			insertAdminPstmt.setString(2, admin.getFullName());
+			insertAdminPstmt.setString(3, admin.getPassword());
+			
+			insertAdminPstmt.executeUpdate();
+			
+			insertAdminPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -317,15 +342,16 @@ public class DatabaseProtocol {
 		}
 
 		try {
-			Statement stmt = startStatement();
-
-			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ADMINS WHERE USERNAME = '" + username + "'");
+			PreparedStatement selectAdminPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.ADMINS WHERE USERNAME = ?");
+			selectAdminPstmt.setString(1, username);
+			ResultSet rs = selectAdminPstmt.executeQuery();
+			
 			if (rs.next()) {
 				Admin admin = new Admin(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
-				stmt.close();
+				selectAdminPstmt.close();
 				return admin;
 			}
-			stmt.close();
+			selectAdminPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -370,18 +396,19 @@ public class DatabaseProtocol {
 			return;
 		}
 		
-		double money = 0.0;
-		
-		if(main)
-			money = 100.0;
-		
 		try {
-			Statement stmt = startStatement();
+			PreparedStatement insertAccountPstmt = con.prepareStatement("INSERT INTO DTUGRP04.ACCOUNTS (USERNAME, TYPE, BALANCE, CREDIT, INTEREST) VALUES (?,?,?,?,?)");
 
-			stmt.executeUpdate("INSERT INTO DTUGRP04.ACCOUNTS " + "(USERNAME, TYPE, BALANCE, CREDIT, INTEREST)"
-					+ "VALUES ('" + customer.getUsername() + "', '" + (main ? "MAIN" : "NORMAL") + "', "+ money +", 0 , 1.05)");
-
-			stmt.close();
+			insertAccountPstmt.setString(1, customer.getUsername());
+			insertAccountPstmt.setString(2, main? "MAIN" : "NORMAL");
+			insertAccountPstmt.setDouble(3, main? 100.0 : 0.0);
+			insertAccountPstmt.setDouble(4, 0.0);
+			insertAccountPstmt.setDouble(5, 1.05);
+			
+			insertAccountPstmt.executeUpdate();
+			
+			insertAccountPstmt.close();
+			
 		} catch (SQLException e) {
 			System.out.println("Could not create account");
 			// e.printStackTrace();
@@ -403,11 +430,14 @@ public class DatabaseProtocol {
 		}
 
 		try {
-			Statement stmt = startStatement();
+			
+			PreparedStatement deleteAccountPstmt = con.prepareStatement("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = ?");
 
-			stmt.executeUpdate("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = '" + account.getAccountID() + "'");
-
-			stmt.close();
+			deleteAccountPstmt.setString(1, account.getAccountID());
+			
+			deleteAccountPstmt.executeUpdate();
+			
+			deleteAccountPstmt.close();
 		} catch (SQLException e) {
 			System.out.println("Could not remove account.");
 			// e.printStackTrace();
@@ -433,18 +463,21 @@ public class DatabaseProtocol {
 			return null;
 		}
 		try {
-			Statement stmt = startStatement();
-
-			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE ID = '" + accountID + "'");
+			PreparedStatement selectAccountPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.ACCOUNTS WHERE ID = ?");
+			
+			selectAccountPstmt.setString(1, accountID);
+			
+			ResultSet rs = selectAccountPstmt.executeQuery();
+			
 			if (rs.next()) {
 				Customer customer = getCustomer(rs.getString("USERNAME"));
 				Account account = new Account(customer, accountID, rs.getDouble("BALANCE"), rs.getDouble("CREDIT"),
 						rs.getString("TYPE"), rs.getDouble("INTEREST"));
 
-				stmt.close();
+				selectAccountPstmt.close();
 				return account;
 			}
-			stmt.close();
+			selectAccountPstmt.close();
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -465,9 +498,9 @@ public class DatabaseProtocol {
 		List<Account> allAccounts = new ArrayList<Account>();
 
 		try {
-			Statement stmt = startStatement();
-
-			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS");
+			PreparedStatement selectAccountsPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.ACCOUNTS");
+			
+			ResultSet rs = selectAccountsPstmt.executeQuery();
 
 			while (rs.next()) {
 				Customer customer = getCustomer(rs.getString("USERNAME"));
@@ -477,7 +510,7 @@ public class DatabaseProtocol {
 				allAccounts.add(account);
 			}
 
-			stmt.close();
+			selectAccountsPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -505,9 +538,12 @@ public class DatabaseProtocol {
 		}
 
 		try {
-			Statement stmt = startStatement();
+			PreparedStatement selectAccountsPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = ?");
 
-			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + username + "'");
+			selectAccountsPstmt.setString(1, username);
+			
+			ResultSet rs = selectAccountsPstmt.executeQuery();
+			
 			Customer customer = getCustomer(username);
 			while (rs.next()) {
 
@@ -515,7 +551,7 @@ public class DatabaseProtocol {
 						rs.getDouble("CREDIT"), rs.getString("TYPE"), rs.getDouble("INTEREST"));
 				accounts.add(account);
 			}
-			stmt.close();
+			selectAccountsPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -546,14 +582,20 @@ public class DatabaseProtocol {
 
 		try {
 
-			Statement stmt = startStatement();
-
-			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET TYPE = '" + oldMain.getType() + "' WHERE ID = '"
-					+ oldMain.getAccountID() + "'");
-			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET TYPE = '" + newMain.getType() + "' WHERE ID = '"
-					+ newMain.getAccountID() + "'");
-
-			stmt.close();
+			
+			PreparedStatement updateAccountTypePstmt = con.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET TYPE = ? WHERE ID = ?");
+			
+			updateAccountTypePstmt.setString(1, oldMain.getType());
+			updateAccountTypePstmt.setString(2, oldMain.getAccountID());
+			
+			updateAccountTypePstmt.executeUpdate();
+			
+			updateAccountTypePstmt.setString(1, newMain.getType());
+			updateAccountTypePstmt.setString(2, newMain.getAccountID());
+			
+			updateAccountTypePstmt.executeUpdate();
+			
+			updateAccountTypePstmt.close();
 		} catch (SQLException e) {
 			System.out.println("Error in DatabaseProtocol::selectNewMainAccount");
 		}
@@ -571,11 +613,15 @@ public class DatabaseProtocol {
 	public void setInterest(String accountID, double interest) {
 
 		try {
-			Statement stmt = startStatement();
-			stmt.executeUpdate(
-					"UPDATE DTUGRP04.ACCOUNTS SET INTEREST = '" + interest + "' WHERE ID = '" + accountID + "'");
-
-			stmt.close();
+			PreparedStatement updateInterestPstmt = con.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET INTEREST = ? WHERE ID = ?");
+			
+			updateInterestPstmt.setDouble(1, interest);
+			updateInterestPstmt.setString(2, accountID);
+			
+			updateInterestPstmt.executeUpdate();
+			
+			updateInterestPstmt.close();
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -591,11 +637,14 @@ public class DatabaseProtocol {
 	public void setCredit(String accountID, double credit) {
 
 		try {
-			Statement stmt = startStatement();
+			PreparedStatement updateCreditPstmt = con.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET CREDIT = ? WHERE ID = ?");
 
-			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET CREDIT = '" + credit + "' WHERE ID = '" + accountID + "'");
-
-			stmt.close();
+			updateCreditPstmt.setDouble(1, credit);
+			updateCreditPstmt.setString(2, accountID);
+			
+			updateCreditPstmt.executeUpdate();
+			
+			updateCreditPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -625,14 +674,17 @@ public class DatabaseProtocol {
 		targetAccount.changeBalance(transferAmount);
 
 		try {
-			Statement stmt = startStatement();
+			PreparedStatement updateBalancePstmt = con.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = ? WHERE ID = ?");
+			
+			updateBalancePstmt.setDouble(1, sourceAccount.getBalance());
+			updateBalancePstmt.setString(2, sourceAccount.getAccountID());
+			updateBalancePstmt.executeUpdate();
+			
+			updateBalancePstmt.setDouble(1, targetAccount.getBalance());
+			updateBalancePstmt.setString(2, targetAccount.getAccountID());
+			updateBalancePstmt.executeUpdate();
 
-			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + sourceAccount.getBalance()
-					+ "' WHERE ID = '" + sourceAccount.getAccountID() + "'");
-			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + targetAccount.getBalance()
-					+ "' WHERE ID = '" + targetAccount.getAccountID() + "'");
-
-			stmt.close();
+			updateBalancePstmt.close();
 		} catch (SQLException e) {
 
 			sourceAccount.changeBalance(transferAmount);
@@ -658,12 +710,14 @@ public class DatabaseProtocol {
 		account.setBalance(newBalance);
 		try {
 
-			Statement stmt = startStatement();
+			PreparedStatement updateBalancePstmt = con.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = ? WHERE ID = ?");
 
-			stmt.executeUpdate("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = '" + account.getBalance() + "' WHERE ID = '"
-					+ account.getAccountID() + "'");
-
-			stmt.close();
+			updateBalancePstmt.setDouble(1, account.getBalance());
+			updateBalancePstmt.setString(2, account.getAccountID());
+			
+			updateBalancePstmt.executeUpdate();
+			
+			updateBalancePstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -688,22 +742,22 @@ public class DatabaseProtocol {
 			return;
 		}
 		try {
-			Statement stmt = startStatement();
+			PreparedStatement selectAccountsPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = ?");
+			selectAccountsPstmt.setString(1, customer.getUsername());
 
-			ResultSet rs = stmt
-					.executeQuery("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = '" + customer.getUsername() + "'");
-
+			ResultSet rs = selectAccountsPstmt.executeQuery();
+			
 			while (rs.next()) {
 				Account newAccount = new Account(customer, rs.getString("ID"), rs.getDouble("BALANCE"),
 						rs.getDouble("CREDIT"), rs.getString("TYPE"), rs.getDouble("INTEREST"));
+				
 				if (rs.getString("TYPE").trim().equals("MAIN")) {
 					customer.setMainAccount(newAccount);
 				}
 			}
-			stmt.close();
+			selectAccountsPstmt.close();
 		} catch (SQLException e) {
 			System.out.println("Error: DatabaseProtocol::addAccountsToLocalCostumer");
-			// e.printStackTrace();
 		}
 
 	}
@@ -725,26 +779,23 @@ public class DatabaseProtocol {
 		// FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
 
 		try {
-			// extract info from TrasactionHistoryElement
-			String date = the.getDate();
-			String sourceAccountID = the.getSourceAccountID();
-			String targetAccountID = the.getTargetAccountID();
-			String sourceUsername = the.getSourceUsername();
-			String targetUsername = the.getTargetUsername();
-			double sourceBalance = the.getSourceBalance();
-			double targetBalance = the.getTargetBalance();
-			double transferAmount = the.getTransferAmount();
-			String message = the.getMessage();
-
-			Statement stmt = startStatement();
-			// update database
-			stmt.executeUpdate(
-					"INSERT INTO DTUGRP04.TRANSACTIONHISTORY (DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) VALUES('"
-							+ date + "', '" + sourceAccountID + "', '" + targetAccountID + "', '" + sourceUsername
-							+ "', '" + targetUsername + "', '" + sourceBalance + "', '" + targetBalance + "', '"
-							+ transferAmount + "', '" + message + "')");
-
-			stmt.close();
+			
+			PreparedStatement insertThePstmt = con.prepareStatement("INSERT INTO DTUGRP04.TRANSACTIONHISTORY "
+					+ "(DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) VALUES(?,?,?,?,?,?,?,?,?)");
+			
+			insertThePstmt.setString(1, the.getDate());
+			insertThePstmt.setString(2, the.getSourceAccountID());
+			insertThePstmt.setString(3, the.getTargetAccountID());
+			insertThePstmt.setString(4, the.getSourceUsername());
+			insertThePstmt.setString(5, the.getTargetUsername());
+			insertThePstmt.setDouble(6, the.getSourceBalance());
+			insertThePstmt.setDouble(7, the.getTargetBalance());
+			insertThePstmt.setDouble(8, the.getTransferAmount());
+			insertThePstmt.setString(9, the.getMessage());
+			
+			insertThePstmt.executeUpdate();
+			
+			insertThePstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -765,10 +816,14 @@ public class DatabaseProtocol {
 
 		try {
 
-			Statement stmt = startStatement();
-
-			ResultSet th = stmt.executeQuery("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE FROMUSER = '"
-					+ customer.getUsername() + "' OR TOUSER = '" + customer.getUsername() + "'");
+			PreparedStatement selectThePstmt = con.prepareStatement("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE FROMUSER = ? OR TOUSER = ?");
+			
+			selectThePstmt.setString(1, customer.getUsername());
+			selectThePstmt.setString(2, customer.getUsername());
+			
+			ResultSet th = selectThePstmt.executeQuery();
+			
+			
 			while (th.next()) {
 
 				TransactionHistoryElement element = new TransactionHistoryElement(th.getString("DATE"),
@@ -778,7 +833,7 @@ public class DatabaseProtocol {
 				transactionHistory.add(element);
 			}
 
-			stmt.close();
+			selectThePstmt.close();
 			return transactionHistory;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -798,10 +853,14 @@ public class DatabaseProtocol {
 	public void moveOldTransactionsToArchive() {
 
 		try {
-			Statement stmt = startStatement();
-
+			
+			PreparedStatement selectThePstmt = con.prepareStatement("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY");
+			
+			
+			
 			// SELECT ALL ENTRIES IN TRANSACTION HISTORY
-			ResultSet rs = stmt.executeQuery("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY");
+			ResultSet rs = selectThePstmt.executeQuery();
+			
 			Calendar cal = new GregorianCalendar();
 			Calendar limit = new GregorianCalendar();
 
@@ -844,35 +903,44 @@ public class DatabaseProtocol {
 
 			}
 
-			stmt.close();
+			selectThePstmt.close();
 
-			stmt = startStatement();
-
+			
+			PreparedStatement insertTheToArchive = con.prepareStatement("INSERT INTO DTUGRP04.TRANSACTIONARCHIVE "
+					+ "(DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) VALUES(?,?,?,?,?,?,?,?,?)");
 			// Add the TransactionHistoryElements added to the list
 			// transactionsToArchive
 			// - add the entries to Transaction Archive in database.
 			for (TransactionHistoryElement the : transactionsToArchive) {
 				// DATABASE FORMAT: DATE, FROMACCOUNT, TOACCOUNT, FROMUSER,
 				// TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
-				stmt.executeUpdate(
-						"INSERT INTO DTUGRP04.TRANSACTIONARCHIVE (DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) "
-								+ "VALUES" + "('" + the.getDate() + "', '" + the.getSourceAccountID() + "', '"
-								+ the.getTargetAccountID() + "', '" + the.getSourceUsername() + "', '"
-								+ the.getTargetUsername() + "', '" + the.getSourceBalance() + "', '"
-								+ the.getTargetBalance() + "', '" + the.getTransferAmount() + "', '" + the.getMessage()
-								+ "')");
+				
+				
+				insertTheToArchive.setString(1, the.getDate());
+				insertTheToArchive.setString(2, the.getSourceAccountID());
+				insertTheToArchive.setString(3, the.getTargetAccountID());
+				insertTheToArchive.setString(4, the.getSourceUsername());
+				insertTheToArchive.setString(5, the.getTargetUsername());
+				insertTheToArchive.setDouble(6, the.getSourceBalance());
+				insertTheToArchive.setDouble(7, the.getTargetBalance());
+				insertTheToArchive.setDouble(8, the.getTransferAmount());
+				insertTheToArchive.setString(9, the.getMessage());
+				insertTheToArchive.executeUpdate();
+				
 			}
 
-			stmt.close();
-			stmt = startStatement();
+			insertTheToArchive.close();
+			
+			PreparedStatement deleteThePstmt = con.prepareStatement("DELETE FROM DTUGRP04.TRANSACTIONHISTORY WHERE DATE = ?");
 
 			// Delete all entries in Transaction History that correspond to
 			// TransactionHistoryElements in transactions list.
 			for (TransactionHistoryElement the : transactionsToArchive) {
-				stmt.executeUpdate("DELETE FROM DTUGRP04.TRANSACTIONHISTORY WHERE DATE = '" + the.getDate() + "'");
+				deleteThePstmt.setString(1, the.getDate());
+				deleteThePstmt.executeUpdate();
 			}
 
-			stmt.close();
+			deleteThePstmt.close();
 
 		} catch (Exception e) {
 			// If anything goes wrong

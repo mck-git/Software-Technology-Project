@@ -63,9 +63,9 @@
 				<br> <input type="submit" value="Login" />
 			</form>
 			
-			<form action ="NewUser.jsp">
-				<input type="hidden" name = "subject" value = "CreateNewUser"/> 
-			<br/><input type="submit" value="Create New User" />
+			<form action ="NewCustomer.jsp">
+				<input type="hidden" name = "subject" value = "CreateNewCustomer"/> 
+			<br/><input type="submit" value="Create New Customer" />
 			
 			</form>
 			

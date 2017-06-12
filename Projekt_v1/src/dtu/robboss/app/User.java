@@ -48,5 +48,9 @@ public abstract class User {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+	
+	public boolean equals(User user){
+		return this.username.equals(user.getUsername()) && this.fullName.equals(user.getFullName()) && this.password.equals(user.getPassword());
+	}
 
 }
