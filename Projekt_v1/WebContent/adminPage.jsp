@@ -41,7 +41,7 @@
 }
 
 .outer {
-	background: rgba(150, 204, 250, 0.8);
+	background: rgba(153, 0, 0, 0.8);
 	width: 40%;
 	padding: 20px;
 	margin: 20px;
@@ -91,8 +91,8 @@ table, th, td {
 
 #footer {
 	clear: both;
-	background: yellow;
-	height: 60px;
+	background: #ffcccc;
+	height: 65px;
 	text-align: center;
 }
 </style>
@@ -113,8 +113,8 @@ table, th, td {
 		<!-- HEADER -->
 		<div id="header">
 			<h1>
-				Welcome
-				<%=userLoggedIn.getFullName() %>, you are so smart and amazing!
+				Welcome admin 
+				<%=userLoggedIn.getFullName() %>
 			</h1>
 		</div>
 
@@ -214,8 +214,6 @@ table, th, td {
 					<%=customerFound.getUsername()%>
 					<br /> Full Name:
 					<%=customerFound.getFullName()%>
-					<br /> Password:
-					<%=customerFound.getPassword()%>
 					<br /> Preferred Currency:
 					<%=customerFound.getCurrency()%>
 					<%
