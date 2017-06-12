@@ -43,10 +43,9 @@ public class DefaultServlet extends HttpServlet {
 		this.request = request;
 		this.response = response;
 
-		
 		response.setContentType("text/html");
 		String subject = request.getParameter("subject");
-		
+
 		switch (subject) {
 		case "CreateNewCustomer":
 			createNewCustomer();
@@ -106,7 +105,7 @@ public class DefaultServlet extends HttpServlet {
 			app.logOut();
 			response.sendRedirect("login.jsp");
 		}
-		
+
 	}
 
 	/**
@@ -122,7 +121,7 @@ public class DefaultServlet extends HttpServlet {
 			app.removeUser(userToDelete, false);
 			request.getSession().removeAttribute("USER");
 
-		} catch (NullPointerException | UserException | AccountException e) {
+		} catch (NullPointerException | UserException | AccountException | DatabaseException e) {
 			String infomessage = e.getMessage();
 			request.setAttribute("INFOMESSAGE", infomessage);
 			System.out.println("DefaultServlet::doPost -> DeleteUser. \nError message: Could not remove user.");
@@ -147,7 +146,7 @@ public class DefaultServlet extends HttpServlet {
 			app.setCredit(accountID, credit);
 			app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
-		} catch (CreditException e) {
+		} catch (CreditException | DatabaseException e) {
 			String infomessage = e.getMessage();
 			request.setAttribute("INFOMESSAGE", infomessage);
 			// e.printStackTrace();
@@ -172,7 +171,7 @@ public class DefaultServlet extends HttpServlet {
 			app.setInterest(accountID, interest);
 			app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
-		} catch (InterestException e) {
+		} catch (InterestException | DatabaseException e) {
 			String infomessage = e.getMessage();
 			request.setAttribute("INFOMESSAGE", infomessage);
 			// e.printStackTrace();
@@ -193,13 +192,15 @@ public class DefaultServlet extends HttpServlet {
 			app.storeOldTransactionsInArchive();
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			String infomessage = e.getMessage();
+			request.setAttribute("INFOMESSAGE", infomessage);
 		}
 
 		app.closeDatabaseConnection();
 		RequestDispatcher rd = request.getRequestDispatcher("adminpage.jsp");
 		rd.forward(request, response);
 	}
+
 	/**
 	 * Applies interest to all accounts
 	 */
@@ -213,7 +214,8 @@ public class DefaultServlet extends HttpServlet {
 				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			String infomessage = e.getMessage();
+			request.setAttribute("INFOMESSAGE", infomessage);
 		}
 
 		app.closeDatabaseConnection();
@@ -222,19 +224,20 @@ public class DefaultServlet extends HttpServlet {
 	}
 
 	/**
-	 *  Performs "applyInterest" and "archiveOldTransactions"
+	 * Performs "applyInterest" and "archiveOldTransactions"
 	 */
 	private void performBatch() throws ServletException, IOException {
 		try {
 			app.startDatabaseConnection();
 			app.applyInterestToAllAccounts();
 			app.storeOldTransactionsInArchive();
-			
+
 			if (request.getSession().getAttribute("CUSTOMERFOUND") != null)
 				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			String infomessage = e.getMessage();
+			request.setAttribute("INFOMESSAGE", infomessage);
 		}
 
 		app.closeDatabaseConnection();
@@ -247,7 +250,7 @@ public class DefaultServlet extends HttpServlet {
 	 */
 	private void deleteUserByAdmin() throws ServletException, IOException {
 		User userToDelete = null;
-		
+
 		try {
 			app.startDatabaseConnection();
 
@@ -257,7 +260,7 @@ public class DefaultServlet extends HttpServlet {
 
 			app.removeUser(userToDelete, true);
 
-		} catch (NullPointerException | UserException | AccountException e) {
+		} catch (NullPointerException | UserException | AccountException | DatabaseException e) {
 			String infomessage = e.getMessage();
 			request.setAttribute("INFOMESSAGE", infomessage);
 			System.out.println("DefaultServlet::doPost -> DeleteUserAdmin\nErorr message: Could not remove user.");
@@ -265,10 +268,10 @@ public class DefaultServlet extends HttpServlet {
 
 		app.closeDatabaseConnection();
 		// TODO: if admin deletes itself, redirect to login page instead
-		
+
 		User userLoggedIn = (User) request.getSession().getAttribute("USER");
-		
-		if(userLoggedIn.equals(userToDelete)){
+
+		if (userLoggedIn.equals(userToDelete)) {
 			RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
 			rd.forward(request, response);
 		} else {
@@ -276,7 +279,6 @@ public class DefaultServlet extends HttpServlet {
 			rd.forward(request, response);
 		}
 	}
-		
 
 	/**
 	 * The admin can create new customer as well as admin users. This functions
@@ -285,60 +287,46 @@ public class DefaultServlet extends HttpServlet {
 	 */
 	private void newUserByAdmin() throws ServletException, IOException {
 
-		if (request.getParameter("userType").equals("customer")) {
-			// Creating a customer
+		String fullname = request.getParameter("fullname");
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
+		String passwordhash = "" + password.hashCode();
+		
+		try {
+			if (request.getParameter("userType").equals("customer")) {
 
-			String fullname = request.getParameter("fullname");
-			String username = request.getParameter("username");
-			String password = request.getParameter("password");
-			String passwordhash = "" + password.hashCode();
+				String currencyString = request.getParameter("currency");
+				Currency currency;
+				
+				if (currencyString != null)
+					currency = Currency.currencyStringToEnum(currencyString);
+				else
+					currency = Currency.DKK;
 
-			String currencyString = request.getParameter("currency");
-
-			Currency currency;
-			if (currencyString != null)
-				currency = Currency.currencyStringToEnum(currencyString);
-			else
-				currency = Currency.DKK;
-
-			app.startDatabaseConnection();
-			try {
 
 				for (int i = 0; i < username.length(); i++) {
 					if (("" + username.charAt(i)).matches("[^a-z]"))
 						throw new UserException("invalid username, password or empty full name");
 				}
 
+				app.startDatabaseConnection();
 				app.createCustomer(fullname, username, passwordhash, currency);
 
-			} catch (AlreadyExistsException | UserException | CurrencyException e) {
-				String infomessage = e.getMessage();
-				request.setAttribute("INFOMESSAGE", infomessage);
-			}
-
-		} else if (request.getParameter("userType").equals("admin")) {
-			// Creating an admin
-
-			String fullname = request.getParameter("fullname");
-			String username = request.getParameter("username");
-			String password = request.getParameter("password");
-			String passwordhash = "" + password.hashCode();
-
-			app.startDatabaseConnection();
-			try {
+			} else if (request.getParameter("userType").equals("admin")) {
 
 				for (int i = 0; i < username.length(); i++) {
 					if (("" + username.charAt(i)).matches("[^a-z]"))
 						throw new UserException("invalid username, password or empty full name");
 				}
 
+				app.startDatabaseConnection();
 				app.createAdmin(fullname, username, passwordhash);
 
-			} catch (AlreadyExistsException | UserException e) {
-				String infomessage = e.getMessage();
-				request.setAttribute("INFOMESSAGE", infomessage);
-				System.out.println("DefaultServlet::doPost -> CreateNewAdmin\nError message: " + e.getMessage());
 			}
+
+		} catch (AlreadyExistsException | UserException | CurrencyException | DatabaseException e) {
+			String infomessage = e.getMessage();
+			request.setAttribute("INFOMESSAGE", infomessage);
 		}
 
 		app.closeDatabaseConnection();
@@ -389,7 +377,7 @@ public class DefaultServlet extends HttpServlet {
 					throw new UserException("customer not found");
 				}
 			}
-		} catch (UserException | AccountException e) {
+		} catch (UserException | AccountException | DatabaseException e) {
 			String infomessage = e.getMessage();
 			request.setAttribute("INFOMESSAGE", infomessage);
 			session.removeAttribute("CUSTOMERFOUND");
@@ -403,14 +391,25 @@ public class DefaultServlet extends HttpServlet {
 
 	/**
 	 * Prints the number of users currently in the database.
+	 * 
+	 * @throws ServletException
 	 */
-	private void userCount() throws IOException {
+	private void userCount() throws IOException, ServletException {
 
-		app.startDatabaseConnection();
-		
-		PrintWriter out = response.getWriter();
-		out.println("Number of users: " + app.customerCount());
-		app.closeDatabaseConnection();
+
+		try {
+			
+			PrintWriter out = response.getWriter();
+			app.startDatabaseConnection();
+			out.println("Number of users: " + app.customerCount());
+			app.closeDatabaseConnection();
+			
+		} catch (DatabaseException e) {
+			String infomessage = e.getMessage();
+			request.setAttribute("INFOMESSAGE", infomessage);
+			RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+			rd.forward(request, response);
+		}
 	}
 
 	/**
@@ -422,9 +421,9 @@ public class DefaultServlet extends HttpServlet {
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
 		String passwordhash = "" + password.hashCode();
+		HttpSession session = request.getSession();
 
 		try {
-			HttpSession session = request.getSession();
 
 			app.startDatabaseConnection();
 
@@ -467,7 +466,7 @@ public class DefaultServlet extends HttpServlet {
 				rd.forward(request, response);
 			}
 
-		} catch (UserException | UnknownLoginException e) {
+		} catch (UserException | UnknownLoginException | DatabaseException e) {
 			System.out.println("DefaultServlet::doPost -> Login\nError message: " + e.getMessage());
 			String infomessage = e.getMessage();
 			app.closeDatabaseConnection();
@@ -492,7 +491,7 @@ public class DefaultServlet extends HttpServlet {
 			Account delete = loggedInCustomer.getAccountByID(accountID);
 
 			app.removeAccount(delete);
-		} catch (AccountException e) {
+		} catch (AccountException | DatabaseException e) {
 			String infomessage = e.getMessage();
 			request.setAttribute("INFOMESSAGE", infomessage);
 			// e.printStackTrace();
@@ -516,9 +515,15 @@ public class DefaultServlet extends HttpServlet {
 		String accountID = request.getParameter("accountSelected");
 		Account newMain = loggedInCustomer.getAccountByID(accountID);
 
-		app.setNewMainAccount(loggedInCustomer, newMain);
-
-		app.closeDatabaseConnection();
+		try {
+			app.setNewMainAccount(loggedInCustomer, newMain);
+			app.closeDatabaseConnection();
+		} catch (DatabaseException e) {
+			String infomessage = e.getMessage();
+			request.setAttribute("INFOMESSAGE", infomessage);
+			RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+			rd.forward(request, response);
+		}
 
 		RequestDispatcher rd = request.getRequestDispatcher("customerpage.jsp");
 		rd.forward(request, response);
@@ -533,8 +538,13 @@ public class DefaultServlet extends HttpServlet {
 		app.startDatabaseConnection();
 
 		Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
-		app.createAccount(loggedInCustomer, false);
-		app.refreshAccountsForCustomer(loggedInCustomer);
+		try {
+			app.createAccount(loggedInCustomer, "NORMAL");
+			app.refreshAccountsForCustomer(loggedInCustomer);
+		} catch (DatabaseException e) {
+			String infomessage = e.getMessage();
+			request.setAttribute("INFOMESSAGE", infomessage);
+		}
 
 		app.closeDatabaseConnection();
 
@@ -602,14 +612,13 @@ public class DefaultServlet extends HttpServlet {
 			List<TransactionHistoryElement> th = app.getTransactionHistory((Customer) session.getAttribute("USER"));
 			session.setAttribute("TRANSACTIONHISTORY", th);
 
-		} catch (NumberFormatException | UserException | AccountException | TransferException e) {
+			// After the transfer is done, the local account information is
+			// updated
+			app.refreshAccountsForCustomer((Customer) session.getAttribute("USER"));
+		} catch (NumberFormatException | UserException | AccountException | TransferException | DatabaseException e) {
 			String infomessage = e.getMessage();
 			request.setAttribute("INFOMESSAGE", infomessage);
 		}
-
-		// After the transfer is done, the local account information is
-		// updated
-		app.refreshAccountsForCustomer((Customer) session.getAttribute("USER"));
 
 		app.closeDatabaseConnection();
 
@@ -627,7 +636,12 @@ public class DefaultServlet extends HttpServlet {
 
 		app.startDatabaseConnection();
 
-		app.setCurrency(loggedInCustomer, currency);
+		try {
+			app.setCurrency(loggedInCustomer, currency);
+		} catch (DatabaseException e) {
+			String infomessage = e.getMessage();
+			request.setAttribute("INFOMESSAGE", infomessage);
+		}
 
 		app.closeDatabaseConnection();
 
@@ -639,19 +653,19 @@ public class DefaultServlet extends HttpServlet {
 	 * Creates a new customer with given credentials in the database
 	 */
 	private void createNewCustomer() throws ServletException, IOException {
-		
+
 		System.out.println("Creating new customer");
-		
+
 		String fullname = request.getParameter("fullname");
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
 		String passwordhash = "" + password.hashCode();
-		
+
 		Currency currency = Currency.currencyStringToEnum(request.getParameter("currency"));
 		app.startDatabaseConnection();
 
 		System.out.println("Got parameters from response object");
-		
+
 		try {
 			for (int i = 0; i < username.length(); i++) {
 				if (("" + username.charAt(i)).matches("[^a-z]"))
@@ -659,30 +673,16 @@ public class DefaultServlet extends HttpServlet {
 			}
 
 			System.out.println("Correct username");
-			
+
 			// Creates customer in database and sets subject to login
 			app.createCustomer(fullname, username, passwordhash, currency);
 			app.closeDatabaseConnection();
 
 			System.out.println("Logging in");
-			
+
 			login();
 
-		} catch (UserException e) {
-			String infomessage = e.getMessage();
-			request.setAttribute("INFOMESSAGE", infomessage);
-			// System.out.println(e.getMessage());
-			app.closeDatabaseConnection();
-			RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
-			rd.forward(request, response);
-		} catch (AlreadyExistsException e) {
-			String infomessage = e.getMessage();
-			request.setAttribute("INFOMESSAGE", infomessage);
-			System.out.println(e.getMessage());
-			app.closeDatabaseConnection();
-			RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
-			rd.forward(request, response);
-		} catch (CurrencyException e) {
+		} catch (UserException | AlreadyExistsException | CurrencyException | DatabaseException e) {
 			String infomessage = e.getMessage();
 			request.setAttribute("INFOMESSAGE", infomessage);
 			// System.out.println(e.getMessage());

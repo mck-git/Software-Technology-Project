@@ -12,6 +12,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import dtu.robboss.exceptions.AlreadyExistsException;
+import dtu.robboss.exceptions.DatabaseException;
 
 public class DatabaseProtocol {
 	private DataSource dataSource;
@@ -32,7 +33,21 @@ public class DatabaseProtocol {
 	// Connection //
 	////////////////
 
-
+	public void rollbackConnection(){
+		if(con == null)
+			return;
+		try{
+			if(!con.getAutoCommit() && !con.isClosed()){
+				con.rollback();
+			}
+			
+			con.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void closeConnection() {
 		if(con == null)
 			return;
@@ -67,10 +82,11 @@ public class DatabaseProtocol {
 	 * 
 	 * @return integer corresponding to number of customers. Returns -1 if the
 	 *         count fails.
+	 * @throws DatabaseException 
 	 * 
 	 * @throws SQLException
 	 */
-	public int customerCount() {
+	public int customerCount() throws DatabaseException {
 		try {
 			
 			PreparedStatement customerCountPstmt = con.prepareStatement("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.CUSTOMERS");
@@ -83,6 +99,8 @@ public class DatabaseProtocol {
 			customerCountPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 		return -1;
 	}
@@ -97,8 +115,9 @@ public class DatabaseProtocol {
 	 * @param user
 	 *            : user to search for.
 	 * @return : true if user is found otherwise false.
+	 * @throws DatabaseException 
 	 */
-	public boolean containsUser(User user) {
+	public boolean containsUser(User user) throws DatabaseException {
 
 		if (user == null)
 			return false;
@@ -116,8 +135,9 @@ public class DatabaseProtocol {
 	 * 
 	 * @param user
 	 *            - user to be removed from database.
+	 * @throws DatabaseException 
 	 */
-	public void removeUser(User user) {
+	public void removeUser(User user) throws DatabaseException {
 
 		try {
 
@@ -145,6 +165,8 @@ public class DatabaseProtocol {
 		} catch (SQLException e) {
 			System.out.println("Could not remove user.");
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 	}
@@ -156,8 +178,9 @@ public class DatabaseProtocol {
 	 * 
 	 * @param username
 	 *            - Username of user we want to find
+	 * @throws DatabaseException 
 	 */
-	public User getUserByUsername(String username) {
+	public User getUserByUsername(String username) throws DatabaseException {
 
 		Customer customer = getCustomer(username);
 		if (!(customer == null)) {
@@ -180,8 +203,9 @@ public class DatabaseProtocol {
 	 *            - customer to be added.
 	 * @throws AlreadyExistsException
 	 *             - if a user with given username already exists in database.
+	 * @throws DatabaseException 
 	 */
-	public void addCustomer(Customer customer) throws AlreadyExistsException {
+	public void addCustomer(Customer customer) throws AlreadyExistsException, DatabaseException {
 		// CUSTOMERS columns: USERNAME, FULLNAME, PASSWORD
 
 		if (containsUser(customer))
@@ -201,6 +225,8 @@ public class DatabaseProtocol {
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 	}
 
@@ -209,9 +235,10 @@ public class DatabaseProtocol {
 	 * 
 	 * @param username
 	 * @return User Object
+	 * @throws DatabaseException 
 	 * @throws SQLException
 	 */
-	public Customer getCustomer(String username) {
+	public Customer getCustomer(String username) throws DatabaseException {
 
 		if (username == null || username.equals("")) {
 			System.out.println("getCustomer -> invalid username");
@@ -244,6 +271,8 @@ public class DatabaseProtocol {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 		return null;
@@ -259,8 +288,9 @@ public class DatabaseProtocol {
 	 * @param currency
 	 *            : enum of type Valuta, corresponding to the currencies DKK,
 	 *            EUR, USD, GDP, JPY
+	 * @throws DatabaseException 
 	 */
-	public void setCurrency(Customer customer, Currency currency) {
+	public void setCurrency(Customer customer, Currency currency) throws DatabaseException {
 
 		if (customer == null) {
 
@@ -287,6 +317,9 @@ public class DatabaseProtocol {
 		} catch (SQLException e) {
 
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
+			
 		}
 	}
 
@@ -306,8 +339,9 @@ public class DatabaseProtocol {
 	 * 
 	 *             Sanitization already occurred in BankApplication, so further
 	 *             sanitization in DatabaseProtocol is not needed
+	 * @throws DatabaseException 
 	 */
-	public void addAdmin(Admin admin) throws AlreadyExistsException {
+	public void addAdmin(Admin admin) throws AlreadyExistsException, DatabaseException {
 
 		if (containsUser(admin))
 			throw new AlreadyExistsException("User");
@@ -323,6 +357,8 @@ public class DatabaseProtocol {
 			insertAdminPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 	}
 
@@ -332,9 +368,10 @@ public class DatabaseProtocol {
 	 * @param username
 	 *            : username for the admin searched for in the database
 	 * @return Admin object
+	 * @throws DatabaseException 
 	 * @throws SQLException
 	 */
-	public Admin getAdmin(String username) {
+	public Admin getAdmin(String username) throws DatabaseException {
 
 		if (username == null || username.equals("")) {
 			System.out.println("getAdmin -> username invalid");
@@ -354,6 +391,8 @@ public class DatabaseProtocol {
 			selectAdminPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 		return null;
@@ -368,8 +407,9 @@ public class DatabaseProtocol {
 	 * 
 	 * @param account
 	 * @return : returns true if account is found.
+	 * @throws DatabaseException 
 	 */
-	public boolean containsAccount(Account account) {
+	public boolean containsAccount(Account account) throws DatabaseException {
 		if (account == null)
 			return false;
 
@@ -388,8 +428,9 @@ public class DatabaseProtocol {
 	 * 
 	 * @param customer
 	 * @param main
+	 * @throws DatabaseException 
 	 */
-	public void addAccount(Customer customer, boolean main) {
+	public void addAccount(Customer customer, String type) throws DatabaseException {
 
 		if (customer == null || customer.getUsername() == null || customer.getUsername().equals("")) {
 			System.out.println("addAccount -> customer is invalid");
@@ -400,8 +441,8 @@ public class DatabaseProtocol {
 			PreparedStatement insertAccountPstmt = con.prepareStatement("INSERT INTO DTUGRP04.ACCOUNTS (USERNAME, TYPE, BALANCE, CREDIT, INTEREST) VALUES (?,?,?,?,?)");
 
 			insertAccountPstmt.setString(1, customer.getUsername());
-			insertAccountPstmt.setString(2, main? "MAIN" : "NORMAL");
-			insertAccountPstmt.setDouble(3, main? 100.0 : 0.0);
+			insertAccountPstmt.setString(2, type);
+			insertAccountPstmt.setDouble(3, type.equals("MAIN")? 100.0 : 0.0);
 			insertAccountPstmt.setDouble(4, 0.0);
 			insertAccountPstmt.setDouble(5, 1.05);
 			
@@ -412,6 +453,8 @@ public class DatabaseProtocol {
 		} catch (SQLException e) {
 			System.out.println("Could not create account");
 			// e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 	}
 
@@ -421,8 +464,9 @@ public class DatabaseProtocol {
 	 * 
 	 * @param account
 	 *            - account to be removed.
+	 * @throws DatabaseException 
 	 */
-	public void removeAccount(Account account) {
+	public void removeAccount(Account account) throws DatabaseException {
 
 		if (account == null) {
 			System.out.println("removeAccount -> account is null");
@@ -441,6 +485,8 @@ public class DatabaseProtocol {
 		} catch (SQLException e) {
 			System.out.println("Could not remove account.");
 			// e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 	}
@@ -455,8 +501,9 @@ public class DatabaseProtocol {
 	 * 
 	 * @param accountID
 	 * @return
+	 * @throws DatabaseException 
 	 */
-	public Account getAccount(String accountID) {
+	public Account getAccount(String accountID) throws DatabaseException {
 
 		if (accountID == null || accountID.equals("")) {
 			System.out.println("getAccount -> invalid accountID");
@@ -481,6 +528,8 @@ public class DatabaseProtocol {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 		return null;
@@ -493,8 +542,9 @@ public class DatabaseProtocol {
 	 * @param accountID
 	 * @return an ArrayList with all accounts in the database. If no accounts
 	 *         are in the table, it returns an empty list
+	 * @throws DatabaseException 
 	 */
-	public List<Account> getAllAccounts() {
+	public List<Account> getAllAccounts() throws DatabaseException {
 		List<Account> allAccounts = new ArrayList<Account>();
 
 		try {
@@ -513,6 +563,8 @@ public class DatabaseProtocol {
 			selectAccountsPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 		return allAccounts;
@@ -526,9 +578,10 @@ public class DatabaseProtocol {
 	 * @return an ArrayList with all accounts in the database belonging to the
 	 *         user. If the customer has no accounts (or does not exist), it
 	 *         returns an empty list.
+	 * @throws DatabaseException 
 	 */
 
-	public ArrayList<Account> getAccountsByUsername(String username) {
+	public ArrayList<Account> getAccountsByUsername(String username) throws DatabaseException {
 
 		ArrayList<Account> accounts = new ArrayList<Account>();
 
@@ -554,6 +607,8 @@ public class DatabaseProtocol {
 			selectAccountsPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 		return accounts;
@@ -574,8 +629,9 @@ public class DatabaseProtocol {
 	 * 
 	 *            Sanitization occured in BankApplication. This method is only
 	 *            run through BankApplication.setNewMainAccount method.
+	 * @throws DatabaseException 
 	 */
-	public void setNewMainAccount(Account oldMain, Account newMain) {
+	public void setNewMainAccount(Account oldMain, Account newMain) throws DatabaseException {
 
 		oldMain.setType("NORMAL");
 		newMain.setType("MAIN");
@@ -598,6 +654,8 @@ public class DatabaseProtocol {
 			updateAccountTypePstmt.close();
 		} catch (SQLException e) {
 			System.out.println("Error in DatabaseProtocol::selectNewMainAccount");
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 	}
@@ -609,8 +667,9 @@ public class DatabaseProtocol {
 	 * @param accountID
 	 * @param interest
 	 *            1.05 corresponds to 5% interest
+	 * @throws DatabaseException 
 	 */
-	public void setInterest(String accountID, double interest) {
+	public void setInterest(String accountID, double interest) throws DatabaseException {
 
 		try {
 			PreparedStatement updateInterestPstmt = con.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET INTEREST = ? WHERE ID = ?");
@@ -624,6 +683,8 @@ public class DatabaseProtocol {
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 	}
 
@@ -633,8 +694,9 @@ public class DatabaseProtocol {
 	 * 
 	 * @param accountID
 	 * @param credit
+	 * @throws DatabaseException 
 	 */
-	public void setCredit(String accountID, double credit) {
+	public void setCredit(String accountID, double credit) throws DatabaseException {
 
 		try {
 			PreparedStatement updateCreditPstmt = con.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET CREDIT = ? WHERE ID = ?");
@@ -647,6 +709,8 @@ public class DatabaseProtocol {
 			updateCreditPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 	}
@@ -666,9 +730,10 @@ public class DatabaseProtocol {
 	 *            : account to send to
 	 * @param transferAmount
 	 *            : how much to transfer
+	 * @throws DatabaseException 
 	 * 
 	 */
-	public void transferFromAccountToAccount(Account sourceAccount, Account targetAccount, double transferAmount) {
+	public void transferFromAccountToAccount(Account sourceAccount, Account targetAccount, double transferAmount) throws DatabaseException {
 
 		sourceAccount.changeBalance(-transferAmount);
 		targetAccount.changeBalance(transferAmount);
@@ -691,6 +756,8 @@ public class DatabaseProtocol {
 			targetAccount.changeBalance(-transferAmount);
 
 			System.out.println("Error in DatabaseProtocol::transferFromAccountToAccount");
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 	}
 
@@ -699,8 +766,9 @@ public class DatabaseProtocol {
 	 * 
 	 * @param account
 	 * @param newBalance
+	 * @throws DatabaseException 
 	 */
-	public void setAccountBalance(Account account, double newBalance) {
+	public void setAccountBalance(Account account, double newBalance) throws DatabaseException {
 
 		if (account == null) {
 			System.out.println("setAccountBalance -> account is null");
@@ -720,6 +788,8 @@ public class DatabaseProtocol {
 			updateBalancePstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 	}
@@ -734,8 +804,9 @@ public class DatabaseProtocol {
 	 * 
 	 * @param customer
 	 *            - customer whose accounts to fetch.
+	 * @throws DatabaseException 
 	 */
-	public void addAccountsToLocalCustomer(Customer customer) {
+	public void addAccountsToLocalCustomer(Customer customer) throws DatabaseException {
 
 		if (customer == null) {
 			System.out.println("addAccountsToLocalCustomer -> customer is null");
@@ -758,6 +829,8 @@ public class DatabaseProtocol {
 			selectAccountsPstmt.close();
 		} catch (SQLException e) {
 			System.out.println("Error: DatabaseProtocol::addAccountsToLocalCostumer");
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 	}
@@ -773,8 +846,9 @@ public class DatabaseProtocol {
 	 * @param the
 	 *            : TransactionHistoryElement, used to store information about a
 	 *            transaction
+	 * @throws DatabaseException 
 	 */
-	public void addTransactionToHistory(TransactionHistoryElement the) {
+	public void addTransactionToHistory(TransactionHistoryElement the) throws DatabaseException {
 		// TABLECOLUMNS: DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER,
 		// FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
 
@@ -798,6 +872,8 @@ public class DatabaseProtocol {
 			insertThePstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 	}
@@ -809,8 +885,9 @@ public class DatabaseProtocol {
 	 * @param customer
 	 * @return An ArrayList of TransactionHistoryElement objects. If no elements
 	 *         are found (or SQL query fails), returns empty list.
+	 * @throws DatabaseException 
 	 */
-	public List<TransactionHistoryElement> getTransactionHistory(Customer customer) {
+	public List<TransactionHistoryElement> getTransactionHistory(Customer customer) throws DatabaseException {
 
 		List<TransactionHistoryElement> transactionHistory = new ArrayList<>();
 
@@ -835,11 +912,13 @@ public class DatabaseProtocol {
 
 			selectThePstmt.close();
 			return transactionHistory;
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
-		return transactionHistory;
 	}
 
 	// ########################
@@ -849,8 +928,9 @@ public class DatabaseProtocol {
 	/**
 	 * Moves all transactions from the Transaction History table to the
 	 * Transaction Archive, if they are older than 7 days.
+	 * @throws DatabaseException 
 	 */
-	public void moveOldTransactionsToArchive() {
+	public void moveOldTransactionsToArchive() throws DatabaseException {
 
 		try {
 			
@@ -945,6 +1025,8 @@ public class DatabaseProtocol {
 		} catch (Exception e) {
 			// If anything goes wrong
 			e.printStackTrace();
+			rollbackConnection();
+			throw new DatabaseException();
 		}
 
 	}
