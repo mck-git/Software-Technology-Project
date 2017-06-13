@@ -34,8 +34,8 @@ table, th, td {
 	background: rgba(240, 230, 255, 0.9);
 	border-radius: 2px;
 	max-height: 160px;
-	overflow: scroll;
 }
+
 
 .outer {
 	background: rgba(51, 102, 255, 0.8);
@@ -125,10 +125,10 @@ table, th, td {
 		<!-- CONTENT AREA -->
 		<div id="content_area">
 
-<div id="accounts" class="outer" style="width: 50%;">
+			<div id="accounts" class="outer" style="width: 50%;">
 				<h3 align="center" style="margin-top: 0">Accounts</h3>
 
-				<div class="innerScrollable">
+				<div class="inner">
 
 					<table style="width: 100%">
 						<tr>
@@ -169,7 +169,8 @@ table, th, td {
 
 					<form method="post" action="DS">
 
-						Select preferred currency: <br><select name="currency">
+						Select preferred currency: <br>
+						<select name="currency">
 
 							<option value="DKK">DKK</option>
 							<option value="EUR">EUR</option>
@@ -248,16 +249,14 @@ table, th, td {
 						<%
 							}
 						%>
-					</select> <br>
-					<br> <input type="hidden" name="subject" value="NewAccount" />
-					<input type="submit" value="Create new account"
+					</select> <br> <br> <input type="hidden" name="subject"
+						value="NewAccount" /> <input type="submit"
+						value="Create new account"
 						onclick="return confirm('Do you wish to create new account?')" />
 
-					<br>
-					<br> <input type="submit" name="subject"
-						value="Set as main account" /> <br>
-					<br> <input type="submit" name="subject"
-						value="Delete account" />
+					<br> <br> <input type="submit" name="subject"
+						value="Set as main account" /> <br> <br> <input
+						type="submit" name="subject" value="Delete account" />
 				</form>
 
 
