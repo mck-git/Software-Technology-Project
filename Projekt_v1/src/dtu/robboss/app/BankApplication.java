@@ -11,6 +11,7 @@ import dtu.robboss.exceptions.AccountException;
 import dtu.robboss.exceptions.AlreadyExistsException;
 import dtu.robboss.exceptions.CreditException;
 import dtu.robboss.exceptions.CurrencyException;
+import dtu.robboss.exceptions.DatabaseException;
 import dtu.robboss.exceptions.InterestException;
 import dtu.robboss.exceptions.TransferException;
 import dtu.robboss.exceptions.UnknownLoginException;
@@ -39,8 +40,9 @@ public class BankApplication {
 	 * @throws UnknownLoginException
 	 *             : If login fails.
 	 * @throws UserException 
+	 * @throws DatabaseException 
 	 */
-	public User login(String username, String pass) throws UnknownLoginException, UserException {
+	public User login(String username, String pass) throws UnknownLoginException, UserException, DatabaseException {
 
 		if (username.equals(""))
 			throw new UnknownLoginException("username is empty");
@@ -94,8 +96,9 @@ public class BankApplication {
 	 * @param currency
 	 *            : Currency enum to set for customer. Valid currencies are:
 	 *            DKK, EUR, USD, GBP, JPY.
+	 * @throws DatabaseException 
 	 */
-	public void setCurrency(Customer customer, Currency currency) {
+	public void setCurrency(Customer customer, Currency currency) throws DatabaseException {
 
 		if (customer == null) {
 			System.out.println("setCurrency -> customer is null");
@@ -117,8 +120,9 @@ public class BankApplication {
 	 * 
 	 * @return The number of customers in the database. If unsuccessful -
 	 *         returns -1.
+	 * @throws DatabaseException 
 	 */
-	public int customerCount() {
+	public int customerCount() throws DatabaseException {
 		return database.customerCount();
 	}
 
@@ -133,9 +137,10 @@ public class BankApplication {
 	 * @throws AlreadyExistsException
 	 * @throws CurrencyException 
 	 * @throws UserException 
+	 * @throws DatabaseException 
 	 */
 	public void createCustomer(String fullname, String username, String password, Currency currency)
-			throws AlreadyExistsException, CurrencyException, UserException {
+			throws AlreadyExistsException, CurrencyException, UserException, DatabaseException {
 
 		if (!newUserHasValidParameters(fullname, username, password)) {
 			System.out.println("createCustomer");
@@ -153,7 +158,7 @@ public class BankApplication {
 
 		// Create a new account for the created customer. New account is set to
 		// Main.
-		createAccount(newCustomer, true);
+		createAccount(newCustomer, "MAIN");
 	}
 
 	/**
@@ -204,7 +209,7 @@ public class BankApplication {
 				|| currency.name().equals("GBP") || currency.name().equals("JPY"));
 	}
 
-	public void createAdmin(String fullname, String username, String password) throws AlreadyExistsException, UserException {
+	public void createAdmin(String fullname, String username, String password) throws AlreadyExistsException, UserException, DatabaseException {
 
 		if (!newUserHasValidParameters(fullname, username, password)) {
 			System.out.println("createAdmin");
@@ -223,8 +228,9 @@ public class BankApplication {
 	 * @param user
 	 * @throws AccountException 
 	 * @throws UserException 
+	 * @throws DatabaseException 
 	 */
-	public void removeUser(User user, boolean admin) throws AccountException, UserException {
+	public void removeUser(User user, boolean admin) throws AccountException, UserException, DatabaseException {
 		if (user == null) {
 			System.out.println("removeUser -> user is null");
 			throw new UserException("user not found");
@@ -256,8 +262,9 @@ public class BankApplication {
 	 * @param username
 	 * @return
 	 * @throws UserException 
+	 * @throws DatabaseException 
 	 */
-	public User getUserByUsername(String username) throws UserException {
+	public User getUserByUsername(String username) throws UserException, DatabaseException {
 		if (username == null || username.equals("")) {
 			System.out.println("getUserByUsername -> username is null or empty string");
 			throw new UserException("unspecified username");
@@ -291,24 +298,24 @@ public class BankApplication {
 	 * @param customer
 	 *            : object of type Customer. All accounts must belong to a
 	 *            customer.
-	 * @param main
+	 * @param type
 	 *            : whether the account is of type main.
+	 * @throws DatabaseException 
 	 */
 
-	// TODO: change boolean main to String
 	// TODO: sanitize for customer, must exist
 
-	public void createAccount(Customer customer, boolean main) {
+	public void createAccount(Customer customer, String type) throws DatabaseException {
 
 		if (customer == null)
 			System.out.println("createAccount -> Customer is null");
 
-		else if (customer.getMainAccount() != null && main)
+		else if (customer.getMainAccount() != null && type.equals("MAIN"))
 			System.out.println("createAccount -> new account is Main and customer already has a main account");
 
 		// TODO: check database if customer has main account
 		else
-			database.addAccount(customer, main);
+			database.addAccount(customer, type);
 	}
 
 	/**
@@ -319,8 +326,9 @@ public class BankApplication {
 	 *            : account object representing the account to be deleted in the
 	 *            database
 	 * @throws AccountException 
+	 * @throws DatabaseException 
 	 */
-	public void removeAccount(Account account) throws AccountException {
+	public void removeAccount(Account account) throws AccountException, DatabaseException {
 		if (account == null) {
 			System.out.println("removeAccount -> account is null");
 			throw new AccountException("account not found");
@@ -373,9 +381,10 @@ public class BankApplication {
 	 * @param username
 	 *            : unique identifier for users in database.s
 	 * @return ArrayList with Account objects
+	 * @throws DatabaseException 
 	 */
 
-	public ArrayList<Account> getAccountsByUsername(String username) {
+	public ArrayList<Account> getAccountsByUsername(String username) throws DatabaseException {
 		if (username.equals(""))
 			return null;
 
@@ -394,8 +403,9 @@ public class BankApplication {
 	 * @param newMain
 	 *            : Account object, corresponding to the new main account for
 	 *            the given customer
+	 * @throws DatabaseException 
 	 */
-	public void setNewMainAccount(Customer customer, Account newMain) {
+	public void setNewMainAccount(Customer customer, Account newMain) throws DatabaseException {
 
 		if (customer == null) {
 			System.out.println("setNewMainAccount -> customer is null");
@@ -427,8 +437,9 @@ public class BankApplication {
 	 * @param interest
 	 *            : double value to set interest for in the database. 1.05 -> 5%
 	 * @throws InterestException 
+	 * @throws DatabaseException 
 	 */
-	public void setInterest(String accountID, double interest) throws InterestException  {
+	public void setInterest(String accountID, double interest) throws InterestException, DatabaseException  {
 		if (interest < 0 || accountID == null || accountID.equals("")) {
 			System.out.println("setInterest -> invalid interest or accountID");
 			throw new InterestException("subzero interest or invalid account id");
@@ -446,8 +457,9 @@ public class BankApplication {
 	 * @param credit
 	 *            : double value to set credit for in the database.
 	 * @throws CreditException 
+	 * @throws DatabaseException 
 	 */
-	public void setCredit(String accountID, double credit) throws CreditException  {
+	public void setCredit(String accountID, double credit) throws CreditException, DatabaseException  {
 		if (credit < 0)
 			throw new CreditException("credit cannot be negative");
 			
@@ -494,10 +506,11 @@ public class BankApplication {
 	 * @throws TransferException 
 	 * @throws AccountException 
 	 * @throws UserException 
+	 * @throws DatabaseException 
 	 * 
 	 */
 	public void transferFromAccountToCustomer(Account sourceAccount, String targetUsername, double transferAmount,
-			String message) throws UserException, AccountException, TransferException
+			String message) throws UserException, AccountException, TransferException, DatabaseException
 			 {
 			User targetUser = getUserByUsername(targetUsername);
 			
@@ -524,10 +537,11 @@ public class BankApplication {
 	 * @throws UserException 
 	 * @throws AccountException 
 	 * @throws TransferException 
+	 * @throws DatabaseException 
 	 * 
 	 */
 	public void transferFromAccountToAccount(Account sourceAccount, Account targetAccount, double transferAmount,
-			String message) throws UserException, AccountException, TransferException {
+			String message) throws UserException, AccountException, TransferException, DatabaseException {
 
 		if (userLoggedIn == null) {
 			System.out.println("transferFromAccountToAccount -> userLoggedIn is null");
@@ -573,8 +587,9 @@ public class BankApplication {
 	 * 
 	 * @return an ArrayList of TransactionHistoryElement objects. Each object
 	 *         corresponds to one transaction.
+	 * @throws DatabaseException 
 	 */
-	public List<TransactionHistoryElement> getTransactionHistory(Customer customer) {
+	public List<TransactionHistoryElement> getTransactionHistory(Customer customer) throws DatabaseException {
 
 		if (customer == null) {
 			System.out.println("getTransactionHistory -> customer is null");
@@ -596,9 +611,10 @@ public class BankApplication {
 	 *            : amount sent
 	 * @param message
 	 *            : message for the transaction
+	 * @throws DatabaseException 
 	 */
 	private void addTransactionToTH(Account sourceAccount, Account targetAccount, Double transferAmount,
-			String message) {
+			String message) throws DatabaseException {
 
 		Calendar date = new GregorianCalendar();
 
@@ -640,8 +656,9 @@ public class BankApplication {
 	 * customer through the database protocol.
 	 * 
 	 * @param customer
+	 * @throws DatabaseException 
 	 */
-	public void refreshAccountsForCustomer(Customer customer) {
+	public void refreshAccountsForCustomer(Customer customer) throws DatabaseException {
 
 		if (customer == null) {
 			System.out.println("refreshAccountsForCustomer -> customer is null");
@@ -657,8 +674,9 @@ public class BankApplication {
 	 * Gets all accounts in the database
 	 * 
 	 * @return All accounts as a List of accounts
+	 * @throws DatabaseException 
 	 */
-	public List<Account> getAllAccounts() {
+	public List<Account> getAllAccounts() throws DatabaseException {
 
 		return database.getAllAccounts();
 
@@ -670,8 +688,9 @@ public class BankApplication {
 
 	/**
 	 * Applies interest to all accounts in the database.
+	 * @throws DatabaseException 
 	 */
-	public void applyInterestToAllAccounts() {
+	public void applyInterestToAllAccounts() throws DatabaseException {
 
 		// 1: get all accounts
 		List<Account> allAccounts = database.getAllAccounts();
@@ -688,8 +707,9 @@ public class BankApplication {
 	/**
 	 * Stores all transactions that are more than 7 days old in the Transaction
 	 * Archive table.
+	 * @throws DatabaseException 
 	 */
-	public void storeOldTransactionsInArchive() {
+	public void storeOldTransactionsInArchive() throws DatabaseException {
 
 		// 1 Get all transactions in Transaction History
 		// 2 Find ID interval for old transactions

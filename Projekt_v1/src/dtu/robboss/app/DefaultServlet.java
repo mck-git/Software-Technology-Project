@@ -31,6 +31,10 @@ public class DefaultServlet extends HttpServlet {
 	private HttpServletRequest request;
 	private HttpServletResponse response;
 
+	// By default, sendto login page. Overwrite string if other pages are
+	// inteded.
+	private String destination;
+
 	@Override
 	public void init() {
 		app = new BankApplication(dataSource);
@@ -43,94 +47,104 @@ public class DefaultServlet extends HttpServlet {
 		this.request = request;
 		this.response = response;
 
-		
 		response.setContentType("text/html");
 		String subject = request.getParameter("subject");
-		
-		switch (subject) {
-		case "CreateNewCustomer":
-			createNewCustomer();
-			break;
-		case "Select currency":
-			selectCurrency();
-			break;
-		case "transfermoney":
-			transferMoney();
-			break;
-		case "LogOutUser":
-			logOut();
-			break;
-		case "NewAccount":
-			newAccount();
-			break;
-		case "Set as main account":
-			selectMainAccount();
-			break;
-		case "Delete account":
-			deleteAccount();
-			break;
-		case "Login":
-			login();
-			break;
-		case "UserCount":
-			userCount();
-			break;
-		case "Search":
-			adminSearch();
-			break;
-		case "CreateNewUserAdmin":
-			newUserByAdmin();
-			break;
-		case "DeleteUserByAdmin":
-			deleteUserByAdmin();
-			break;
-		case "Perform Batch":
-			performBatch();
-			break;
-		case "Apply Interest":
-			applyInterest();
-			break;
-		case "Archive Old Transactions":
-			archiveOldTransactions();
-			break;
-		case "Set Interest":
-			setInterest();
-			break;
-		case "Set Credit":
-			setCredit();
-			break;
-		case "DeleteLoggedInUser":
-			deleteLoggedInUser();
-			break;
-		default:
-			app.logOut();
-			response.sendRedirect("loginPage.jsp");
+
+		try {
+			
+			switch (subject) {
+			case "CreateNewCustomer":
+				createNewCustomer();
+				break;
+			case "Select currency":
+				selectCurrency();
+				break;
+			case "transfermoney":
+				transferMoney();
+				break;
+			case "LogOutUser":
+				logOut();
+				break;
+			case "NewAccount":
+				newAccount();
+				break;
+			case "Set as main account":
+				selectMainAccount();
+				break;
+			case "Delete account":
+				deleteAccount();
+				break;
+			case "Login":
+				login();
+				break;
+			case "UserCount":
+				userCount();
+				break;
+			case "Search":
+				adminSearch();
+				break;
+			case "CreateNewUserAdmin":
+				newUserByAdmin();
+				break;
+			case "DeleteUserByAdmin":
+				deleteUserByAdmin();
+				break;
+			case "Perform Batch":
+				performBatch();
+				break;
+			case "Apply Interest":
+				applyInterest();
+				break;
+			case "Archive Old Transactions":
+				archiveOldTransactions();
+				break;
+			case "Set Interest":
+				setInterest();
+				break;
+			case "Set Credit":
+				setCredit();
+				break;
+			case "DeleteLoggedInUser":
+				deleteLoggedInUser();
+				break;
+			default:
+				app.logOut();
+				response.sendRedirect("login.jsp");
+			}
+
+		} finally {
+			app.closeDatabaseConnection();
 		}
-		
+
+	}
+
+	private void forwardToDestination() throws ServletException, IOException {
+		RequestDispatcher rd = request.getRequestDispatcher(destination);
+		rd.forward(request, response);
 	}
 
 	/**
 	 * Deletes the current logged in user locally and from database.
 	 */
 	private void deleteLoggedInUser() throws ServletException, IOException {
-		User userToDelete = (User) request.getSession().getAttribute("USER");
 		try {
 
+			User userToDelete = (User) request.getSession().getAttribute("USER");
 			app.startDatabaseConnection();
 
 			System.out.println("Removing " + userToDelete.getUsername() + ".");
 			app.removeUser(userToDelete, false);
 			request.getSession().removeAttribute("USER");
 
-		} catch (NullPointerException | UserException | AccountException e) {
-			String infomessage = e.getMessage();
-			request.setAttribute("INFOMESSAGE", infomessage);
-			System.out.println("DefaultServlet::doPost -> DeleteUser. \nError message: Could not remove user.");
-		}
+		} catch (NullPointerException | UserException | AccountException | DatabaseException e) {
 
-		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
-		rd.forward(request, response);
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+		} finally {
+
+			app.closeDatabaseConnection();
+			this.destination = "login.jsp";
+			forwardToDestination();
+		}
 	}
 
 	/**
@@ -147,21 +161,22 @@ public class DefaultServlet extends HttpServlet {
 			app.setCredit(accountID, credit);
 			app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
-		} catch (CreditException e) {
-			String infomessage = e.getMessage();
-			request.setAttribute("INFOMESSAGE", infomessage);
-			// e.printStackTrace();
-		}
+		} catch (CreditException | DatabaseException e) {
 
-		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
-		rd.forward(request, response);
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+		} finally {
+
+			app.closeDatabaseConnection();
+			this.destination = "adminpage.jsp";
+			forwardToDestination();
+		}
 	}
 
 	/**
 	 * Sets interest of the account, as specified in response fields
 	 */
 	private void setInterest() throws ServletException, IOException {
+
 		try {
 			double interest = Double.parseDouble(request.getParameter("interest"));
 			String accountID = request.getParameter("accountSelected");
@@ -172,15 +187,16 @@ public class DefaultServlet extends HttpServlet {
 			app.setInterest(accountID, interest);
 			app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
-		} catch (InterestException e) {
-			String infomessage = e.getMessage();
-			request.setAttribute("INFOMESSAGE", infomessage);
-			// e.printStackTrace();
+		} catch (InterestException | DatabaseException e) {
+
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+		} finally {
+
+			app.closeDatabaseConnection();
+			this.destination = "adminpage.jsp";
+			forwardToDestination();
 		}
 
-		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
-		rd.forward(request, response);
 	}
 
 	/**
@@ -193,13 +209,15 @@ public class DefaultServlet extends HttpServlet {
 			app.storeOldTransactionsInArchive();
 
 		} catch (Exception e) {
-			e.printStackTrace();
-		}
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+		} finally {
 
-		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
-		rd.forward(request, response);
+			app.closeDatabaseConnection();
+			this.destination = "adminpage.jsp";
+			forwardToDestination();
+		}
 	}
+
 	/**
 	 * Applies interest to all accounts
 	 */
@@ -213,33 +231,38 @@ public class DefaultServlet extends HttpServlet {
 				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
 		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
-		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
-		rd.forward(request, response);
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+		} finally {
+
+			app.closeDatabaseConnection();
+			this.destination = "adminpage.jsp";
+			forwardToDestination();
+		}
 	}
 
 	/**
-	 *  Performs "applyInterest" and "archiveOldTransactions"
+	 * Performs "applyInterest" and "archiveOldTransactions"
 	 */
 	private void performBatch() throws ServletException, IOException {
+
 		try {
 			app.startDatabaseConnection();
 			app.applyInterestToAllAccounts();
 			app.storeOldTransactionsInArchive();
-			
+
 			if (request.getSession().getAttribute("CUSTOMERFOUND") != null)
 				app.refreshAccountsForCustomer((Customer) request.getSession().getAttribute("CUSTOMERFOUND"));
 
 		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
-		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
-		rd.forward(request, response);
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+		} finally {
+
+			app.closeDatabaseConnection();
+			this.destination = "adminpage.jsp";
+			forwardToDestination();
+		}
 	}
 
 	/**
@@ -247,36 +270,33 @@ public class DefaultServlet extends HttpServlet {
 	 */
 	private void deleteUserByAdmin() throws ServletException, IOException {
 		User userToDelete = null;
-		
+
 		try {
 			app.startDatabaseConnection();
 
 			userToDelete = app.getUserByUsername(request.getParameter("username"));
 
-			System.out.println("Removing " + userToDelete.getUsername() + ".");
+			// System.out.println("Removing " + userToDelete.getUsername() +
+			// ".");
 
 			app.removeUser(userToDelete, true);
 
-		} catch (NullPointerException | UserException | AccountException e) {
-			String infomessage = e.getMessage();
-			request.setAttribute("INFOMESSAGE", infomessage);
-			System.out.println("DefaultServlet::doPost -> DeleteUserAdmin\nErorr message: Could not remove user.");
-		}
+		} catch (NullPointerException | UserException | AccountException | DatabaseException e) {
 
-		app.closeDatabaseConnection();
-		// TODO: if admin deletes itself, redirect to login page instead
-		
-		User userLoggedIn = (User) request.getSession().getAttribute("USER");
-		
-		if(userLoggedIn.equals(userToDelete)){
-			RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
-			rd.forward(request, response);
-		} else {
-			RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
-			rd.forward(request, response);
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+		} finally {
+
+			User userLoggedIn = (User) request.getSession().getAttribute("USER");
+			app.closeDatabaseConnection();
+
+			if (userLoggedIn == null || userLoggedIn.equals(userToDelete))
+				this.destination = "login.jsp";
+			else
+				this.destination = "adminpage.jsp";
+
+			forwardToDestination();
 		}
 	}
-		
 
 	/**
 	 * The admin can create new customer as well as admin users. This functions
@@ -285,65 +305,38 @@ public class DefaultServlet extends HttpServlet {
 	 */
 	private void newUserByAdmin() throws ServletException, IOException {
 
-		if (request.getParameter("userType").equals("customer")) {
-			// Creating a customer
+		String fullname = request.getParameter("fullname");
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
+		String passwordhash = "" + password.hashCode();
+		String userType = request.getParameter("userType");
 
-			String fullname = request.getParameter("fullname");
-			String username = request.getParameter("username");
-			String password = request.getParameter("password");
-			String passwordhash = "" + password.hashCode();
+		try {
 
-			String currencyString = request.getParameter("currency");
-
-			Currency currency;
-			if (currencyString != null)
-				currency = Currency.currencyStringToEnum(currencyString);
-			else
-				currency = Currency.DKK;
-
-			app.startDatabaseConnection();
-			try {
-
-				for (int i = 0; i < username.length(); i++) {
-					if (("" + username.charAt(i)).matches("[^a-z]"))
-						throw new UserException("invalid username, password or empty full name");
-				}
-
-				app.createCustomer(fullname, username, passwordhash, currency);
-
-			} catch (AlreadyExistsException | UserException | CurrencyException e) {
-				String infomessage = e.getMessage();
-				request.setAttribute("INFOMESSAGE", infomessage);
+			for (int i = 0; i < username.length(); i++) {
+				if (("" + username.charAt(i)).matches("[^a-z]"))
+					throw new UserException("invalid username, password or empty full name");
 			}
 
-		} else if (request.getParameter("userType").equals("admin")) {
-			// Creating an admin
+			if (userType.equals("customer")) {
 
-			String fullname = request.getParameter("fullname");
-			String username = request.getParameter("username");
-			String password = request.getParameter("password");
-			String passwordhash = "" + password.hashCode();
+				app.startDatabaseConnection();
+				app.createCustomer(fullname, username, passwordhash, Currency.DKK);
+			} else if (userType.equals("admin")) {
 
-			app.startDatabaseConnection();
-			try {
-
-				for (int i = 0; i < username.length(); i++) {
-					if (("" + username.charAt(i)).matches("[^a-z]"))
-						throw new UserException("invalid username, password or empty full name");
-				}
-
+				app.startDatabaseConnection();
 				app.createAdmin(fullname, username, passwordhash);
-
-			} catch (AlreadyExistsException | UserException e) {
-				String infomessage = e.getMessage();
-				request.setAttribute("INFOMESSAGE", infomessage);
-				System.out.println("DefaultServlet::doPost -> CreateNewAdmin\nError message: " + e.getMessage());
 			}
-		}
 
-		app.closeDatabaseConnection();
-		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
-		rd.forward(request, response);
+		} catch (AlreadyExistsException | UserException | CurrencyException | DatabaseException e) {
+
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+		} finally {
+
+			app.closeDatabaseConnection();
+			this.destination = "adminpage.jsp";
+			forwardToDestination();
+		}
 	}
 
 	/**
@@ -363,54 +356,64 @@ public class DefaultServlet extends HttpServlet {
 				// This utilizes the fact that getAccount() creates a
 				// customer object with only that one account in it.
 				Account accountFound = app.getAccountByID(searchToken);
-				if (accountFound != null) {
-					Customer customerFound = accountFound.getCustomer();
 
-					// Sets the attribute in session scope as the search result
-					session.setAttribute("CUSTOMERFOUND", customerFound);
-				} else {
-					session.removeAttribute("CUSTOMERFOUND");
+				if (accountFound == null)
 					throw new AccountException("account not found");
-				}
+
+				// Sets the attribute in session scope as the search result
+				Customer customerFound = accountFound.getCustomer();
+				session.setAttribute("CUSTOMERFOUND", customerFound);
 
 			} else if (searchBy.equals("user")) {
 				// Searching for a specific user
 				// This finds all information about the user, including all
-				// his/hers accounts
+				// their accounts
 
 				User userFound = app.getUserByUsername(searchToken);
-				if (userFound instanceof Customer) {
-					Customer customerFound = (Customer) userFound;
 
-					// Sets the attribute in session scope as the search result
-					session.setAttribute("CUSTOMERFOUND", customerFound);
-				} else {
-					session.removeAttribute("CUSTOMERFOUND");
+				if (!(userFound instanceof Customer))
 					throw new UserException("customer not found");
-				}
+
+				// Sets the attribute in session scope as the search result
+				Customer customerFound = (Customer) userFound;
+				session.setAttribute("CUSTOMERFOUND", customerFound);
 			}
-		} catch (UserException | AccountException e) {
-			String infomessage = e.getMessage();
-			request.setAttribute("INFOMESSAGE", infomessage);
+
+		} catch (UserException | AccountException | DatabaseException e) {
+
+			request.setAttribute("INFOMESSAGE", e.getMessage());
 			session.removeAttribute("CUSTOMERFOUND");
+		} finally {
+
+			app.closeDatabaseConnection();
+			this.destination = "adminpage.jsp";
+			forwardToDestination();
 		}
-
-		app.closeDatabaseConnection();
-
-		RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
-		rd.forward(request, response);
 	}
 
 	/**
 	 * Prints the number of users currently in the database.
+	 * 
+	 * @throws ServletException
 	 */
-	private void userCount() throws IOException {
+	private void userCount() throws IOException, ServletException {
 
-		app.startDatabaseConnection();
 		
-		PrintWriter out = response.getWriter();
-		out.println("Number of users: " + app.customerCount());
-		app.closeDatabaseConnection();
+		try {
+
+			PrintWriter out = response.getWriter();
+			app.startDatabaseConnection();
+			out.println("Number of users: " + app.customerCount());
+
+		} catch (DatabaseException e) {
+			app.closeDatabaseConnection();
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+			this.destination = "login.jsp";
+			forwardToDestination();
+		} finally {
+
+			app.closeDatabaseConnection();
+		}
 	}
 
 	/**
@@ -422,9 +425,9 @@ public class DefaultServlet extends HttpServlet {
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
 		String passwordhash = "" + password.hashCode();
+		HttpSession session = request.getSession();
 
 		try {
-			HttpSession session = request.getSession();
 
 			app.startDatabaseConnection();
 
@@ -445,10 +448,7 @@ public class DefaultServlet extends HttpServlet {
 				List<TransactionHistoryElement> th = app.getTransactionHistory(customerLoggedIn);
 				session.setAttribute("TRANSACTIONHISTORY", th);
 
-				app.closeDatabaseConnection();
-
-				RequestDispatcher rd = request.getRequestDispatcher("customerPage.jsp");
-				rd.forward(request, response);
+				this.destination = "customerpage.jsp";
 			}
 
 			// Checks if user logged in is an admin
@@ -461,20 +461,17 @@ public class DefaultServlet extends HttpServlet {
 				// Creates a list to store future admin search results
 				session.setAttribute("ACCOUNTSFOUND", new ArrayList<Account>());
 
-				app.closeDatabaseConnection();
-
-				RequestDispatcher rd = request.getRequestDispatcher("adminPage.jsp");
-				rd.forward(request, response);
+				this.destination = "adminpage.jsp";
 			}
 
-		} catch (UserException | UnknownLoginException e) {
-			System.out.println("DefaultServlet::doPost -> Login\nError message: " + e.getMessage());
-			String infomessage = e.getMessage();
-			app.closeDatabaseConnection();
+		} catch (UserException | UnknownLoginException | DatabaseException e) {
 
-			request.setAttribute("INFOMESSAGE", infomessage);
-			RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
-			rd.forward(request, response);
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+			this.destination = "login.jsp";
+		} finally {
+
+			app.closeDatabaseConnection();
+			forwardToDestination();
 		}
 	}
 
@@ -483,32 +480,28 @@ public class DefaultServlet extends HttpServlet {
 	 */
 	private void deleteAccount() throws ServletException, IOException {
 		Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
+		String accountID = request.getParameter("accountSelected");
 
 		app.startDatabaseConnection();
 		try {
 
-			// Gets account to be deleted
-			String accountID = request.getParameter("accountSelected");
 			Account delete = loggedInCustomer.getAccountByID(accountID);
-
 			app.removeAccount(delete);
-		} catch (AccountException e) {
-			String infomessage = e.getMessage();
-			request.setAttribute("INFOMESSAGE", infomessage);
-			// e.printStackTrace();
+		} catch (AccountException | DatabaseException e) {
+
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+		} finally {
+
+			app.closeDatabaseConnection();
+			this.destination = "customerpage.jsp";
+			forwardToDestination();
 		}
-
-		app.closeDatabaseConnection();
-
-		RequestDispatcher rd = request.getRequestDispatcher("customerPage.jsp");
-		rd.forward(request, response);
 	}
 
 	/**
 	 * Sets the selected account as the currently logged in users main account.
 	 */
 	private void selectMainAccount() throws ServletException, IOException {
-		app.startDatabaseConnection();
 
 		Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
 
@@ -516,12 +509,21 @@ public class DefaultServlet extends HttpServlet {
 		String accountID = request.getParameter("accountSelected");
 		Account newMain = loggedInCustomer.getAccountByID(accountID);
 
-		app.setNewMainAccount(loggedInCustomer, newMain);
+		app.startDatabaseConnection();
 
-		app.closeDatabaseConnection();
+		try {
 
-		RequestDispatcher rd = request.getRequestDispatcher("customerPage.jsp");
-		rd.forward(request, response);
+			app.setNewMainAccount(loggedInCustomer, newMain);
+			this.destination = "customerpage.jsp";
+		} catch (DatabaseException e) {
+
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+			this.destination = "login.jsp";
+		} finally {
+
+			app.closeDatabaseConnection();
+			forwardToDestination();
+		}
 	}
 
 	/**
@@ -530,16 +532,22 @@ public class DefaultServlet extends HttpServlet {
 	 */
 	private void newAccount() throws ServletException, IOException {
 
+		Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
 		app.startDatabaseConnection();
 
-		Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
-		app.createAccount(loggedInCustomer, false);
-		app.refreshAccountsForCustomer(loggedInCustomer);
+		try {
 
-		app.closeDatabaseConnection();
+			app.createAccount(loggedInCustomer, "NORMAL");
+			app.refreshAccountsForCustomer(loggedInCustomer);
+		} catch (DatabaseException e) {
 
-		RequestDispatcher rd = request.getRequestDispatcher("customerPage.jsp");
-		rd.forward(request, response);
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+		} finally {
+
+			app.closeDatabaseConnection();
+			this.destination = "customerpage.jsp";
+			forwardToDestination();
+		}
 	}
 
 	/**
@@ -549,9 +557,17 @@ public class DefaultServlet extends HttpServlet {
 	private void logOut() throws ServletException, IOException {
 		request.getSession().removeAttribute("USER");
 		request.getSession().removeAttribute("CUSTOMERFOUND");
-		app.logOut();
-		RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
-		rd.forward(request, response);
+
+		try {
+			app.logOut();
+
+			this.destination = "login.jsp";
+		} finally {
+
+			app.closeDatabaseConnection();
+			forwardToDestination();
+		}
+
 	}
 
 	/**
@@ -566,8 +582,6 @@ public class DefaultServlet extends HttpServlet {
 		String message = request.getParameter("message");
 		String accountIDFrom = request.getParameter("accountToSendFrom");
 
-		app.startDatabaseConnection();
-
 		// Gets the amount to be transferred.
 		// Leading and trailing zero's enables empty input in either field
 		// to be legal.
@@ -575,6 +589,8 @@ public class DefaultServlet extends HttpServlet {
 		String beforedecimalseperator = "0" + request.getParameter("beforedecimalseperator");
 		String afterdecimalseperator = request.getParameter("afterdecimalseperator") + "00";
 		String transferAmount = beforedecimalseperator + "." + afterdecimalseperator.substring(0, 2);
+
+		app.startDatabaseConnection();
 
 		// Tries to transfer money
 		try {
@@ -602,19 +618,19 @@ public class DefaultServlet extends HttpServlet {
 			List<TransactionHistoryElement> th = app.getTransactionHistory((Customer) session.getAttribute("USER"));
 			session.setAttribute("TRANSACTIONHISTORY", th);
 
-		} catch (NumberFormatException | UserException | AccountException | TransferException e) {
-			String infomessage = e.getMessage();
-			request.setAttribute("INFOMESSAGE", infomessage);
+			// After the transfer is done, the local account information is
+			// updated
+			app.refreshAccountsForCustomer((Customer) session.getAttribute("USER"));
+
+		} catch (NumberFormatException | UserException | AccountException | TransferException | DatabaseException e) {
+
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+		} finally {
+
+			app.closeDatabaseConnection();
+			this.destination = "customerpage.jsp";
+			forwardToDestination();
 		}
-
-		// After the transfer is done, the local account information is
-		// updated
-		app.refreshAccountsForCustomer((Customer) session.getAttribute("USER"));
-
-		app.closeDatabaseConnection();
-
-		RequestDispatcher rd = request.getRequestDispatcher("customerPage.jsp");
-		rd.forward(request, response);
 	}
 
 	/**
@@ -622,74 +638,74 @@ public class DefaultServlet extends HttpServlet {
 	 * one.
 	 */
 	private void selectCurrency() throws ServletException, IOException {
+		
 		Customer loggedInCustomer = (Customer) request.getSession().getAttribute("USER");
 		Currency currency = Currency.currencyStringToEnum(request.getParameter("currency"));
 
 		app.startDatabaseConnection();
 
-		app.setCurrency(loggedInCustomer, currency);
+		try {
+			
+			app.setCurrency(loggedInCustomer, currency);
+		} catch (DatabaseException e) {
+			
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+		} finally {
 
-		app.closeDatabaseConnection();
-
-		RequestDispatcher rd = request.getRequestDispatcher("customerPage.jsp");
-		rd.forward(request, response);
+			app.closeDatabaseConnection();
+			this.destination = "customerpage.jsp";
+			forwardToDestination();
+		}
 	}
 
 	/**
 	 * Creates a new customer with given credentials in the database
 	 */
 	private void createNewCustomer() throws ServletException, IOException {
-		
-		System.out.println("Creating new customer");
-		
+
+
 		String fullname = request.getParameter("fullname");
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
 		String passwordhash = "" + password.hashCode();
-		
+
 		Currency currency = Currency.currencyStringToEnum(request.getParameter("currency"));
+
+
 		app.startDatabaseConnection();
 
-		System.out.println("Got parameters from response object");
+		boolean successfullyCreated = false;
 		
 		try {
+			
 			for (int i = 0; i < username.length(); i++) {
 				if (("" + username.charAt(i)).matches("[^a-z]"))
 					throw new UserException("invalid username, password or empty full name");
 			}
 
-			System.out.println("Correct username");
-			
+
 			// Creates customer in database and sets subject to login
 			app.createCustomer(fullname, username, passwordhash, currency);
-			app.closeDatabaseConnection();
 
-			System.out.println("Logging in");
+			successfullyCreated = true;
+
+		} catch (UserException | AlreadyExistsException | CurrencyException | DatabaseException e) {
 			
-			login();
-
-		} catch (UserException e) {
-			String infomessage = e.getMessage();
-			request.setAttribute("INFOMESSAGE", infomessage);
-			// System.out.println(e.getMessage());
+			request.setAttribute("INFOMESSAGE", e.getMessage());
+			this.destination = "login.jsp";
+			
+		} finally {
+			
 			app.closeDatabaseConnection();
-			RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
-			rd.forward(request, response);
-		} catch (AlreadyExistsException e) {
-			String infomessage = e.getMessage();
-			request.setAttribute("INFOMESSAGE", infomessage);
-			System.out.println(e.getMessage());
-			app.closeDatabaseConnection();
-			RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
-			rd.forward(request, response);
-		} catch (CurrencyException e) {
-			String infomessage = e.getMessage();
-			request.setAttribute("INFOMESSAGE", infomessage);
-			// System.out.println(e.getMessage());
-			app.closeDatabaseConnection();
-			RequestDispatcher rd = request.getRequestDispatcher("loginPage.jsp");
-			rd.forward(request, response);
+			
+			if(successfullyCreated)
+				login();
+			else
+				forwardToDestination();
+			
 		}
+		
+		
 	}
 
 }

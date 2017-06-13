@@ -39,7 +39,8 @@ public enum Currency {
 	 * @throws SQLException
 	 */
 	public static Currency currencyStringToEnum(String currencyString) {
-		Currency currency = null;
+		Currency currency;
+		
 		switch (currencyString) {
 		case "EUR":
 			currency = Currency.EUR;
