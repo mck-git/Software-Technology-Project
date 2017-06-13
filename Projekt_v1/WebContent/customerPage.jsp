@@ -125,48 +125,43 @@ table, th, td {
 		<!-- CONTENT AREA -->
 		<div id="content_area">
 
-			<div id="accounts" class="outer">
-				<h3 align="center" style="margin-top: 0;">Accounts</h3>
+<div id="accounts" class="outer" style="width: 50%;">
+				<h3 align="center" style="margin-top: 0">Accounts</h3>
 
-				<div class="inner">
-					<%
-						String type;
-					%>
-					<%
-						for (Account account : userLoggedIn.getAccounts()) {
-					%>
+				<div class="innerScrollable">
 
-					ID:
-					<%=account.getAccountID()%>
+					<table style="width: 100%">
+						<tr>
+							<th>ID</th>
+							<th>Balance</th>
+							<th>Credit</th>
+							<th>Type</th>
+							<th>Interest</th>
+						</tr>
 
-					- balance:
-					<%=Currency.convert(account.getBalance(), userLoggedIn)%>
-
-					- credit:
-					<%=Currency.convert(account.getCredit(), userLoggedIn)%>
-
-					- interest:
-					<%=account.getInterest()%>
-
-					<%
-						if (account.equals(userLoggedIn.getMainAccount()))
-								type = "MAIN";
-							else
-								type = "NORMAL";
-					%>
-					- type:
-					<%=type%>
-					<br>
-
-					<%
-						}
-					%>
-
+						<%
+							if (userLoggedIn != null)
+								for (Account account : userLoggedIn.getAccounts()) {
+						%>
+						<tr>
+							<td><%=account.getAccountID()%></td>
+							<td><%=Currency.convert(account.getBalance(), userLoggedIn)%></td>
+							<td><%=Currency.convert(account.getCredit(), userLoggedIn)%></td>
+							<td><%=account.getType()%></td>
+							<td><%=account.getInterest()%></td>
+						</tr>
+						<%
+							}
+						%>
+					</table>
 					<%=(userLoggedIn.getAccounts().size() == 0 ? "No accounts" : "")%>
+
+
 				</div>
 			</div>
 
-			<div id="currency" class="outer">
+
+			<div id="currency" class="outer" style="width: 30%;">
 				<h3 align="center" style="margin-top: 0;">Currency</h3>
 
 				<div class="inner" style="text-align: center;">
@@ -174,7 +169,7 @@ table, th, td {
 
 					<form method="post" action="DS">
 
-						Select preferred currency: <select name="currency">
+						Select preferred currency: <br><select name="currency">
 
 							<option value="DKK">DKK</option>
 							<option value="EUR">EUR</option>
