@@ -33,30 +33,30 @@ public class DatabaseProtocol {
 	// Connection //
 	////////////////
 
-	public void rollbackConnection(){
-		if(con == null)
+	public void rollbackConnection() {
+		if (con == null)
 			return;
-		try{
-			if(!con.getAutoCommit() && !con.isClosed()){
+		try {
+			if (!con.getAutoCommit() && !con.isClosed()) {
 				con.rollback();
 			}
-			
+
 			con.close();
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void closeConnection() {
-		if(con == null)
+		if (con == null)
 			return;
-		
+
 		try {
-			if(!con.getAutoCommit() && !con.isClosed()){
+			if (!con.isClosed() && !con.getAutoCommit()) {
 				con.commit();
 			}
-			
+
 			con.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -67,7 +67,7 @@ public class DatabaseProtocol {
 		try {
 			con = dataSource.getConnection("DTU02", "FAGP2017");
 			con.setAutoCommit(false);
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -82,27 +82,34 @@ public class DatabaseProtocol {
 	 * 
 	 * @return integer corresponding to number of customers. Returns -1 if the
 	 *         count fails.
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 * 
 	 * @throws SQLException
 	 */
 	public int customerCount() throws DatabaseException {
 		try {
-			
-			PreparedStatement customerCountPstmt = con.prepareStatement("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.CUSTOMERS");
+
+			PreparedStatement customerCountPstmt = con
+					.prepareStatement("SELECT COUNT(*) AS USERCOUNT FROM DTUGRP04.CUSTOMERS");
 			ResultSet rs = customerCountPstmt.executeQuery();
+
+			int userCount;
+
 			if (rs.next()) {
-				int userCount = Integer.parseInt(rs.getString("USERCOUNT"));
-				closeConnection();
-				return userCount;
+				userCount = Integer.parseInt(rs.getString("USERCOUNT"));
+			} else {
+				userCount = -1;
 			}
+
+			rs.close();
 			customerCountPstmt.close();
+			return userCount;
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			rollbackConnection();
 			throw new DatabaseException();
 		}
-		return -1;
 	}
 
 	///////////
@@ -115,7 +122,7 @@ public class DatabaseProtocol {
 	 * @param user
 	 *            : user to search for.
 	 * @return : true if user is found otherwise false.
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public boolean containsUser(User user) throws DatabaseException {
 
@@ -135,28 +142,28 @@ public class DatabaseProtocol {
 	 * 
 	 * @param user
 	 *            - user to be removed from database.
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public void removeUser(User user) throws DatabaseException {
 
 		try {
 
 			if (user instanceof Customer) {
-				PreparedStatement deleteCustomerPstmt = con.prepareStatement("DELETE FROM DTUGRP04.CUSTOMERS WHERE USERNAME = ?");
-				PreparedStatement deleteAccountsPstmt = con.prepareStatement("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = ?");
-				
+				PreparedStatement deleteCustomerPstmt = con
+						.prepareStatement("DELETE FROM DTUGRP04.CUSTOMERS WHERE USERNAME = ?");
 				deleteCustomerPstmt.setString(1, user.getUsername());
-				deleteAccountsPstmt.setString(1, user.getUsername());
-				
 				deleteCustomerPstmt.executeUpdate();
-				deleteAccountsPstmt.executeUpdate();
-				
 				deleteCustomerPstmt.close();
-				deleteAccountsPstmt.close();
-				
 
-			} else{
-				PreparedStatement deleteAdminPstmt = con.prepareStatement("DELETE FROM DTUGRP04.ADMINS WHERE USERNAME = ?");
+				PreparedStatement deleteAccountsPstmt = con
+						.prepareStatement("DELETE FROM DTUGRP04.ACCOUNTS WHERE USERNAME = ?");
+				deleteAccountsPstmt.setString(1, user.getUsername());
+				deleteAccountsPstmt.executeUpdate();
+				deleteAccountsPstmt.close();
+
+			} else {
+				PreparedStatement deleteAdminPstmt = con
+						.prepareStatement("DELETE FROM DTUGRP04.ADMINS WHERE USERNAME = ?");
 				deleteAdminPstmt.setString(1, user.getUsername());
 				deleteAdminPstmt.executeUpdate();
 				deleteAdminPstmt.close();
@@ -178,11 +185,12 @@ public class DatabaseProtocol {
 	 * 
 	 * @param username
 	 *            - Username of user we want to find
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public User getUserByUsername(String username) throws DatabaseException {
 
 		Customer customer = getCustomer(username);
+
 		if (!(customer == null)) {
 			return customer;
 		}
@@ -203,7 +211,7 @@ public class DatabaseProtocol {
 	 *            - customer to be added.
 	 * @throws AlreadyExistsException
 	 *             - if a user with given username already exists in database.
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public void addCustomer(Customer customer) throws AlreadyExistsException, DatabaseException {
 		// CUSTOMERS columns: USERNAME, FULLNAME, PASSWORD
@@ -212,15 +220,16 @@ public class DatabaseProtocol {
 			throw new AlreadyExistsException("User");
 
 		try {
-			PreparedStatement addCustomerPstmt = con.prepareStatement("INSERT INTO DTUGRP04.CUSTOMERS (USERNAME, FULLNAME, PASSWORD, CURRENCY) VALUES(?,?,?,?)");
-			
+			PreparedStatement addCustomerPstmt = con.prepareStatement(
+					"INSERT INTO DTUGRP04.CUSTOMERS (USERNAME, FULLNAME, PASSWORD, CURRENCY) VALUES(?,?,?,?)");
+
 			addCustomerPstmt.setString(1, customer.getUsername());
 			addCustomerPstmt.setString(2, customer.getFullName());
 			addCustomerPstmt.setString(3, customer.getPassword());
 			addCustomerPstmt.setString(4, customer.getCurrency().name());
 
 			addCustomerPstmt.executeUpdate();
-			
+
 			addCustomerPstmt.close();
 			
 		} catch (SQLException e) {
@@ -235,7 +244,7 @@ public class DatabaseProtocol {
 	 * 
 	 * @param username
 	 * @return User Object
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 * @throws SQLException
 	 */
 	public Customer getCustomer(String username) throws DatabaseException {
@@ -246,28 +255,30 @@ public class DatabaseProtocol {
 		}
 
 		try {
-			PreparedStatement getCustomerPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.CUSTOMERS WHERE USERNAME = ?");
+			PreparedStatement getCustomerPstmt = con
+					.prepareStatement("SELECT * FROM DTUGRP04.CUSTOMERS WHERE USERNAME = ?");
 			getCustomerPstmt.setString(1, username);
-			
+
 			ResultSet rs = getCustomerPstmt.executeQuery();
-			
+
 			if (rs.next()) {
 				// if such a user exists
 
 				Currency currency = Currency.currencyStringToEnum(rs.getString("CURRENCY"));
-				if (currency == null) {
-					System.out.println("getCustomer -> invalid currency");
-					getCustomerPstmt.close();
-					return null;
-				}
+				if (currency != null) {
 
-				Customer customer = new Customer(rs.getString("FULLNAME"), rs.getString("USERNAME"),
-						rs.getString("PASSWORD"), currency);
-				getCustomerPstmt.close();
-				return customer;
+					Customer customer = new Customer(rs.getString("FULLNAME"), rs.getString("USERNAME"),
+							rs.getString("PASSWORD"), currency);
+
+					rs.close();
+					getCustomerPstmt.close();
+					return customer;
+				}
 			}
 
+			rs.close();
 			getCustomerPstmt.close();
+			return null;
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -275,7 +286,6 @@ public class DatabaseProtocol {
 			throw new DatabaseException();
 		}
 
-		return null;
 	}
 
 	/**
@@ -288,38 +298,32 @@ public class DatabaseProtocol {
 	 * @param currency
 	 *            : enum of type Valuta, corresponding to the currencies DKK,
 	 *            EUR, USD, GDP, JPY
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public void setCurrency(Customer customer, Currency currency) throws DatabaseException {
 
-		if (customer == null) {
+		if (customer == null || currency == null) {
 
-			System.out.println("setCurrency -> customer is null");
-			return;
-		}
-
-		if (currency == null) {
-			System.out.println("setCurrency -> currency is null");
 			return;
 		}
 
 		try {
 
-			PreparedStatement updateCurrencyPstmt = con.prepareStatement("UPDATE DTUGRP04.CUSTOMERS SET CURRENCY = ? WHERE USERNAME = ?");
-			
+			PreparedStatement updateCurrencyPstmt = con
+					.prepareStatement("UPDATE DTUGRP04.CUSTOMERS SET CURRENCY = ? WHERE USERNAME = ?");
+
 			updateCurrencyPstmt.setString(1, currency.name());
 			updateCurrencyPstmt.setString(2, customer.getUsername());
-			
+
 			updateCurrencyPstmt.executeUpdate();
-			
+
 			updateCurrencyPstmt.close();
-			
+
 		} catch (SQLException e) {
 
 			e.printStackTrace();
 			rollbackConnection();
 			throw new DatabaseException();
-			
 		}
 	}
 
@@ -339,21 +343,22 @@ public class DatabaseProtocol {
 	 * 
 	 *             Sanitization already occurred in BankApplication, so further
 	 *             sanitization in DatabaseProtocol is not needed
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public void addAdmin(Admin admin) throws AlreadyExistsException, DatabaseException {
 
 		if (containsUser(admin))
 			throw new AlreadyExistsException("User");
+
 		try {
-			PreparedStatement insertAdminPstmt = con.prepareStatement("INSERT INTO DTUGRP04.ADMINS (USERNAME, FULLNAME, PASSWORD) VALUES(?,?,?)");
-			
+			PreparedStatement insertAdminPstmt = con
+					.prepareStatement("INSERT INTO DTUGRP04.ADMINS (USERNAME, FULLNAME, PASSWORD) VALUES(?,?,?)");
+
 			insertAdminPstmt.setString(1, admin.getUsername());
 			insertAdminPstmt.setString(2, admin.getFullName());
 			insertAdminPstmt.setString(3, admin.getPassword());
-			
+
 			insertAdminPstmt.executeUpdate();
-			
 			insertAdminPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -368,7 +373,7 @@ public class DatabaseProtocol {
 	 * @param username
 	 *            : username for the admin searched for in the database
 	 * @return Admin object
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 * @throws SQLException
 	 */
 	public Admin getAdmin(String username) throws DatabaseException {
@@ -382,20 +387,22 @@ public class DatabaseProtocol {
 			PreparedStatement selectAdminPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.ADMINS WHERE USERNAME = ?");
 			selectAdminPstmt.setString(1, username);
 			ResultSet rs = selectAdminPstmt.executeQuery();
-			
+
 			if (rs.next()) {
 				Admin admin = new Admin(rs.getString("FULLNAME"), rs.getString("USERNAME"), rs.getString("PASSWORD"));
 				selectAdminPstmt.close();
 				return admin;
 			}
+			
+			rs.close();
 			selectAdminPstmt.close();
+			return null;
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			rollbackConnection();
 			throw new DatabaseException();
 		}
-
-		return null;
 	}
 
 	//////////////
@@ -407,7 +414,7 @@ public class DatabaseProtocol {
 	 * 
 	 * @param account
 	 * @return : returns true if account is found.
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public boolean containsAccount(Account account) throws DatabaseException {
 		if (account == null)
@@ -428,28 +435,28 @@ public class DatabaseProtocol {
 	 * 
 	 * @param customer
 	 * @param main
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public void addAccount(Customer customer, String type) throws DatabaseException {
 
 		if (customer == null || customer.getUsername() == null || customer.getUsername().equals("")) {
-			System.out.println("addAccount -> customer is invalid");
 			return;
 		}
-		
+
 		try {
-			PreparedStatement insertAccountPstmt = con.prepareStatement("INSERT INTO DTUGRP04.ACCOUNTS (USERNAME, TYPE, BALANCE, CREDIT, INTEREST) VALUES (?,?,?,?,?)");
+			PreparedStatement insertAccountPstmt = con.prepareStatement(
+					"INSERT INTO DTUGRP04.ACCOUNTS (USERNAME, TYPE, BALANCE, CREDIT, INTEREST) VALUES (?,?,?,?,?)");
 
 			insertAccountPstmt.setString(1, customer.getUsername());
 			insertAccountPstmt.setString(2, type);
-			insertAccountPstmt.setDouble(3, type.equals("MAIN")? 100.0 : 0.0);
+			insertAccountPstmt.setDouble(3, type.equals("MAIN") ? 100.0 : 0.0);
 			insertAccountPstmt.setDouble(4, 0.0);
 			insertAccountPstmt.setDouble(5, 1.05);
-			
+
 			insertAccountPstmt.executeUpdate();
-			
+
 			insertAccountPstmt.close();
-			
+
 		} catch (SQLException e) {
 			System.out.println("Could not create account");
 			// e.printStackTrace();
@@ -464,24 +471,21 @@ public class DatabaseProtocol {
 	 * 
 	 * @param account
 	 *            - account to be removed.
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public void removeAccount(Account account) throws DatabaseException {
 
 		if (account == null) {
-			System.out.println("removeAccount -> account is null");
 			return;
 		}
 
 		try {
-			
-			PreparedStatement deleteAccountPstmt = con.prepareStatement("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = ?");
 
+			PreparedStatement deleteAccountPstmt = con.prepareStatement("DELETE FROM DTUGRP04.ACCOUNTS WHERE ID = ?");
 			deleteAccountPstmt.setString(1, account.getAccountID());
-			
 			deleteAccountPstmt.executeUpdate();
-			
 			deleteAccountPstmt.close();
+			
 		} catch (SQLException e) {
 			System.out.println("Could not remove account.");
 			// e.printStackTrace();
@@ -501,30 +505,33 @@ public class DatabaseProtocol {
 	 * 
 	 * @param accountID
 	 * @return
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public Account getAccount(String accountID) throws DatabaseException {
 
 		if (accountID == null || accountID.equals("")) {
-			System.out.println("getAccount -> invalid accountID");
 			return null;
 		}
+		
 		try {
 			PreparedStatement selectAccountPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.ACCOUNTS WHERE ID = ?");
-			
+
 			selectAccountPstmt.setString(1, accountID);
-			
+
 			ResultSet rs = selectAccountPstmt.executeQuery();
-			
+
 			if (rs.next()) {
 				Customer customer = getCustomer(rs.getString("USERNAME"));
 				Account account = new Account(customer, accountID, rs.getDouble("BALANCE"), rs.getDouble("CREDIT"),
 						rs.getString("TYPE"), rs.getDouble("INTEREST"));
-
+				rs.close();
 				selectAccountPstmt.close();
 				return account;
 			}
+			
+			rs.close();
 			selectAccountPstmt.close();
+			return null;
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -532,7 +539,6 @@ public class DatabaseProtocol {
 			throw new DatabaseException();
 		}
 
-		return null;
 
 	}
 
@@ -542,14 +548,14 @@ public class DatabaseProtocol {
 	 * @param accountID
 	 * @return an ArrayList with all accounts in the database. If no accounts
 	 *         are in the table, it returns an empty list
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public List<Account> getAllAccounts() throws DatabaseException {
-		List<Account> allAccounts = new ArrayList<Account>();
 
 		try {
-			PreparedStatement selectAccountsPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.ACCOUNTS");
+			List<Account> allAccounts = new ArrayList<Account>();
 			
+			PreparedStatement selectAccountsPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.ACCOUNTS");
 			ResultSet rs = selectAccountsPstmt.executeQuery();
 
 			while (rs.next()) {
@@ -560,14 +566,15 @@ public class DatabaseProtocol {
 				allAccounts.add(account);
 			}
 
+			rs.close();
 			selectAccountsPstmt.close();
+			return allAccounts;
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			rollbackConnection();
 			throw new DatabaseException();
 		}
-
-		return allAccounts;
 
 	}
 
@@ -578,25 +585,26 @@ public class DatabaseProtocol {
 	 * @return an ArrayList with all accounts in the database belonging to the
 	 *         user. If the customer has no accounts (or does not exist), it
 	 *         returns an empty list.
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 
 	public ArrayList<Account> getAccountsByUsername(String username) throws DatabaseException {
 
-		ArrayList<Account> accounts = new ArrayList<Account>();
-
 		if (username == null || username.equals("")) {
 			System.out.println("getAccountsByUsername -> invalid username");
-			return accounts;
+			return new ArrayList<Account>();
 		}
 
+
 		try {
-			PreparedStatement selectAccountsPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = ?");
+			ArrayList<Account> accounts = new ArrayList<Account>();
+			PreparedStatement selectAccountsPstmt = con
+					.prepareStatement("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = ?");
 
 			selectAccountsPstmt.setString(1, username);
-			
+
 			ResultSet rs = selectAccountsPstmt.executeQuery();
-			
+
 			Customer customer = getCustomer(username);
 			while (rs.next()) {
 
@@ -604,14 +612,16 @@ public class DatabaseProtocol {
 						rs.getDouble("CREDIT"), rs.getString("TYPE"), rs.getDouble("INTEREST"));
 				accounts.add(account);
 			}
+			
+			rs.close();
 			selectAccountsPstmt.close();
+			return accounts;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			rollbackConnection();
 			throw new DatabaseException();
 		}
 
-		return accounts;
 
 	}
 
@@ -629,7 +639,7 @@ public class DatabaseProtocol {
 	 * 
 	 *            Sanitization occured in BankApplication. This method is only
 	 *            run through BankApplication.setNewMainAccount method.
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public void setNewMainAccount(Account oldMain, Account newMain) throws DatabaseException {
 
@@ -638,19 +648,19 @@ public class DatabaseProtocol {
 
 		try {
 
-			
-			PreparedStatement updateAccountTypePstmt = con.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET TYPE = ? WHERE ID = ?");
-			
+			PreparedStatement updateAccountTypePstmt = con
+					.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET TYPE = ? WHERE ID = ?");
+
 			updateAccountTypePstmt.setString(1, oldMain.getType());
 			updateAccountTypePstmt.setString(2, oldMain.getAccountID());
-			
 			updateAccountTypePstmt.executeUpdate();
-			
+
+
 			updateAccountTypePstmt.setString(1, newMain.getType());
 			updateAccountTypePstmt.setString(2, newMain.getAccountID());
-			
 			updateAccountTypePstmt.executeUpdate();
-			
+
+
 			updateAccountTypePstmt.close();
 		} catch (SQLException e) {
 			System.out.println("Error in DatabaseProtocol::selectNewMainAccount");
@@ -667,20 +677,20 @@ public class DatabaseProtocol {
 	 * @param accountID
 	 * @param interest
 	 *            1.05 corresponds to 5% interest
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public void setInterest(String accountID, double interest) throws DatabaseException {
 
 		try {
-			PreparedStatement updateInterestPstmt = con.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET INTEREST = ? WHERE ID = ?");
-			
+			PreparedStatement updateInterestPstmt = con
+					.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET INTEREST = ? WHERE ID = ?");
+
 			updateInterestPstmt.setDouble(1, interest);
 			updateInterestPstmt.setString(2, accountID);
-			
 			updateInterestPstmt.executeUpdate();
-			
+
 			updateInterestPstmt.close();
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			rollbackConnection();
@@ -694,18 +704,18 @@ public class DatabaseProtocol {
 	 * 
 	 * @param accountID
 	 * @param credit
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public void setCredit(String accountID, double credit) throws DatabaseException {
 
 		try {
-			PreparedStatement updateCreditPstmt = con.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET CREDIT = ? WHERE ID = ?");
+			PreparedStatement updateCreditPstmt = con
+					.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET CREDIT = ? WHERE ID = ?");
 
 			updateCreditPstmt.setDouble(1, credit);
 			updateCreditPstmt.setString(2, accountID);
-			
 			updateCreditPstmt.executeUpdate();
-			
+
 			updateCreditPstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -730,21 +740,23 @@ public class DatabaseProtocol {
 	 *            : account to send to
 	 * @param transferAmount
 	 *            : how much to transfer
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 * 
 	 */
-	public void transferFromAccountToAccount(Account sourceAccount, Account targetAccount, double transferAmount) throws DatabaseException {
+	public void transferFromAccountToAccount(Account sourceAccount, Account targetAccount, double transferAmount)
+			throws DatabaseException {
 
 		sourceAccount.changeBalance(-transferAmount);
 		targetAccount.changeBalance(transferAmount);
 
 		try {
-			PreparedStatement updateBalancePstmt = con.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = ? WHERE ID = ?");
-			
+			PreparedStatement updateBalancePstmt = con
+					.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = ? WHERE ID = ?");
+
 			updateBalancePstmt.setDouble(1, sourceAccount.getBalance());
 			updateBalancePstmt.setString(2, sourceAccount.getAccountID());
 			updateBalancePstmt.executeUpdate();
-			
+
 			updateBalancePstmt.setDouble(1, targetAccount.getBalance());
 			updateBalancePstmt.setString(2, targetAccount.getAccountID());
 			updateBalancePstmt.executeUpdate();
@@ -766,7 +778,7 @@ public class DatabaseProtocol {
 	 * 
 	 * @param account
 	 * @param newBalance
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public void setAccountBalance(Account account, double newBalance) throws DatabaseException {
 
@@ -778,13 +790,13 @@ public class DatabaseProtocol {
 		account.setBalance(newBalance);
 		try {
 
-			PreparedStatement updateBalancePstmt = con.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = ? WHERE ID = ?");
+			PreparedStatement updateBalancePstmt = con
+					.prepareStatement("UPDATE DTUGRP04.ACCOUNTS SET BALANCE = ? WHERE ID = ?");
 
 			updateBalancePstmt.setDouble(1, account.getBalance());
 			updateBalancePstmt.setString(2, account.getAccountID());
-			
 			updateBalancePstmt.executeUpdate();
-			
+
 			updateBalancePstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -804,7 +816,7 @@ public class DatabaseProtocol {
 	 * 
 	 * @param customer
 	 *            - customer whose accounts to fetch.
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public void addAccountsToLocalCustomer(Customer customer) throws DatabaseException {
 
@@ -813,19 +825,21 @@ public class DatabaseProtocol {
 			return;
 		}
 		try {
-			PreparedStatement selectAccountsPstmt = con.prepareStatement("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = ?");
+			PreparedStatement selectAccountsPstmt = con
+					.prepareStatement("SELECT * FROM DTUGRP04.ACCOUNTS WHERE USERNAME = ?");
 			selectAccountsPstmt.setString(1, customer.getUsername());
 
 			ResultSet rs = selectAccountsPstmt.executeQuery();
-			
+
 			while (rs.next()) {
 				Account newAccount = new Account(customer, rs.getString("ID"), rs.getDouble("BALANCE"),
 						rs.getDouble("CREDIT"), rs.getString("TYPE"), rs.getDouble("INTEREST"));
-				
-				if (rs.getString("TYPE").trim().equals("MAIN")) {
+
+				if (rs.getString("TYPE").equals("MAIN")) {
 					customer.setMainAccount(newAccount);
 				}
 			}
+			rs.close();
 			selectAccountsPstmt.close();
 		} catch (SQLException e) {
 			System.out.println("Error: DatabaseProtocol::addAccountsToLocalCostumer");
@@ -846,17 +860,17 @@ public class DatabaseProtocol {
 	 * @param the
 	 *            : TransactionHistoryElement, used to store information about a
 	 *            transaction
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public void addTransactionToHistory(TransactionHistoryElement the) throws DatabaseException {
 		// TABLECOLUMNS: DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER,
 		// FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
 
 		try {
-			
+
 			PreparedStatement insertThePstmt = con.prepareStatement("INSERT INTO DTUGRP04.TRANSACTIONHISTORY "
 					+ "(DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) VALUES(?,?,?,?,?,?,?,?,?)");
-			
+
 			insertThePstmt.setString(1, the.getDate());
 			insertThePstmt.setString(2, the.getSourceAccountID());
 			insertThePstmt.setString(3, the.getTargetAccountID());
@@ -866,9 +880,9 @@ public class DatabaseProtocol {
 			insertThePstmt.setDouble(7, the.getTargetBalance());
 			insertThePstmt.setDouble(8, the.getTransferAmount());
 			insertThePstmt.setString(9, the.getMessage());
-			
+
 			insertThePstmt.executeUpdate();
-			
+
 			insertThePstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -885,22 +899,22 @@ public class DatabaseProtocol {
 	 * @param customer
 	 * @return An ArrayList of TransactionHistoryElement objects. If no elements
 	 *         are found (or SQL query fails), returns empty list.
-	 * @throws DatabaseException 
+	 * @throws DatabaseException
 	 */
 	public List<TransactionHistoryElement> getTransactionHistory(Customer customer) throws DatabaseException {
 
-		List<TransactionHistoryElement> transactionHistory = new ArrayList<>();
 
 		try {
+			List<TransactionHistoryElement> transactionHistory = new ArrayList<>();
 
-			PreparedStatement selectThePstmt = con.prepareStatement("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE FROMUSER = ? OR TOUSER = ?");
-			
+			PreparedStatement selectThePstmt = con
+					.prepareStatement("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY WHERE FROMUSER = ? OR TOUSER = ?");
+
 			selectThePstmt.setString(1, customer.getUsername());
 			selectThePstmt.setString(2, customer.getUsername());
-			
+
 			ResultSet th = selectThePstmt.executeQuery();
-			
-			
+
 			while (th.next()) {
 
 				TransactionHistoryElement element = new TransactionHistoryElement(th.getString("DATE"),
@@ -909,10 +923,11 @@ public class DatabaseProtocol {
 						th.getDouble("AMOUNT"), th.getString("MESSAGE"));
 				transactionHistory.add(element);
 			}
-
+			
+			th.close();
 			selectThePstmt.close();
 			return transactionHistory;
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			rollbackConnection();
@@ -928,30 +943,28 @@ public class DatabaseProtocol {
 	/**
 	 * Moves all transactions from the Transaction History table to the
 	 * Transaction Archive, if they are older than 7 days.
-	 * @throws DatabaseException 
+	 * 
+	 * @throws DatabaseException
 	 */
 	public void moveOldTransactionsToArchive() throws DatabaseException {
 
 		try {
-			
+
 			PreparedStatement selectThePstmt = con.prepareStatement("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY");
-			
-			
-			
+
 			// SELECT ALL ENTRIES IN TRANSACTION HISTORY
 			ResultSet rs = selectThePstmt.executeQuery();
-			
+
 			Calendar cal = new GregorianCalendar();
 			Calendar limit = new GregorianCalendar();
 
 			// Sets the 7 day limit for elements to be moved
-			limit.set(Calendar.DAY_OF_YEAR, limit.get(Calendar.DAY_OF_YEAR) - 7);
+			limit.add(Calendar.DAY_OF_YEAR, -7);
 
 			List<TransactionHistoryElement> transactionsToArchive = new ArrayList<TransactionHistoryElement>();
 
 			while (rs.next()) {
 				String date = rs.getString("DATE");
-				// 0123456789
 				// date format for database: YYYY/MM/DD/hh/mm
 
 				int year = Integer.parseInt(date.substring(0, 4));
@@ -982,10 +995,10 @@ public class DatabaseProtocol {
 				}
 
 			}
-
+			
+			rs.close();
 			selectThePstmt.close();
 
-			
 			PreparedStatement insertTheToArchive = con.prepareStatement("INSERT INTO DTUGRP04.TRANSACTIONARCHIVE "
 					+ "(DATE, FROMACCOUNT, TOACCOUNT, FROMUSER, TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE) VALUES(?,?,?,?,?,?,?,?,?)");
 			// Add the TransactionHistoryElements added to the list
@@ -994,8 +1007,7 @@ public class DatabaseProtocol {
 			for (TransactionHistoryElement the : transactionsToArchive) {
 				// DATABASE FORMAT: DATE, FROMACCOUNT, TOACCOUNT, FROMUSER,
 				// TOUSER, FROMBALANCE, TOBALANCE, AMOUNT, MESSAGE
-				
-				
+
 				insertTheToArchive.setString(1, the.getDate());
 				insertTheToArchive.setString(2, the.getSourceAccountID());
 				insertTheToArchive.setString(3, the.getTargetAccountID());
@@ -1006,12 +1018,13 @@ public class DatabaseProtocol {
 				insertTheToArchive.setDouble(8, the.getTransferAmount());
 				insertTheToArchive.setString(9, the.getMessage());
 				insertTheToArchive.executeUpdate();
-				
+
 			}
 
 			insertTheToArchive.close();
-			
-			PreparedStatement deleteThePstmt = con.prepareStatement("DELETE FROM DTUGRP04.TRANSACTIONHISTORY WHERE DATE = ?");
+
+			PreparedStatement deleteThePstmt = con
+					.prepareStatement("DELETE FROM DTUGRP04.TRANSACTIONHISTORY WHERE DATE = ?");
 
 			// Delete all entries in Transaction History that correspond to
 			// TransactionHistoryElements in transactions list.
