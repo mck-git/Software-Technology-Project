@@ -58,12 +58,12 @@
 			
 			<form method="post" action="DS">
 				<input type="hidden" name = "subject" value = "Login"/> 
-				<br />User Name: <br /> <input name="username" maxlength="20" /> <br /> 
+				<br />Username: <br /> <input name="username" maxlength="20" /> <br /> 
 				<br />Password: <br /> <input type="password" name="password" maxlength="20" /> 
 				<br> <input type="submit" value="Login" />
 			</form>
 			
-			<form action ="NewCustomer.jsp">
+			<form action ="createCustomerPage.jsp">
 				<input type="hidden" name = "subject" value = "CreateNewCustomer"/> 
 			<br/><input type="submit" value="Create New Customer" />
 			

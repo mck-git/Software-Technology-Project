@@ -38,7 +38,7 @@ table, th, td {
 }
 
 .outer {
-	background: rgba(150, 204, 250, 0.8);
+	background: rgba(51, 102, 255, 0.8);
 	width: 40%;
 	padding: 20px;
 	margin: 20px;
@@ -59,7 +59,7 @@ table, th, td {
 	float: left;
 }
 
-#payment {
+#transfer {
 	clear: both;
 	float: right;
 }
@@ -76,7 +76,7 @@ table, th, td {
 
 #footer {
 	clear: both;
-	background: #dfa;
+	background: #ccd9ff;
 	height: 65px;
 	text-align: center;
 }
@@ -85,17 +85,18 @@ table, th, td {
 <!-- Get current logged in user -->
 <%
 	//Delete cache from browser
-	response.setHeader("Cache-Control","no-cache");
-	response.setHeader("Cache-Control","no-store");
-	response.setHeader("Pragma","no-cache");
-	response.setDateHeader ("Expires", 0);
+	response.setHeader("Cache-Control", "no-cache");
+	response.setHeader("Cache-Control", "no-store");
+	response.setHeader("Pragma", "no-cache");
+	response.setDateHeader("Expires", 0);
 
 	//If USER is null, redirect to login page.
-	if(session.getAttribute("USER") == null)
+	if (session.getAttribute("USER") == null)
 		response.sendRedirect("login.html");
 	String infomessage = (String) request.getAttribute("INFOMESSAGE");
 	Customer userLoggedIn = (Customer) session.getAttribute("USER");
-	ArrayList<TransactionHistoryElement> th = (ArrayList<TransactionHistoryElement>) session.getAttribute("TRANSACTIONHISTORY");
+	ArrayList<TransactionHistoryElement> th = (ArrayList<TransactionHistoryElement>) session
+			.getAttribute("TRANSACTIONHISTORY");
 %>
 
 </head>
@@ -110,56 +111,57 @@ table, th, td {
 				<%=userLoggedIn.getFullName()%>
 			</h1>
 		</div>
-	
-		<% if(infomessage != null){ %>
-		<p style="text-align: center; color: red" > <%=infomessage %> </p>
-		<%} %>
-	
+
+		<%
+			if (infomessage != null) {
+		%>
+		<p style="text-align: center; color: red">
+			<%=infomessage%>
+		</p>
+		<%
+			}
+		%>
+
 		<!-- CONTENT AREA -->
 		<div id="content_area">
 
-			<div id="accounts" class="outer">
-				<h3 align="center" style="margin-top: 0;">Accounts</h3>
+<div id="accounts" class="outer" style="width: 50%;">
+				<h3 align="center" style="margin-top: 0">Accounts</h3>
 
-				<div class="inner">
-					<%
-						String type;
-					%>
-					<%
-						for (Account account : userLoggedIn.getAccounts()) {
-					%>
+				<div class="innerScrollable">
 
-					ID:
-					<%=account.getAccountID()%>
+					<table style="width: 100%">
+						<tr>
+							<th>ID</th>
+							<th>Balance</th>
+							<th>Credit</th>
+							<th>Type</th>
+							<th>Interest</th>
+						</tr>
 
-					- balance:
-					<%=Currency.convert(account.getBalance(), userLoggedIn)%>
-
-					- credit:
-					<%=Currency.convert(account.getCredit(), userLoggedIn)%>
-
-					- interest:
-					<%=account.getInterest()%>
-
-					<%
-						if (account.equals(userLoggedIn.getMainAccount()))
-								type = "MAIN";
-							else
-								type = "NORMAL";
-					%>
-					- type:
-					<%=type%>
-					<br>
-
-					<%
-						}
-					%>
-
+						<%
+							if (userLoggedIn != null)
+								for (Account account : userLoggedIn.getAccounts()) {
+						%>
+						<tr>
+							<td><%=account.getAccountID()%></td>
+							<td><%=Currency.convert(account.getBalance(), userLoggedIn)%></td>
+							<td><%=Currency.convert(account.getCredit(), userLoggedIn)%></td>
+							<td><%=account.getType()%></td>
+							<td><%=account.getInterest()%></td>
+						</tr>
+						<%
+							}
+						%>
+					</table>
 					<%=(userLoggedIn.getAccounts().size() == 0 ? "No accounts" : "")%>
+
+
 				</div>
 			</div>
 
-			<div id="currency" class="outer">
+
+			<div id="currency" class="outer" style="width: 30%;">
 				<h3 align="center" style="margin-top: 0;">Currency</h3>
 
 				<div class="inner" style="text-align: center;">
@@ -167,7 +169,7 @@ table, th, td {
 
 					<form method="post" action="DS">
 
-						Select preferred currency: <select name="currency">
+						Select preferred currency: <br><select name="currency">
 
 							<option value="DKK">DKK</option>
 							<option value="EUR">EUR</option>
@@ -184,9 +186,9 @@ table, th, td {
 				</div>
 			</div>
 
-			<div id="payment" class="outer"
+			<div id="transfer" class="outer"
 				style="height: 300px; max-height: 260px;">
-				<h3 align="center" style="margin-top: 0;">Payment</h3>
+				<h3 align="center" style="margin-top: 0;">Transfer</h3>
 
 				<div class="inner"
 					style="display: inline-block; text-align: center; width: 100%; height: 220px; max-height: 220px;">
@@ -212,8 +214,9 @@ table, th, td {
 							%>
 						</select> <br> Send to: <input type="radio" name="receiverType"
 							value="account" /> Account <input type="radio" checked="checked"
-							name="receiverType" value="user" /> Customer <br> Receiver: <input
-							type="text" name="receiver" maxlength="20" /> <br> <br> Message:
+							name="receiverType" value="user" /> Customer <br> Receiver:
+						<input type="text" name="receiver" maxlength="20" /> <br> <br>
+						Message:
 						<textarea name="message" style="height: 3em; width: 90%;"
 							maxlength="140"></textarea>
 						<br> <br> Amount <br> <input type="text"
@@ -229,8 +232,8 @@ table, th, td {
 				</div>
 			</div>
 
-			<div id="editAccounts" class="outer"  style="text-align: center;">
-				<h3 align="center" style="margin-top: 0;">Edit Account</h3>
+			<div id="editAccounts" class="outer" style="text-align: center;">
+				<h3 align="center" style="margin-top: 0;">Edit Accounts</h3>
 
 
 				<form method="post" action="DS">
@@ -239,23 +242,31 @@ table, th, td {
 							for (Account account : userLoggedIn.getAccounts()) {
 								String accountID = "" + account.getAccountID();
 						%>
-						<option value=<%=accountID%>>AccountID: <%=accountID%>
+						<option value=<%=accountID%>>AccountID:
+							<%=accountID%>
 						</option>
 						<%
 							}
 						%>
-					</select> 
-					<br><br>
-					<input type="submit" name="subject" value="Set as main account" />
-					<br><br> 
-					<input type="submit" name="subject" value="Delete account" />
+					</select> <br>
+					<br> <input type="hidden" name="subject" value="NewAccount" />
+					<input type="submit" value="Create new account"
+						onclick="return confirm('Do you wish to create new account?')" />
+
+					<br>
+					<br> <input type="submit" name="subject"
+						value="Set as main account" /> <br>
+					<br> <input type="submit" name="subject"
+						value="Delete account" />
 				</form>
+
+
 
 			</div>
 
 			<div id="TH" class="outer">
 				<h3 align="center" style="margin-top: 0;">Transaction History</h3>
-					<!--FORMAT: DATE[0], FROMACCOUNT[1], TOACCOUNT[2], FROMUSER[3], TOUSER[4], FROMBALANCE[5], TOBALANCE[6], AMOUNT[7], MESSAGE[8]-->
+				<!--FORMAT: DATE[0], FROMACCOUNT[1], TOACCOUNT[2], FROMUSER[3], TOUSER[4], FROMBALANCE[5], TOBALANCE[6], AMOUNT[7], MESSAGE[8]-->
 				<div class="inner">
 
 					<table style="width: 100%">
@@ -276,12 +287,22 @@ table, th, td {
 							<td><%=th.get(i).getSourceUsername()%>/<%=th.get(i).getSourceAccountID()%></td>
 							<td><%=th.get(i).getTargetUsername()%>/<%=th.get(i).getTargetAccountID()%></td>
 							<td><%=Currency.convert(th.get(i).getTransferAmount(), userLoggedIn)%></td>
-							
-							<% if(userLoggedIn.getUsername().equals(th.get(i).getSourceUsername())){ %> 
-							<td> <%=Currency.convert(th.get(i).getSourceBalance(), userLoggedIn)%> </td> 
-							<% }else{ %> 
-							<td> <%=Currency.convert(th.get(i).getTargetBalance(), userLoggedIn)%> </td> <%}; %>
-							
+
+							<%
+								if (userLoggedIn.getUsername().equals(th.get(i).getSourceUsername())) {
+							%>
+							<td><%=Currency.convert(th.get(i).getSourceBalance(), userLoggedIn)%>
+							</td>
+							<%
+								} else {
+							%>
+							<td><%=Currency.convert(th.get(i).getTargetBalance(), userLoggedIn)%>
+							</td>
+							<%
+								}
+									;
+							%>
+
 							<td><%=th.get(i).getMessage()%></td>
 						</tr>
 						<%
@@ -299,8 +320,8 @@ table, th, td {
 				<div class="inner"
 					style="display: inline-block; text-align: center; width: 100%;">
 					<form method="post" action="DS">
-						<input type="hidden" name="subject" value="DeleteLoggedInUser" /> <input
-							type="submit" value="Delete user"
+						<input type="hidden" name="subject" value="DeleteLoggedInUser" />
+						<input type="submit" value="Delete user"
 							onclick="return confirm('Do you wish to delete user?')" />
 					</form>
 
@@ -308,12 +329,6 @@ table, th, td {
 						<input type="hidden" name="subject" value="LogOutUser" /> <input
 							type="submit" value="Log out user"
 							onclick="return confirm('Do you wish to log out?')" />
-					</form>
-
-					<form method="post" action="DS">
-						<input type="hidden" name="subject" value="NewAccount" /> <input
-							type="submit" value="Add new account"
-							onclick="return confirm('Do you wish to create new account?')" />
 					</form>
 
 				</div>
@@ -324,23 +339,19 @@ table, th, td {
 		<!-- FOOTER -->
 		<div id="footer">
 			<div style="height: 100%; width: 24%; float: left">
-				Username: <%=userLoggedIn.getUsername()%><br>
-				Full name: <%=userLoggedIn.getFullName()%>
+				Username:
+				<%=userLoggedIn.getUsername()%><br> Full name:
+				<%=userLoggedIn.getFullName()%>
 			</div>
 			<div style="height: 100%; width: 24%; float: left">
-				Amount of accounts: <%=userLoggedIn.getAccounts().size()%>
+				Number of accounts:
+				<%=userLoggedIn.getAccounts().size()%>
 			</div>
 			<div style="height: 100%; width: 24%; float: right">
-				<br>
-				s154666@student.dtu.dk
-				<br>
-				s151952@student.dtu.dk
+				<br> s154666@student.dtu.dk <br> s151952@student.dtu.dk
 			</div>
 			<div style="height: 100%; width: 24%; float: right">
-				Contact information:
-				<br>
-				s144107@student.dtu.dk
-				<br>
+				Contact information: <br> s144107@student.dtu.dk <br>
 				s144063@student.dtu.dk
 			</div>
 		</div>
