@@ -980,8 +980,8 @@ public class DatabaseProtocol {
 				// TransactionHistoryElement and add to list
 				if (cal.before(limit)) {
 					String dateString = rs.getString("DATE");
-					String fromAccountID = rs.getString("FROM");
-					String toAccountID = rs.getString("TO");
+					String fromAccountID = rs.getString("FROMACCOUNT");
+					String toAccountID = rs.getString("TOACCOUNT");
 					String fromUser = rs.getString("FROMUSER");
 					String toUser = rs.getString("TOUSER");
 					double fromBalance = rs.getDouble("FROMBALANCE");
