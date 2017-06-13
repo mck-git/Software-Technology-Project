@@ -952,7 +952,7 @@ public class DatabaseProtocol {
 
 			PreparedStatement selectThePstmt = con.prepareStatement("SELECT * FROM DTUGRP04.TRANSACTIONHISTORY");
 
-			// SELECT ALL ENTRIES IN TRANSACTION HISTORY
+			// select all entries in transaction history
 			ResultSet rs = selectThePstmt.executeQuery();
 
 			Calendar cal = new GregorianCalendar();
@@ -971,7 +971,7 @@ public class DatabaseProtocol {
 				cal.set(Calendar.YEAR, year);
 
 				int month = Integer.parseInt(date.substring(5, 7));
-				cal.set(Calendar.MONTH, month);
+				cal.set(Calendar.MONTH, month - 1);
 
 				int day = Integer.parseInt(date.substring(8, 10));
 				cal.set(Calendar.DAY_OF_MONTH, day);
