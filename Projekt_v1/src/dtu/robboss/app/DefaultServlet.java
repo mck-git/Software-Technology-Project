@@ -109,7 +109,7 @@ public class DefaultServlet extends HttpServlet {
 				break;
 			default:
 				app.logOut();
-				response.sendRedirect("login.jsp");
+				response.sendRedirect("loginPage.jsp");
 			}
 
 		} finally {
@@ -142,7 +142,7 @@ public class DefaultServlet extends HttpServlet {
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "login.jsp";
+			this.destination = "loginPage.jsp";
 			forwardToDestination();
 		}
 	}
@@ -167,7 +167,7 @@ public class DefaultServlet extends HttpServlet {
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "adminpage.jsp";
+			this.destination = "adminPage.jsp";
 			forwardToDestination();
 		}
 	}
@@ -193,7 +193,7 @@ public class DefaultServlet extends HttpServlet {
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "adminpage.jsp";
+			this.destination = "adminPage.jsp";
 			forwardToDestination();
 		}
 
@@ -213,7 +213,7 @@ public class DefaultServlet extends HttpServlet {
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "adminpage.jsp";
+			this.destination = "adminPage.jsp";
 			forwardToDestination();
 		}
 	}
@@ -236,7 +236,7 @@ public class DefaultServlet extends HttpServlet {
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "adminpage.jsp";
+			this.destination = "adminPage.jsp";
 			forwardToDestination();
 		}
 	}
@@ -260,7 +260,7 @@ public class DefaultServlet extends HttpServlet {
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "adminpage.jsp";
+			this.destination = "adminPage.jsp";
 			forwardToDestination();
 		}
 	}
@@ -290,9 +290,9 @@ public class DefaultServlet extends HttpServlet {
 			app.closeDatabaseConnection();
 
 			if (userLoggedIn == null || userLoggedIn.equals(userToDelete))
-				this.destination = "login.jsp";
+				this.destination = "loginPage.jsp";
 			else
-				this.destination = "adminpage.jsp";
+				this.destination = "adminPage.jsp";
 
 			forwardToDestination();
 		}
@@ -334,7 +334,7 @@ public class DefaultServlet extends HttpServlet {
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "adminpage.jsp";
+			this.destination = "adminPage.jsp";
 			forwardToDestination();
 		}
 	}
@@ -386,7 +386,7 @@ public class DefaultServlet extends HttpServlet {
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "adminpage.jsp";
+			this.destination = "adminPage.jsp";
 			forwardToDestination();
 		}
 	}
@@ -408,7 +408,7 @@ public class DefaultServlet extends HttpServlet {
 		} catch (DatabaseException e) {
 			app.closeDatabaseConnection();
 			request.setAttribute("INFOMESSAGE", e.getMessage());
-			this.destination = "login.jsp";
+			this.destination = "loginPage.jsp";
 			forwardToDestination();
 		} finally {
 
@@ -448,7 +448,7 @@ public class DefaultServlet extends HttpServlet {
 				List<TransactionHistoryElement> th = app.getTransactionHistory(customerLoggedIn);
 				session.setAttribute("TRANSACTIONHISTORY", th);
 
-				this.destination = "customerpage.jsp";
+				this.destination = "customerPage.jsp";
 			}
 
 			// Checks if user logged in is an admin
@@ -461,13 +461,13 @@ public class DefaultServlet extends HttpServlet {
 				// Creates a list to store future admin search results
 				session.setAttribute("ACCOUNTSFOUND", new ArrayList<Account>());
 
-				this.destination = "adminpage.jsp";
+				this.destination = "adminPage.jsp";
 			}
 
 		} catch (UserException | UnknownLoginException | DatabaseException e) {
 
 			request.setAttribute("INFOMESSAGE", e.getMessage());
-			this.destination = "login.jsp";
+			this.destination = "loginPage.jsp";
 		} finally {
 
 			app.closeDatabaseConnection();
@@ -493,7 +493,7 @@ public class DefaultServlet extends HttpServlet {
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "customerpage.jsp";
+			this.destination = "customerPage.jsp";
 			forwardToDestination();
 		}
 	}
@@ -514,11 +514,11 @@ public class DefaultServlet extends HttpServlet {
 		try {
 
 			app.setNewMainAccount(loggedInCustomer, newMain);
-			this.destination = "customerpage.jsp";
+			this.destination = "customerPage.jsp";
 		} catch (DatabaseException e) {
 
 			request.setAttribute("INFOMESSAGE", e.getMessage());
-			this.destination = "login.jsp";
+			this.destination = "loginPage.jsp";
 		} finally {
 
 			app.closeDatabaseConnection();
@@ -545,7 +545,7 @@ public class DefaultServlet extends HttpServlet {
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "customerpage.jsp";
+			this.destination = "customerPage.jsp";
 			forwardToDestination();
 		}
 	}
@@ -561,7 +561,7 @@ public class DefaultServlet extends HttpServlet {
 		try {
 			app.logOut();
 
-			this.destination = "login.jsp";
+			this.destination = "loginPage.jsp";
 		} finally {
 
 			app.closeDatabaseConnection();
@@ -628,7 +628,7 @@ public class DefaultServlet extends HttpServlet {
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "customerpage.jsp";
+			this.destination = "customerPage.jsp";
 			forwardToDestination();
 		}
 	}
@@ -653,7 +653,7 @@ public class DefaultServlet extends HttpServlet {
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "customerpage.jsp";
+			this.destination = "customerPage.jsp";
 			forwardToDestination();
 		}
 	}
@@ -692,7 +692,7 @@ public class DefaultServlet extends HttpServlet {
 		} catch (UserException | AlreadyExistsException | CurrencyException | DatabaseException e) {
 			
 			request.setAttribute("INFOMESSAGE", e.getMessage());
-			this.destination = "login.jsp";
+			this.destination = "loginPage.jsp";
 			
 		} finally {
 			
