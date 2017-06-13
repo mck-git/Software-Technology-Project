@@ -37,7 +37,7 @@ public class DatabaseProtocol {
 		if (con == null)
 			return;
 		try {
-			if (!con.getAutoCommit() && !con.isClosed()) {
+			if (!con.isClosed() && !con.getAutoCommit()) {
 				con.rollback();
 			}
 
