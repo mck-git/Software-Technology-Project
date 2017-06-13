@@ -34,8 +34,16 @@ table, th, td {
 	background: rgba(240, 230, 255, 0.9);
 	border-radius: 2px;
 	max-height: 160px;
+	overflow: hidden;
 }
 
+.innerScrollable {
+	width: 100%;
+	background: rgba(240, 230, 255, 0.9);
+	border-radius: 2px;
+	max-height: 160px;
+	overflow: scroll;
+}
 
 .outer {
 	background: rgba(51, 102, 255, 0.8);
@@ -128,7 +136,7 @@ table, th, td {
 			<div id="accounts" class="outer" style="width: 50%;">
 				<h3 align="center" style="margin-top: 0">Accounts</h3>
 
-				<div class="inner">
+				<div class="innerScrollable">
 
 					<table style="width: 100%">
 						<tr>
@@ -169,8 +177,7 @@ table, th, td {
 
 					<form method="post" action="DS">
 
-						Select preferred currency: <br>
-						<select name="currency">
+						Select preferred currency: <br> <select name="currency">
 
 							<option value="DKK">DKK</option>
 							<option value="EUR">EUR</option>
@@ -236,29 +243,29 @@ table, th, td {
 			<div id="editAccounts" class="outer" style="text-align: center;">
 				<h3 align="center" style="margin-top: 0;">Edit Accounts</h3>
 
+				<div class="inner">
+					<form method="post" action="DS">
+						Select account to edit: <select name="accountSelected">
+							<%
+								for (Account account : userLoggedIn.getAccounts()) {
+									String accountID = "" + account.getAccountID();
+							%>
+							<option value=<%=accountID%>>AccountID:
+								<%=accountID%>
+							</option>
+							<%
+								}
+							%>
+						</select> <br> <br> <input type="hidden" name="subject"
+							value="NewAccount" /> <input type="submit"
+							value="Create new account"
+							onclick="return confirm('Do you wish to create new account?')" />
 
-				<form method="post" action="DS">
-					Select account to edit: <select name="accountSelected">
-						<%
-							for (Account account : userLoggedIn.getAccounts()) {
-								String accountID = "" + account.getAccountID();
-						%>
-						<option value=<%=accountID%>>AccountID:
-							<%=accountID%>
-						</option>
-						<%
-							}
-						%>
-					</select> <br> <br> <input type="hidden" name="subject"
-						value="NewAccount" /> <input type="submit"
-						value="Create new account"
-						onclick="return confirm('Do you wish to create new account?')" />
-
-					<br> <br> <input type="submit" name="subject"
-						value="Set as main account" /> <br> <br> <input
-						type="submit" name="subject" value="Delete account" />
-				</form>
-
+						<br> <br> <input type="submit" name="subject"
+							value="Set as main account" /> <br> <br> <input
+							type="submit" name="subject" value="Delete account" />
+					</form>
+				</div>
 
 
 			</div>
@@ -266,7 +273,7 @@ table, th, td {
 			<div id="TH" class="outer">
 				<h3 align="center" style="margin-top: 0;">Transaction History</h3>
 				<!--FORMAT: DATE[0], FROMACCOUNT[1], TOACCOUNT[2], FROMUSER[3], TOUSER[4], FROMBALANCE[5], TOBALANCE[6], AMOUNT[7], MESSAGE[8]-->
-				<div class="inner">
+				<div class="innerScrollable">
 
 					<table style="width: 100%">
 						<tr>

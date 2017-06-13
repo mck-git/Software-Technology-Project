@@ -113,7 +113,7 @@ table, th, td {
 		<!-- HEADER -->
 		<div id="header">
 			<h1>
-				Welcome admin 
+				Welcome admin: 
 				<%=userLoggedIn.getFullName() %>
 			</h1>
 		</div>
@@ -309,23 +309,6 @@ table, th, td {
 
 				</div>
 			</div>
-
-
-
-
-			<!--  
-			<div id="deleteUser" class="outer">
-				<h3 align="center" style="margin-top: 0;">Delete user</h3>
-				<div class="inner">
-					<form method="post" action="DS" align="center">
-						<input type="hidden" name="subject" value="DeleteUserAdmin" />
-						User name: <input type="text" name="username" /> <br> <input
-							type="submit" value="Delete User">
-					</form>
-				</div>
-
-			</div>
--->
 
 
 		</div>
