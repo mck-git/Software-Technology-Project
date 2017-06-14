@@ -65,7 +65,7 @@ public class DefaultServlet extends HttpServlet {
 			case "LogOutUser":
 				logOut();
 				break;
-			case "NewAccount":
+			case "Create new account":
 				newAccount();
 				break;
 			case "Set as main account":

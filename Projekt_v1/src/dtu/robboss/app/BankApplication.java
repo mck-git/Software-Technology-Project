@@ -176,7 +176,7 @@ public class BankApplication {
 			return false;
 		}
 
-		if (username == null || username.equals("")) {
+		if (username == null || username.equals("") || username.length() > 20) {
 			System.out.println("creating user -> invalid username");
 			return false;
 		}

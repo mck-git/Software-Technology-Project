@@ -245,7 +245,8 @@ table, th, td {
 
 				<div class="inner">
 					<form method="post" action="DS">
-						Select account to edit: <select name="accountSelected">
+						Select account to edit: 
+						<select name="accountSelected">
 							<%
 								for (Account account : userLoggedIn.getAccounts()) {
 									String accountID = "" + account.getAccountID();
@@ -256,14 +257,12 @@ table, th, td {
 							<%
 								}
 							%>
-						</select> <br> <br> <input type="hidden" name="subject"
-							value="NewAccount" /> <input type="submit"
-							value="Create new account"
+						</select> <br> <br> 
+						<input type="submit" name = "subject" value="Create new account"
 							onclick="return confirm('Do you wish to create new account?')" />
 
-						<br> <br> <input type="submit" name="subject"
-							value="Set as main account" /> <br> <br> <input
-							type="submit" name="subject" value="Delete account" />
+						<br> <br> <input type="submit" name="subject" value="Set as main account" /> <br> <br> 
+						<input type="submit" name="subject" value="Delete account" />
 					</form>
 				</div>
 
