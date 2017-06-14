@@ -65,7 +65,7 @@
 			
 			<form action ="createCustomerPage.jsp">
 				<input type="hidden" name = "subject" value = "CreateNewCustomer"/> 
-			<br/><input type="submit" value="Create New Customer" />
+			<br/><input type="submit" value="Create New User" />
 			
 			</form>
 			
