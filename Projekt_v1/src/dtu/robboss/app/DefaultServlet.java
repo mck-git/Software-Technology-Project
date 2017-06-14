@@ -135,14 +135,14 @@ public class DefaultServlet extends HttpServlet {
 			System.out.println("Removing " + userToDelete.getUsername() + ".");
 			app.removeUser(userToDelete, false);
 			request.getSession().removeAttribute("USER");
-
+			this.destination = "loginPage.jsp";
 		} catch (NullPointerException | UserException | AccountException | DatabaseException e) {
-
+			
+			this.destination = "customerPage.jsp";
 			request.setAttribute("INFOMESSAGE", e.getMessage());
 		} finally {
 
 			app.closeDatabaseConnection();
-			this.destination = "loginPage.jsp";
 			forwardToDestination();
 		}
 	}
